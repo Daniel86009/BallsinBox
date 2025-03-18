@@ -7,15 +7,21 @@ const rSlider1 = document.getElementById("rSlider1");
 const rSlider2 = document.getElementById("rSlider2");
 const minRText = document.getElementById("minR");
 const maxRText = document.getElementById("maxR");
+const useQuadInput = document.getElementById("useQuad");
+const drawQuadInput = document.getElementById("drawQuad");
+const drawCheckRangeInput = document.getElementById("drawCheckRange");
 
 const circles = [];
 var cNum = 0;
 const isMobile = !window.matchMedia('(hover: hover)').matches;
+let useQuad = true;
+let drawQuad = false;
+let drawCheck = false;
 
 var g = 0.2;
 const wallFriction = 0.7;
 var minRadius = 5;
-var maxRadius = 20
+var maxRadius = 20;
 
 var mouse = {x: 0, y: 0, ox: 0, oy:0, down: false}
 
@@ -27,6 +33,9 @@ function setUp() {
   gSlider.value = g;
   rSlider1.value = minRadius;
   rSlider2.value = maxRadius;
+  useQuadInput.checked = useQuad;
+  drawQuadInput.checked = drawQuad;
+  drawCheckRangeInput.checked = drawCheck;
   for (let i = 0; i < cNum; i++) {
     circles.push(new circleObj());
   }
@@ -58,25 +67,42 @@ function setUp() {
     g = gSlider.value;
     gText.innerHTML = g;
   });
+
+  useQuadInput.addEventListener("change", function() {
+    useQuad = useQuadInput.checked;
+    drawQuad = useQuadInput.checked;
+    drawQuadInput.checked = useQuadInput.checked;
+  });
+
+  drawQuadInput.addEventListener("change", function() {
+    drawQuad = drawQuadInput.checked;
+  });
+
+  drawCheckRangeInput.addEventListener("change", function() {
+    drawCheck = drawCheckRangeInput.checked;
+  });
 }
 
 function update() {
   ctx.clearRect(0, 0, c.width, c.height);
-  
+
+  let tree = new TreeNode(new Quad(0, 0, c.width, c.height), 0);
+  if (useQuad) {
+    for (let i = 0; i < circles.length; i++) tree.insert(circles[i]);
+    if (drawQuad) tree.draw();
+  }
+
   var steps = 8;
   var delta = 1 / steps;
   
   while (steps--) {
     for (var i = 0; i < circles.length; i++) {
-      circles[i].update(delta);
+      circles[i].update(delta, tree);
     }
   }
   
   for (var i = 0; i < circles.length; i++) {
     circles[i].wallCol();
-    for (var j = 0; j < circles.length; j++){
-      //circles[i].objectCol(circles[j]);
-    }
     circles[i].wallCol();
     circles[i].draw();
   }
@@ -121,9 +147,11 @@ class circleObj {
     ctx.stroke();
   }
     
-  update(delta) {
+  update(delta, tree) {
     delta *= delta;
     this.ya = g;
+    let xv = this.x - this.ox;
+    let yv = this.y - this.oy;
     var nx = this.x * 2 - this.ox + this.xa * delta;
     var ny = this.y * 2 - this.oy + this.ya * delta;
     
@@ -137,10 +165,21 @@ class circleObj {
       this.mouseCol();
     }
 
-
+    let checkPoints;
+    if (useQuad) {
+      let w = ((2 * this.r) + (4 * Math.max(xv, yv)));
+      let checkRange = new Quad(this.x - w, this.y - w, w * 2, w * 2);
+      if (drawCheck) checkRange.draw();
+      checkPoints = tree.queryRange(checkRange);
     
-    for (let i = 0; i < circles.length; i ++) {
-      this.objectCol(circles[i]);
+      for (let i = 0; i < checkPoints.length; i ++) {
+        this.objectCol(checkPoints[i]);
+      }
+    }
+    else {
+      for (let i = 0; i < circles.length; i++) {
+        this.objectCol(circles[i]);
+      }
     }
   }
   
@@ -251,6 +290,112 @@ class circleObj {
       this.ox = this.x - xv1;
       this.oy = this.y - yv1;
     }
+  }
+}
+
+class Quad {
+  constructor(x, y, w, h) {
+    this.x1 = x;
+    this.y1 = y;
+    this.x2 = x + w;
+    this.y2 = y + h;
+    this.w = w;
+    this.h = h;
+  }
+
+  contains(p) {
+    if (this.x1 > p.x + p.r || this.x2 < p.x - p.r) return false;
+    if (this.y1 > p.y + p.r || this.y2 < p.y - p.r) return false;
+    
+    return true;
+  }
+
+  intersects(b) {
+    if (this.x1 > b.x2 || b.x1 > this.x2) return false;
+    if (this.y1 > b.y2 || b.y1 > this.y2) return false;
+    return true;
+  }
+
+  draw() {
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.strokeRect(this.x1, this.y1, this.x2 - this.x1,  this.y2 - this.y1);
+    ctx.stroke();
+  }
+}
+
+class TreeNode {
+  constructor(area, depth) {
+    this.area = area;
+    this.points = [];
+    this.isLeaf = true;
+    this.depth = depth;
+  }
+
+  insert(p) {
+    if (!this.area.contains(p)) return false;
+
+    if (this.points.length < 4 && this.isLeaf) {
+      this.points.push(p);
+      return true;
+    }
+
+    if (this.depth > 8) return true;
+    if (this.isLeaf) this.subdivide();
+    if (this.tl.insert(p)) return true;
+    if (this.tr.insert(p)) return true;
+    if (this.bl.insert(p)) return true;
+    if (this.br.insert(p)) return true;
+
+    return false;
+  }
+
+  subdivide() {
+    let mx = (this.area.x2 - this.area.x1) / 2;
+    let my = (this.area.y2 - this.area.y1) / 2;
+
+    this.tl = new TreeNode(new Quad(this.area.x1, this.area.y1, mx, my), this.depth + 1);
+    this.tr = new TreeNode(new Quad(this.area.x1 + mx, this.area.y1, mx, my), this.depth + 1);
+    this.bl = new TreeNode(new Quad(this.area.x1, this.area.y1 + my, mx, my), this.depth + 1);
+    this.br = new TreeNode(new Quad(this.area.x1 + mx, this.area.y1 + my, mx, my), this.depth + 1);
+
+    this.isLeaf = false;
+    for (let i = 0; i < this.points.length; i++) this.insert(this.points[i]);
+    this.points = [];
+  }
+
+  queryRange(area) {
+    let pointsInRange = [];
+
+    if (!this.area.intersects(area)) return pointsInRange;
+
+    for (let i = 0; i < this.points.length; i++) {
+      if (area.contains(this.points[i])) pointsInRange.push(this.points[i]);
+    }
+
+    if (this.isLeaf) return pointsInRange;
+
+    pointsInRange = pointsInRange.concat(this.tl.queryRange(area));
+    pointsInRange = pointsInRange.concat(this.tr.queryRange(area));
+    pointsInRange = pointsInRange.concat(this.bl.queryRange(area));
+    pointsInRange = pointsInRange.concat(this.br.queryRange(area));
+
+    return pointsInRange;
+  }
+
+  draw() {
+    if (this.isLeaf) this.area.draw();
+    else {
+      this.tl.draw();
+      this.tr.draw();
+      this.bl.draw();
+      this.br.draw();
+    }
+   //this.area.draw();
+   //this.tl?.draw();
+   //this.tr?.draw();
+   //this.bl?.draw();
+   //this.br?.draw();
   }
 }
 
