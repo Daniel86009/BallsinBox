@@ -32,6 +32,20 @@
         <input type="range" id="rSlider2" class="slider" min="1" max="99" step="1" value="20" oninput="rSlide2()">
       </div>
     </div>
+    <div id="debugMenu">
+      <p class="debugMenuItem">Debug</p>
+      <div id="dropDownContent">
+        <div>
+          <p class="debugMenuItem">QuadTree:</p>
+          <p class="debugMenuItem">-Use QuadTree:</p>
+          <input type="checkbox" id="useQuad" checked="true">
+          <p class="debugMenuItem">-Draw QuadTree:</p>
+          <input type="checkbox" id="drawQuad" checked="false">
+          <p class="debugMenuItem">Draw Check Range:</p>
+          <input type="checkbox" id="drawCheckRange" checked="false">
+        </div>
+      </div>
+    </div>
     <canvas id="canvas"></canvas>
     <script src="script.js"></script>
   </body>
