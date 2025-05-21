@@ -53,7 +53,7 @@ function start() {
         {x: 20, y: 380}
     ], true));
 
-    shapes[0].mass = 10;
+    shapes[0].mass = 2;
 }
 
 function update() {
