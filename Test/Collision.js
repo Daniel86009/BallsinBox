@@ -90,8 +90,6 @@ function update() {
         }
     }
 
-    
-
     for (let i = 0; i < shapes.length; i++) {
         shapes[i].draw();
     }
