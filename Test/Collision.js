@@ -6,7 +6,7 @@ let shapes = [];
 let pressedKeys = [];
 
 let damping = 0.01;
-let iter = 5;
+let iter = 1;
 
 function start() {
     c.width = 400;
