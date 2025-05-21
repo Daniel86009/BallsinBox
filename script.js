@@ -1,573 +1,423 @@
-let c = document.getElementById('c');
-let ctx = c.getContext('2d');
+const c = document.getElementById("canvas");
+const ctx = c.getContext("2d");
+const cNumText = document.getElementById("cNum");
+const gSlider = document.getElementById("gSlider");
+const gText = document.getElementById("gravity");
+const rSlider1 = document.getElementById("rSlider1");
+const rSlider2 = document.getElementById("rSlider2");
+const minRText = document.getElementById("minR");
+const maxRText = document.getElementById("maxR");
+const useQuadInput = document.getElementById("useQuad");
+const drawQuadInput = document.getElementById("drawQuad");
+const drawCheckRangeInput = document.getElementById("drawCheckRange");
 
-let shapes = [];
+const circles = [];
+var cNum = 0;
+const isMobile = !window.matchMedia('(hover: hover)').matches;
+let useQuad = true;
+let drawQuad = false;
+let drawCheck = false;
 
-let pressedKeys = [];
+var g = 0.2;
+const wallFriction = 0.7;
+var minRadius = 5;
+var maxRadius = 20;
 
-let damping = 0.01;
-let iter = 5;
+var mouse = {x: 0, y: 0, ox: 0, oy:0, down: false}
 
-function start() {
-    c.width = 400;
-    c.height = 400;
 
-    document.addEventListener('keydown', (event) => {
-        let keyName = event.key;
-        for (let i = 0; i < pressedKeys.length; i++) {
-            if (pressedKeys[i] == keyName) {
-                pressedKeys.splice(i, 1);
-                i--;
-            }
-        }
-        pressedKeys.push(keyName);
-    });
 
-    document.addEventListener('keyup', (event) => {
-        let keyName = event.key;
-        for (let i = 0; i < pressedKeys.length; i++) {
-            if (pressedKeys[i] == keyName) {
-                pressedKeys.splice(i, 1);
-                i--;
-            }
-        }
-    });
+function setUp() {
+  c.width = document.documentElement.clientWidth - 0.01;
+  c.height = document.documentElement.clientHeight - 0.01;
+  gSlider.value = g;
+  rSlider1.value = minRadius;
+  rSlider2.value = maxRadius;
+  useQuadInput.checked = useQuad;
+  drawQuadInput.checked = drawQuad;
+  drawCheckRangeInput.checked = drawCheck;
+  for (let i = 0; i < cNum; i++) {
+    circles.push(new circleObj());
+  }
+  
+  c.addEventListener("click", function() {
+    if (isMobile) {
+      circles.push(new circleObj(event.clientX, event.clientY));
+    }
+  });
 
-    shapes.push(new Shape([
-        {x: 100, y: 100},
-        {x: 100, y: 200},
-        {x: 200, y: 200},
-        {x: 200, y: 100}
-    ]));
+  c.addEventListener("mousedown", function() {
+    mouse.down = true;
+  });
+  c.addEventListener("mouseup", function() {
+    mouse.down = false;
+  });
+  
+  document.addEventListener("mousemove", function() {
+    mouse.x = event.clientX;
+    mouse.y = event.clientY;
+  });
 
-    shapes.push(new Shape([
-        {x: 200, y: 200},
-        {x: 200, y: 300},
-        {x: 300, y: 300}
-    ]));
+  window.addEventListener("resize", function() {
+    c.width = document.documentElement.clientWidth - 0.01;
+    c.height = document.documentElement.clientHeight - 0.01;
+  });
 
-    shapes.push(new Shape([
-        {x: 20, y: 350},
-        {x: 380, y: 350},
-        {x: 380, y: 380},
-        {x: 20, y: 380}
-    ], true));
+  gSlider.addEventListener("input", function() {
+    g = gSlider.value;
+    gText.innerHTML = g;
+  });
 
-    shapes[0].mass = 10;
+  useQuadInput.addEventListener("change", function() {
+    useQuad = useQuadInput.checked;
+    drawQuad = useQuadInput.checked;
+    drawQuadInput.checked = useQuadInput.checked;
+  });
+
+  drawQuadInput.addEventListener("change", function() {
+    drawQuad = drawQuadInput.checked;
+  });
+
+  drawCheckRangeInput.addEventListener("change", function() {
+    drawCheck = drawCheckRangeInput.checked;
+  });
 }
 
 function update() {
-    ctx.clearRect(0, 0, c.width, c.height);
+  ctx.clearRect(0, 0, c.width, c.height);
 
-    inputs();
+  let tree = new TreeNode(new Quad(0, 0, c.width, c.height), 0);
+  if (useQuad) {
+    for (let i = 0; i < circles.length; i++) tree.insert(circles[i]);
+    if (drawQuad) tree.draw();
+  }
 
-    for (let i = 0; i < shapes.length; i++) {
-        shapes[i].colour = 'rgba(220, 220, 220, 0.5)';
-        shapes[i].update();
+  var steps = 8;
+  var delta = 1 / steps;
+  
+  while (steps--) {
+    for (var i = 0; i < circles.length; i++) {
+      circles[i].update(delta, tree);
     }
+  }
+  
+  for (var i = 0; i < circles.length; i++) {
+    circles[i].wallCol();
+    circles[i].wallCol();
+    circles[i].draw();
+  }
 
-    let delta = 1 / iter;
+  if (mouse.down) {
+    cNum++;
+    cNumText.innerHTML = cNum;
+    circles.push(new circleObj(mouse.x, mouse.y));
+  }
+  
+  mouse.ox = mouse.x;
+  mouse.oy = mouse.y;
+  window.requestAnimationFrame(update);
+}
 
-    for (let i = 0; i < iter; i++) {
-        let col1 = Collision.GJK(shapes[0], shapes[1]);
-        let col2 = Collision.GJK(shapes[2], shapes[0]);
-        let col3 = Collision.GJK(shapes[2], shapes[1]);
-
-        if (col1 != 0) {
-            shapes[0].colour = 'rgba(207, 44, 44, 0.5)';
-            shapes[1].colour = 'rgba(207, 44, 44, 0.5)';
-            shapes[1].collide(col1, shapes[0], delta);
-        }
-        if (col2 != 0) {
-            shapes[0].colour = 'rgba(207, 44, 44, 0.5)';
-            shapes[2].colour = 'rgba(207, 44, 44, 0.5)';
-            shapes[0].collide(col2, shapes[2], delta);
-        }
-        if (col3 !=0) {
-            shapes[1].colour = 'rgba(207, 44, 44, 0.5)';
-            shapes[2].colour = 'rgba(207, 44, 44, 0.5)';
-            shapes[1].collide(col3, shapes[2], delta);
-        }
-    }
-
+class circleObj {
+  constructor(x, y) {
+    if (x == undefined) x = Math.random() * (c.width - 20) + 10;
+    if (y == undefined) y = Math.random() * (c.width - 20) + 10;
     
-
-    for (let i = 0; i < shapes.length; i++) {
-        shapes[i].draw();
-    }
-
-    window.requestAnimationFrame(update);
-}
-
-function inputs() {
-    let maxVel = 4;
-    for (let i = 0; i < pressedKeys.length; i++) {
-        switch (pressedKeys[i]) {
-            case 'w':
-                if (shapes[0].vel.y >= -maxVel) {
-                    shapes[0].vel.y -= 0.3;
-                } else {
-                    shapes[0].vel.y = -maxVel;
-                }
-                break;
-            case 'a':
-                if (shapes[0].vel.x >= -maxVel) {
-                    shapes[0].vel.x -= 0.1;
-                } else {
-                    shapes[0].vel.x = -maxVel;
-                }
-                break;
-            case 's':
-                if (shapes[0].vel.y <= maxVel) {
-                    shapes[0].vel.y += 0.1;
-                } else {
-                    shapes[0].vel.y = maxVel;
-                }
-                break;
-            case 'd':
-                if (shapes[0].vel.x <= maxVel) {
-                    shapes[0].vel.x += 0.1;
-                } else {
-                    shapes[0].vel.x = maxVel;
-                }
-                break;
-            case 'q':
-                shapes[0].rotate(-0.05);
-                break;
-            case 'e':
-                shapes[0].rotate(0.05);
-                break;
-
-
-            case 'u':
-                if (shapes[1].vel.y >= -maxVel) {
-                    shapes[1].vel.y -= 0.3;
-                } else {
-                    shapes[1].vel.y = -maxVel;
-                }
-                break;
-            case 'h':
-                if (shapes[1].vel.x >= -maxVel) {
-                    shapes[1].vel.x -= 0.1;
-                } else {
-                    shapes[1].vel.x = -maxVel;
-                }
-                break;
-            case 'j':
-                if (shapes[1].vel.y <= maxVel) {
-                    shapes[1].vel.y += 0.1;
-                } else {
-                    shapes[1].vel.y = maxVel;
-                }
-                break;
-            case 'k':
-                if (shapes[1].vel.x <= maxVel) {
-                    shapes[1].vel.x += 0.1;
-                } else {
-                    shapes[1].vel.x = maxVel;
-                }
-                break;
-            case 'y':
-                shapes[1].rotate(-0.05);
-                break;
-            case 'i':
-                shapes[1].rotate(0.05);
-                break;
-
-            case 'r':
-                shapes[0].translate(-shapes[0].vertices[0].x + 100, -shapes[0].vertices[0].y + 100);
-                shapes[1].translate(-shapes[1].vertices[1].x + 200, -shapes[1].vertices[1].y + 200);
-                shapes[0].vel = {x: 0, y: 0};
-                shapes[1].vel = {x: 0, y: 0};
-                break;
-        }
-    }
-}
-
-class Shape {
-    constructor(vertices, isStatic = false) {
-        this.vertices = vertices;
-
-        this.centroid = M.calcCentroid(this.vertices);
-
-        this.vel = {x: 0, y: 0};
-        this.isStatic = isStatic;
-        this.mass = 1;
-
-        this.colour = 'rgba(220, 220, 220, 0.5)';
-    }
-
-    draw() {
-        ctx.beginPath();
-        ctx.fillStyle = this.colour;
-        ctx.moveTo(this.vertices[0].x, this.vertices[0].y);
-        for (let i = 0; i < this.vertices.length; i++) {
-            ctx.lineTo(this.vertices[i].x, this.vertices[i].y);
-        }
-        ctx.fill();
-        ctx.beginPath();
-        ctx.fillStyle = 'red';
-        ctx.arc(this.centroid.x, this.centroid.y, 5, 0, 2 * Math.PI);
-        ctx.fill();
-        ctx.stroke();
-    }
-
-    update() {
-        if (this.isStatic) return;
-        
-        this.vel.y += 0.2;
-        this.vel.x *= 0.99;
-        this.vel.y *= 0.99;
-
-        this.translate(this.vel.x, this.vel.y);
-    }
-
-    collide(v, obj, delta) {
-        let n = M.normalise({x: -v.x, y: -v.y});
-        let rv = {x: obj.vel.x - this.vel.x, y: obj.vel.y - this.vel.y};
-        let m = rv.x * n.x + rv.y * n.y;
-
-        if (m > 0) return;
-
-        let ima = 1 / this.mass;
-        let imb = 1 / obj.mass;
-        let j = -(1 + damping) * m / (ima + imb);
-        let impulse = {x: j * n.x, y: j * n.y};
-
-        if (!this.isStatic) {
-            this.translate(v.x / 2, v.y / 2);
-            this.vel.x -= impulse.x * ima * delta;
-            this.vel.y -= impulse.y * ima * delta;
-        }
-
-        if (!obj.isStatic) {
-            obj.translate(-v.x / 2, -v.y / 2);
-            obj.vel.x += impulse.x * imb * delta;
-            obj.vel.y += impulse.y * imb * delta;
-        } else {
-            this.translate(v.x / 2, v.y / 2);
-        }
-    }
-
-    collideRot(v, obj) {
-        let damping = 0.05;
-
-        let n = M.normalise({x: -v.x, y: -v.y});
-        let rv = {x: obj.vel.x - this.vel.x, y: obj.vel.y - this.vel.y};
-        let m = rv.x * n.x + rv.y * n.y;
-
-        if (m > 0) return;
-
-        let ima = 1 / this.mass;
-        let imb = 1 / obj.mass;
-        let j = -(1 + damping) * m / (ima + imb);
-        let impulse = {x: j * n.x, y: j * n.y};
-
-        let refEdge = Collision.findRef(this.vertices, n);
-        let iEdge = Collision.findIncident(obj.vertices, n);
-
-        let refDir = {x: refEdge[0].x - refEdge[1].x, y: refEdge[0].y - refEdge[1].y};
-        refDir = M.normalise(refDir);
-
-        let edgeNorm = {x: -refDir.y, y: refDir.x};
-
-        let off1 = M.dot(refDir, refEdge[1]);
-        let off2 = -refDir.x * refEdge[0].x - refDir.y * refEdge[0];
-
-        let clipped = Collision.clipPoints(iEdge, refDir, off1);
-        clipped = Collision.clipPoints(clipped, {x: -refDir.x, y: -refDir.y}, -off2);
-
-        let pOff = edgeNorm.x * refEdge[1].x + edgeNorm.y * refEdge[1].y;
-        clipped = Collision.clipPoints(clipped, edgeNorm, pOff);
-
-        /*ctx.beginPath();
-        ctx.fillStyle = 'red';
-        ctx.arc(clipped[0].x, clipped[0].y, 5, 0, 2 * Math.PI);
-        ctx.fill();*/
-        console.log(clipped);
-
-        if (!this.isStatic) {
-            this.translate(v.x / 2, v.y / 2);
-            this.vel.x -= impulse.x * ima;
-            this.vel.y -= impulse.y * ima;
-        }
-
-        if (!obj.isStatic) {
-            obj.translate(-v.x / 2, -v.y / 2);
-            obj.vel.x += impulse.x * imb;
-            obj.vel.y += impulse.y * imb;
-        } else {
-            this.translate(v.x / 2, v.y / 2);
-        }
-    }
-
-    translate(x, y) {
-        for (let i = 0; i < this.vertices.length; i++) {
-            this.vertices[i].x += x;
-            this.vertices[i].y += y;
-        }
-        this.centroid.x += x;
-        this.centroid.y += y; 
-    }
+    this.x = x;
+    this.y = y;
     
-    rotate(r) {
-        for (let i = 0; i < this.vertices.length; i++) {
-            let x = this.vertices[i].x;
-            let y = this.vertices[i].y;
-            let dx = x - this.centroid.x;
-            let dy = y - this.centroid.y;
-            let rx = dx * Math.cos(r) + dy * -Math.sin(r);
-            let ry = dx * Math.sin(r) + dy * Math.cos(r);
+    this.ox = x;
+    this.oy = y;
+    
+    this.xa = 0;
+    this.ya = 0;
+    
+    this.r = Math.random() * (maxRadius - minRadius) + minRadius;
+    this.mass = this.r;
+    
+    this.colour = "#" + ((1 << 24) * Math.random() | 0).toString(16).padStart(6, "0");
+  }
+    
+  draw() {
+    ctx.beginPath();
+    ctx.lineWidth = 2;
+    ctx.fillStyle = this.colour;
+    ctx.arc(this.x, this.y, this.r, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.stroke();
+  }
+    
+  update(delta, tree) {
+    delta *= delta;
+    this.ya = g;
+    let xv = this.x - this.ox;
+    let yv = this.y - this.oy;
+    var nx = this.x * 2 - this.ox + this.xa * delta;
+    var ny = this.y * 2 - this.oy + this.ya * delta;
+    
+    this.ox = this.x;
+    this.oy = this.y;
+    
+    this.x = nx;
+    this.y = ny;
 
-            this.vertices[i].x = rx + this.centroid.x;
-            this.vertices[i].y = ry + this.centroid.y;
-        }
+    if (mouse.down == false) {
+      this.mouseCol();
     }
 
-    findFurthest(dir) {
-        let maxPoint = null;
-        let maxDist = -Infinity;
-        for (let i = 0; i < this.vertices.length; i++) {
-            let dist = M.dot(this.vertices[i], dir);
-            if (dist > maxDist) {
-                maxDist = dist;
-                maxPoint = this.vertices[i];
-            }
-        }
-
-        return maxPoint;
+    let checkPoints;
+    if (useQuad) {
+      let w = ((2 * this.r) + (4 * Math.max(xv, yv)));
+      let checkRange = new Quad(this.x - w, this.y - w, w * 2, w * 2);
+      if (drawCheck) checkRange.draw();
+      checkPoints = tree.queryRange(checkRange);
+    
+      for (let i = 0; i < checkPoints.length; i ++) {
+        this.objectCol(checkPoints[i]);
+      }
     }
-}
-
-class Collision {
-    static support(a, b, dir) {
-        let fa = a.findFurthest(dir);
-        let fb = b.findFurthest({x: -dir.x, y: -dir.y});
-
-        return {x: fa.x - fb.x, y: fa.y - fb.y, fa: fa, fb: fb};
+    else {
+      for (let i = 0; i < circles.length; i++) {
+        this.objectCol(circles[i]);
+      }
     }
-
-    static GJK(a, b) {
-        let simplex = [];
-        let dir = {x: 1, y: 0};
-        let support = this.support(a, b, dir);
-        let testIter = 0;
-
-        simplex.unshift(support);
-
-        dir = {x: -support.x, y: -support.y};
-
-        while (true) {
-            if (testIter++ > 50) {
-                console.error('infinite loop');
-                return null;
-            }
-
-            support = this.support(a, b, dir);
-
-            if (M.dot(support, dir) <= 0) {
-                return 0;
-            }
-            
-            simplex.unshift(support);
-
-            if (this.nextSimplex(simplex, dir)) {
-                return this.EPA(a, b, simplex);
-            }
-        }
+  }
+  
+  wallCol() {
+    var xv = this.x - this.ox;
+    var yv = this.y - this.oy;
+    //y collision
+    if (this.y + this.r > c.height) {
+      this.y = c.height - this.r;
+      this.oy = this.y + yv * wallFriction;
     }
-
-    static nextSimplex(points, dir) {
-        if (points.length == 2) return this.lineTest(points, dir);
-
-        if (points.length == 3) return this.triangleTest(points, dir);
-
-        return false;
+    if (this.y - this.r < 0) {
+      this.y = 0 + this.r;
+      this.oy = this.y + yv * wallFriction;
     }
-
-    static lineTest(points, dir) {
-        let a = points[0];
-        let b = points[1];
-
-        let ab = {x: a.x - b.x, y: a.y - b.y};
-        let ao = {x: -a.x, y: -a.y};
-
-        let nDir = M.normal(ab, ao);
-
-        dir.x = nDir.x;
-        dir.y = nDir.y;
-
-        return false;
+    //x collision
+    if (this.x + this.r > c.width) {
+      this.x = c.width - this.r;
+      this.ox = this.x + xv * wallFriction;
     }
-
-    static triangleTest(points, dir) {
-        let a = points[0];
-        let b = points[1];
-        let c = points[2];
-
-        let ab = {x: a.x - b.x, y: a.y - b.y};
-        let ac = {x: a.x - c.x, y: a.y - c.y};
-        let ao = {x: -a.x, y: -a.y};
-
-        let perp = M.normal(ab, ac);
-        if (M.dot(perp, ao) > 0) {
-            points.splice(2, 1);
-            dir.x = perp.x;
-            dir.y = perp.y;
-
-            return false;
-        }
-
-        let perp2 = M.normal(ac, ab);
-        if (M.dot(perp2, ao) > 0) {
-            points.splice(1, 1);
-            dir.x = perp2.x;
-            dir.y = perp2.y;
-
-            return false;
-        }
-
-        return true;
+    if (this.x - this.r < 0) {
+      this.x = 0 + this.r;
+      this.ox = this.x + xv * wallFriction;
     }
-
-    static EPA(a, b, points) {
-        let iter = 0;
-
-        while (iter++ < 100) {
-            let minDist = Infinity;
-            let cEdge = {index: -1, normal: null, dist: 0};
-
-            for (let i = 0; i < points.length; i++) {
-                let j = (i+1) % points.length;
-                let v1 = points[i];
-                let v2 = points[j];
-
-                let diff = {x: v2.x - v1.x, y: v2.y - v1.y};
-                let normal = M.normalise({x: diff.y, y: -diff.x});
-                let dist = M.dot(normal, v1);
-
-                if (dist < minDist) {
-                    minDist = dist;
-                    cEdge = {index: j, normal, dist};
-                }
-            }
-
-            let support = this.support(a, b, cEdge.normal);
-            let sDist = M.dot(cEdge.normal, support);
-
-            if (sDist - cEdge.dist > 0.005) {
-                points.splice(cEdge.index, 0, support);
-            } else {
-                return {x: cEdge.normal.x * cEdge.dist + 0.005, y: cEdge.normal.y * cEdge.dist + 0.005};
-            }
-        }
-
-        return {x: 0, y: 0};
-    }
-
-    static clipPoints(points, normal, offset) {
-        let result = [null, null];
-        for (let i = 0; i < points.length; i++) {
-            let a = points[i];
-            let b = points[(i + 1) % points.length];
-
-            let da = normal.x * a.x + normal.y * a.y - offset;
-            let db = normal.x * b.x + normal.y * b.y - offset;
-
-            let ai = da >= 0;
-            let bi = db >= 0;
-
-            if (ai && bi) {
-                result.push(b);
-            } else if (ai && !bi) {
-                result.push(M.intersectsEdge(a, b, normal, offset));
-            } else if (!ai && bi) {
-                result.push(M.intersectsEdge(a, b, normal, offset));
-                result.push(b);
-            }
-        }
-
-        return result;
-    }
-
-    static findIncident(points, normal) {
-        let minDot = Infinity;
-        let iEdge = [];
-
-        for (let i = 0; i < points.length; i++) {
-            let v1 = points[i];
-            let v2 = points[(i + 1) % points.length];
-
-            let edge = {x: v2.x - v1.x, y: v2.y - v1.y};
-            let edgeNorm = M.normalise({x: edge.y, y: -edge.x});
-            
-            if (M.dot(edgeNorm, normal) < minDot) {
-                minDot = M.dot(edgeNorm, normal);
-                iEdge = [v1, v2];
-            } 
-        }
-
-        return iEdge;
-    }
-
-    static findRef(points, normal) {
-        let maxDot = -Infinity;
-        let refEdge = [];
-
-        for (let i = 0; i < points.length; i++) {
-            let v1 = points[i];
-            let v2 = points[(i + 1) % points.length];
-
-            let edge = {x: v2.x - v1.x, y: v2.y - v1.y};
-            let edgeNorm = M.normalise({x: edge.y, y: -edge.x});
-
-            if (M.dot(edgeNorm, normal) > maxDot) {
-                maxDot = M.dot(edgeNorm, normal);
-                refEdge = [v1, v2];
-            }
-        }
-
-        return refEdge;
-    }
-}
-
-class M {
-    static calcCentroid(vertices) {
-        let sum = {x: 0, y: 0};
-        for (let i = 0; i < vertices.length; i++) {
-            sum.x += vertices[i].x;
-            sum.y += vertices[i].y;
-        }
-        return ({x: sum.x / vertices.length, y: sum.y / vertices.length});
-    }
-
-    static dot(v1, v2) {
-        //console.log(v2);
-        return (v1.x * v2.x) + (v1.y * v2.y);
-    }
-
-    static normal(v1, v2) {
-        let perp = {x: -v1.y, y: v1.x};
-        let normal = this.dot(perp, {x: -v2.x, y: -v2.y}) > 0
-            ? {x: -perp.x, y: -perp.y}
-            : perp;
+  }
+  
+  objectCol(obj) {
+    if (obj == this) return;
         
-        return normal;
-    }
-
-    static normalise(v) {
-        let mag = Math.sqrt(v.x * v.x + v.y * v.y);
+    var minDist = obj.r + this.r;
+    var dx = this.x - obj.x;  
+    var dy = this.y - obj.y;
+    var d2 = dx * dx + dy * dy;
+          
+    //angle of line between two circles
+    var a = Math.atan2(dy, dx);
         
-        return {x: v.x * (1 / mag), y: v.y * (1 / mag)};
-    }
+    //check for collision
+    if (d2 < minDist * minDist && d2 != 0) {
+          var xv1 = this.x - this.ox;
+          var yv1 = this.y - this.oy;
+          var xv2 = obj.x - obj.ox;
+          var yv2 = obj.y - obj.oy;
+          
+          var p1 = 0.8 * (dx * xv1 + dy * yv1) / d2;
+          var p2 = 0.8 * (dx * xv2 + dy * yv2) / d2;
+          var m1 = (2 * obj.mass) / (this.mass + obj.mass) * dot((xv1 - xv2), (yv1 - yv2), dx, dy) / (dx * 2, dy * 2) * (dx - dy);
+          
+          //update position
+          var o = minDist - Math.sqrt(d2);
+          var c = 0.5;
+      
+          var sepX = (dx / Math.sqrt(d2)) * o * c;
+          var sepY = (dy / Math.sqrt(d2)) * o * c;
+    
+          this.x += sepX / 2;
+          this.y += sepY / 2;
+          obj.x -= sepX / 2;
+          obj.y -= sepY / 2;
+          
+          //update velocity
+          xv1 += p2 * dx - p1 * dx;
+          xv2 += p1 * dx - p2 * dx;
+          yv1 += p2 * dy - p1 * dy;
+          yv2 += p1 * dy - p1 * dy;
+          
+          this.ox = this.x - xv1;
+          this.oy = this.y - yv1;
+          obj.ox = obj.x - xv2;
+          obj.oy = obj.y - yv2;
 
-    static intersectsEdge(a, b, normal, offset) {
-        let ab = {x: b.x - a.x, y: b.y - a.y};
-        let t = (offset - (normal.x * a.x + normal.y * a.y)) / (normal.x * ab.x + normal.y * ab.y);
-
-        return {x: a.x + t * ab.x, y: a.y + t * ab.y};
     }
+  }
+  
+  mouseCol() {
+    var minDist = 50 + this.r;
+    var dx = mouse.x - this.x;  
+    var dy = mouse.y - this.y;
+    var d2 = dx * dx + dy * dy;
+      
+    //angle of line between two circles
+    var a = Math.atan2(dy, dx);
+    
+    //check for collision
+    if (d2 < minDist * minDist && d2 != 0) {
+      var xv1 = this.x - this.ox;
+      var yv1 = this.y - this.oy;
+      var xvm = mouse.x - mouse.ox;
+      var yvm = mouse.y - mouse.oy;
+      
+      var p1 = 0.8 * (dx * xv1 + dy * yv1) / d2;
+      var p2 = 0.1 * (dx * xvm + dy * yvm) / d2;
+      
+      //update position
+      var o = minDist - Math.sqrt(d2);
+      var c = 0.5;
+  
+      var sepX = (dx / Math.sqrt(d2)) * o * c;
+      var sepY = (dy / Math.sqrt(d2)) * o * c;
+
+      this.x -= sepX / 2;
+      this.y -= sepY / 2;
+      
+      //update velocity
+      xv1 += p2 * dx - p1 * dx;
+      yv1 += p2 * dy - p1 * dy;
+      
+      this.ox = this.x - xv1;
+      this.oy = this.y - yv1;
+    }
+  }
 }
 
-start();
+class Quad {
+  constructor(x, y, w, h) {
+    this.x1 = x;
+    this.y1 = y;
+    this.x2 = x + w;
+    this.y2 = y + h;
+    this.w = w;
+    this.h = h;
+  }
+
+  contains(p) {
+    if (this.x1 > p.x + p.r || this.x2 < p.x - p.r) return false;
+    if (this.y1 > p.y + p.r || this.y2 < p.y - p.r) return false;
+    
+    return true;
+  }
+
+  intersects(b) {
+    if (this.x1 > b.x2 || b.x1 > this.x2) return false;
+    if (this.y1 > b.y2 || b.y1 > this.y2) return false;
+    return true;
+  }
+
+  draw() {
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.strokeRect(this.x1, this.y1, this.x2 - this.x1,  this.y2 - this.y1);
+    ctx.stroke();
+  }
+}
+
+class TreeNode {
+  constructor(area, depth) {
+    this.area = area;
+    this.points = [];
+    this.isLeaf = true;
+    this.depth = depth;
+  }
+
+  insert(p) {
+    if (!this.area.contains(p)) return false;
+
+    if (this.points.length < 4 && this.isLeaf) {
+      this.points.push(p);
+      return true;
+    }
+
+    if (this.depth > 8) return true;
+    if (this.isLeaf) this.subdivide();
+    if (this.tl.insert(p)) return true;
+    if (this.tr.insert(p)) return true;
+    if (this.bl.insert(p)) return true;
+    if (this.br.insert(p)) return true;
+
+    return false;
+  }
+
+  subdivide() {
+    let mx = (this.area.x2 - this.area.x1) / 2;
+    let my = (this.area.y2 - this.area.y1) / 2;
+
+    this.tl = new TreeNode(new Quad(this.area.x1, this.area.y1, mx, my), this.depth + 1);
+    this.tr = new TreeNode(new Quad(this.area.x1 + mx, this.area.y1, mx, my), this.depth + 1);
+    this.bl = new TreeNode(new Quad(this.area.x1, this.area.y1 + my, mx, my), this.depth + 1);
+    this.br = new TreeNode(new Quad(this.area.x1 + mx, this.area.y1 + my, mx, my), this.depth + 1);
+
+    this.isLeaf = false;
+    for (let i = 0; i < this.points.length; i++) this.insert(this.points[i]);
+    this.points = [];
+  }
+
+  queryRange(area) {
+    let pointsInRange = [];
+
+    if (!this.area.intersects(area)) return pointsInRange;
+
+    for (let i = 0; i < this.points.length; i++) {
+      if (area.contains(this.points[i])) pointsInRange.push(this.points[i]);
+    }
+
+    if (this.isLeaf) return pointsInRange;
+
+    pointsInRange = pointsInRange.concat(this.tl.queryRange(area));
+    pointsInRange = pointsInRange.concat(this.tr.queryRange(area));
+    pointsInRange = pointsInRange.concat(this.bl.queryRange(area));
+    pointsInRange = pointsInRange.concat(this.br.queryRange(area));
+
+    return pointsInRange;
+  }
+
+  draw() {
+    if (this.isLeaf) this.area.draw();
+    else {
+      this.tl.draw();
+      this.tr.draw();
+      this.bl.draw();
+      this.br.draw();
+    }
+   //this.area.draw();
+   //this.tl?.draw();
+   //this.tr?.draw();
+   //this.bl?.draw();
+   //this.br?.draw();
+  }
+}
+
+function dot(x1, y1, x2, y2) {
+  return (x1 * x2) + (y1 * y2);
+}
+
+function rSlide1() {
+  if (rSlider2.value - rSlider1.value <= 0) {
+    rSlider1.value = rSlider2.value;
+  }
+  minRadius = parseInt(rSlider1.value);
+  minRText.innerHTML = parseInt(rSlider1.value);
+}
+
+function rSlide2() {
+  if (rSlider2.value - rSlider1.value <= 0) {
+    rSlider2.value = rSlider1.value;
+  }
+  maxRadius = parseInt(rSlider2.value);
+  maxRText.innerHTML = parseInt(rSlider2.value);
+}
+
+setUp();
 window.requestAnimationFrame(update);

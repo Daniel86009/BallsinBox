@@ -1,14 +1,62 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
+<html lang="en" >
+  <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <meta name="keywords" content="Balls, Box, Fun, Game">
+    <meta name="description" content="A fun, sandbox game about balls in a box.">
+    <meta name="author" content="an idiot">
+    <meta name='admaven-placement' content=BqdCGpjCE>
+    <title>BallsinBox</title>
+    <link rel="icon" href="Imgs/Balls.png" type="image/x-icon">
     <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <canvas id="c"></canvas>
+    <base href="https://ballsinbox.dedyn.io/index.html/" target="_self">
+    <script type="application/ld+json">
+      {
+        "@context" : "https://schema.org",
+        "@type" : "WebSite",
+        "name" : "BallsinBox",
+        "url" : "https://ballsinbox.dedyn.io/"
+      }
+    </script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-8E14BJYHWQ"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
 
+      gtag('config', 'G-8E14BJYHWQ');
+    </script>
+  </head>
+  <body>
+    <p id="title">Click To Create Balls!</p>
+    <div id="menu">
+      <p class="menuItem">Balls: <output id="cNum">0</output> *(Over 300 can cause lag)</p>
+      <div>
+        <p class="menuItem">Gravity: <output id="gravity">0.2</output></p>
+        <input type="range" id="gSlider" class="slider" min="-1" max="1" step="0.1" value="0.2">
+      </div>
+      <div id="radius">
+        <p class="menuItem">Min Radius: <output id="minR">5</output></p>
+        <input type="range" id="rSlider1" class="slider" min="1" max="99" step="1" value="5" oninput="rSlide1()">
+        <p class="menuItem">Max Radius: <output id="maxR">20</output></p>
+        <input type="range" id="rSlider2" class="slider" min="1" max="99" step="1" value="20" oninput="rSlide2()">
+      </div>
+    </div>
+    <div id="debugMenu">
+      <p class="debugMenuItem">Debug</p>
+      <div id="dropDownContent">
+        <div>
+          <p class="debugMenuItem">QuadTree:</p>
+          <p class="debugMenuItem">-Use QuadTree:</p>
+          <input type="checkbox" id="useQuad" checked="true">
+          <p class="debugMenuItem">-Draw QuadTree:</p>
+          <input type="checkbox" id="drawQuad" checked="false">
+          <p class="debugMenuItem">Draw Check Range:</p>
+          <input type="checkbox" id="drawCheckRange" checked="false">
+        </div>
+      </div>
+    </div>
+    <canvas id="canvas"></canvas>
     <script src="script.js"></script>
-</body>
+  </body>
 </html>
