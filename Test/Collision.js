@@ -463,10 +463,10 @@ class Collision {
             let support = this.support(a, b, cEdge.normal);
             let sDist = M.dot(cEdge.normal, support);
 
-            if (sDist - cEdge.dist > 0.005) {
+            if (sDist - cEdge.dist > 0.00000005) {
                 points.splice(cEdge.index, 0, support);
             } else {
-                return {x: cEdge.normal.x * cEdge.dist + 0.005, y: cEdge.normal.y * cEdge.dist + 0.005};
+                return {x: cEdge.normal.x * cEdge.dist + 0.00000005, y: cEdge.normal.y * cEdge.dist + 0.00000005};
             }
         }
 
