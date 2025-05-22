@@ -472,71 +472,6 @@ class Collision {
 
         return {x: 0, y: 0};
     }
-
-    static clipPoints(points, normal, offset) {
-        let result = [null, null];
-        for (let i = 0; i < points.length; i++) {
-            let a = points[i];
-            let b = points[(i + 1) % points.length];
-
-            let da = normal.x * a.x + normal.y * a.y - offset;
-            let db = normal.x * b.x + normal.y * b.y - offset;
-
-            let ai = da >= 0;
-            let bi = db >= 0;
-
-            if (ai && bi) {
-                result.push(b);
-            } else if (ai && !bi) {
-                result.push(M.intersectsEdge(a, b, normal, offset));
-            } else if (!ai && bi) {
-                result.push(M.intersectsEdge(a, b, normal, offset));
-                result.push(b);
-            }
-        }
-
-        return result;
-    }
-
-    static findIncident(points, normal) {
-        let minDot = Infinity;
-        let iEdge = [];
-
-        for (let i = 0; i < points.length; i++) {
-            let v1 = points[i];
-            let v2 = points[(i + 1) % points.length];
-
-            let edge = {x: v2.x - v1.x, y: v2.y - v1.y};
-            let edgeNorm = M.normalise({x: edge.y, y: -edge.x});
-            
-            if (M.dot(edgeNorm, normal) < minDot) {
-                minDot = M.dot(edgeNorm, normal);
-                iEdge = [v1, v2];
-            } 
-        }
-
-        return iEdge;
-    }
-
-    static findRef(points, normal) {
-        let maxDot = -Infinity;
-        let refEdge = [];
-
-        for (let i = 0; i < points.length; i++) {
-            let v1 = points[i];
-            let v2 = points[(i + 1) % points.length];
-
-            let edge = {x: v2.x - v1.x, y: v2.y - v1.y};
-            let edgeNorm = M.normalise({x: edge.y, y: -edge.x});
-
-            if (M.dot(edgeNorm, normal) > maxDot) {
-                maxDot = M.dot(edgeNorm, normal);
-                refEdge = [v1, v2];
-            }
-        }
-
-        return refEdge;
-    }
 }
 
 class M {
@@ -567,13 +502,6 @@ class M {
         let mag = Math.sqrt(v.x * v.x + v.y * v.y);
         
         return {x: v.x * (1 / mag), y: v.y * (1 / mag)};
-    }
-
-    static intersectsEdge(a, b, normal, offset) {
-        let ab = {x: b.x - a.x, y: b.y - a.y};
-        let t = (offset - (normal.x * a.x + normal.y * a.y)) / (normal.x * ab.x + normal.y * ab.y);
-
-        return {x: a.x + t * ab.x, y: a.y + t * ab.y};
     }
 }
 
