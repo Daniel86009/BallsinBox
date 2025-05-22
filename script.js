@@ -42,7 +42,9 @@ function setUp() {
   
   c.addEventListener("click", function() {
     if (isMobile) {
-      circles.push(new circleObj(event.clientX, event.clientY));
+      for (let i = 0; i < 50; i++) {
+        circles.push(new circleObj(event.clientX, event.clientY));
+      } 
     }
   });
 

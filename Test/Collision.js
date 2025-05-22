@@ -6,7 +6,8 @@ let shapes = [];
 let pressedKeys = [];
 
 let damping = 0.01;
-let iter = 1;
+let gravity = {x: 0, y: 0.4};
+let iter = 5;
 
 function start() {
     c.width = 400;
@@ -61,14 +62,20 @@ function update() {
 
     inputs();
 
-    for (let i = 0; i < shapes.length; i++) {
+    /*for (let i = 0; i < shapes.length; i++) {
         shapes[i].colour = 'rgba(220, 220, 220, 0.5)';
         shapes[i].update();
-    }
+    }*/
 
     let delta = 1 / iter;
 
     for (let i = 0; i < iter; i++) {
+
+        for (let i = 0; i < shapes.length; i++) {
+            shapes[i].colour = 'rgba(220, 220, 220, 0.5)';
+            shapes[i].update(delta);
+        }
+
         let col1 = Collision.GJK(shapes[0], shapes[1]);
         let col2 = Collision.GJK(shapes[2], shapes[0]);
         let col3 = Collision.GJK(shapes[2], shapes[1]);
@@ -103,7 +110,7 @@ function inputs() {
         switch (pressedKeys[i]) {
             case 'w':
                 if (shapes[0].vel.y >= -maxVel) {
-                    shapes[0].vel.y -= 0.3;
+                    shapes[0].vel.y -= 1;
                 } else {
                     shapes[0].vel.y = -maxVel;
                 }
@@ -139,7 +146,7 @@ function inputs() {
 
             case 'u':
                 if (shapes[1].vel.y >= -maxVel) {
-                    shapes[1].vel.y -= 0.3;
+                    shapes[1].vel.y -= 1;
                 } else {
                     shapes[1].vel.y = -maxVel;
                 }
@@ -210,14 +217,17 @@ class Shape {
         ctx.stroke();
     }
 
-    update() {
+    update(delta) {
         if (this.isStatic) return;
         
-        this.vel.y += 0.2;
+        //delta *= delta;
+
+        this.vel.x += gravity.x * delta;
+        this.vel.y += gravity.y * delta;
         this.vel.x *= 0.99;
         this.vel.y *= 0.99;
 
-        this.translate(this.vel.x, this.vel.y);
+        this.translate(this.vel.x * delta, this.vel.y * delta);
     }
 
     collide(v, obj, delta) {
