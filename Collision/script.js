@@ -4,10 +4,12 @@ let ctx = c.getContext('2d');
 let shapes = [];
 
 let pressedKeys = [];
+let mouse = {x: 0, y: 0, down: false};
 
 let damping = 0.01;
-let gravity = {x: 0, y: 0.4};
-let iter = 5;
+let iter = 4;
+
+let scale = 1;
 
 function start() {
     c.width = 400;
@@ -34,6 +36,28 @@ function start() {
         }
     });
 
+    document.addEventListener('mousemove', (event) => {
+        mouse.x = event.clientX;
+        mouse.y = event.clientY;
+    });
+
+    document.addEventListener('mousedown', (event) => {
+        mouse.down = true;
+    });
+
+    document.addEventListener('mouseup', (event) => {
+        mouse.down = false;
+    });
+
+    document.addEventListener('wheel', (event) => {
+        console.log(event.deltaY);
+        console.log();
+        //ctx.scale(scale + event.deltaY / 1000, scale + event.deltaY / 1000);
+        scale += event.deltaY / 1000;
+        
+    });
+
+    //--------------Bodies--------------
     shapes.push(new Shape([
         {x: 100, y: 100},
         {x: 100, y: 200},
@@ -47,6 +71,15 @@ function start() {
         {x: 300, y: 300}
     ]));
 
+    for (let i = 0; i < 5; i++) {
+        shapes.push(new Shape([
+        {x: 200, y: 200},
+        {x: 200, y: 240},
+        {x: 240, y: 240}
+        ]));
+    }
+
+    //--------------Walls--------------
     shapes.push(new Shape([
         {x: 20, y: 350},
         {x: 380, y: 350},
@@ -54,47 +87,68 @@ function start() {
         {x: 20, y: 380}
     ], true));
 
-    shapes[0].mass = 2;
+    shapes.push(new Shape([
+        {x: 0, y: 380},
+        {x: 30, y: 380},
+        {x: 30, y: 30},
+        {x: 0, y: 30}
+    ], true));
+
+    shapes.push(new Shape([
+        {x: 400, y: 380},
+        {x: 370, y: 380},
+        {x: 370, y: 30},
+        {x: 400, y: 30}
+    ], true));
+
+    shapes[1].density = 0.2;
+    shapes[1].mass = shapes[1].area * shapes[1].density;
+    shapes[0].density = 0.8;
+    shapes[0].mass = shapes[0].area * shapes[0].density;
 }
 
 function update() {
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, c.width, c.height);
+    ctx.scale(scale, scale);
 
     inputs();
-
-    /*for (let i = 0; i < shapes.length; i++) {
-        shapes[i].colour = 'rgba(220, 220, 220, 0.5)';
-        shapes[i].update();
-    }*/
 
     let delta = 1 / iter;
 
     for (let i = 0; i < iter; i++) {
-
-        for (let i = 0; i < shapes.length; i++) {
-            shapes[i].colour = 'rgba(220, 220, 220, 0.5)';
-            shapes[i].update(delta);
+        for (let j = 0; j < shapes.length; j++) {
+            shapes[j].colour = 'rgba(220, 220, 220, 0.5)';
+            shapes[j].update(delta);
         }
 
-        let col1 = Collision.GJK(shapes[0], shapes[1]);
-        let col2 = Collision.GJK(shapes[2], shapes[0]);
-        let col3 = Collision.GJK(shapes[2], shapes[1]);
+        for (let j = 0; j < shapes.length; j++) {
+            let s1 = shapes[j];
 
-        if (col1 != 0) {
-            shapes[0].colour = 'rgba(207, 44, 44, 0.5)';
-            shapes[1].colour = 'rgba(207, 44, 44, 0.5)';
-            shapes[1].collide(col1, shapes[0], delta);
+            for (let l = 0; l < shapes.length; l++) {
+                let s2 = shapes[l];
+
+                if (s1 == s2) continue
+
+                let col = Collision.GJK(s1, s2);
+
+                if (col != 0) {
+                    s1.colour = 'rgba(207, 44, 44, 0.5)';
+                    s2.colour = 'rgba(207, 44, 44, 0.5)';
+                    let cont = Collision.findContacts(s1, s2);
+                    s2.collideRot(col, s1, cont, delta);
+                    s2.collide(col, s1, delta);
+                }
+            }
         }
-        if (col2 != 0) {
-            shapes[0].colour = 'rgba(207, 44, 44, 0.5)';
-            shapes[2].colour = 'rgba(207, 44, 44, 0.5)';
-            shapes[0].collide(col2, shapes[2], delta);
-        }
-        if (col3 !=0) {
-            shapes[1].colour = 'rgba(207, 44, 44, 0.5)';
-            shapes[2].colour = 'rgba(207, 44, 44, 0.5)';
-            shapes[1].collide(col3, shapes[2], delta);
-        }
+    }
+
+    if (mouse.down) {
+        shapes[0].colour = 'rgba(50, 50, 137, 0.5)';
+        ctx.beginPath();
+        ctx.fillStyle = 'blue';
+        ctx.arc(mouse.x, mouse.y, 10, 0, 2 * Math.PI);
+        ctx.fill();
     }
 
     for (let i = 0; i < shapes.length; i++) {
@@ -137,10 +191,10 @@ function inputs() {
                 }
                 break;
             case 'q':
-                shapes[0].rotate(-0.05);
+                shapes[0].aVel -= 0.01;
                 break;
             case 'e':
-                shapes[0].rotate(0.05);
+                shapes[0].aVel += 0.01;
                 break;
 
 
@@ -173,10 +227,10 @@ function inputs() {
                 }
                 break;
             case 'y':
-                shapes[1].rotate(-0.05);
+                shapes[1].aVel -= 0.01;
                 break;
             case 'i':
-                shapes[1].rotate(0.05);
+                shapes[1].aVel += 0.01;
                 break;
 
             case 'r':
@@ -185,7 +239,18 @@ function inputs() {
                 shapes[0].vel = {x: 0, y: 0};
                 shapes[1].vel = {x: 0, y: 0};
                 break;
+            
+            case 'z':
+                //---------Debug key---------
+                console.log(shapes[0].momInertia);
         }
+    }
+
+    if (mouse.down) {
+        let dx = mouse.x - shapes[0].centroid.x * scale;
+        let dy = mouse.y - shapes[0].centroid.y * scale;
+        shapes[0].vel.x = dx * 200 / shapes[0].mass;
+        shapes[0].vel.y = dy * 200 / shapes[0].mass;
     }
 }
 
@@ -196,8 +261,16 @@ class Shape {
         this.centroid = M.calcCentroid(this.vertices);
 
         this.vel = {x: 0, y: 0};
+        this.aVel = 0;
         this.isStatic = isStatic;
-        this.mass = 1;
+        this.impulses = [{x: 0, y: 0}, {x: 0, y: 0}];
+        this.raList = [{x: 0, y: 0}, {x: 0, y: 0}];
+        this.rbList = [{x: 0, y: 0}, {x: 0, y: 0}];
+        this.area = this.calcArea();
+        this.density = 0.1;
+        this.mass = this.density * this.area;
+        this.inertia = this.calcMomentInertia() / 100000000000000000;
+        this.restitution = 0.01;
 
         this.colour = 'rgba(220, 220, 220, 0.5)';
     }
@@ -220,13 +293,12 @@ class Shape {
     update(delta) {
         if (this.isStatic) return;
         
-        //delta *= delta;
+        this.vel.y += 0.2 * delta;
+        this.vel.x *= 0.999;
+        this.vel.y *= 0.999;
+        this.aVel *= 0.999;
 
-        this.vel.x += gravity.x * delta;
-        this.vel.y += gravity.y * delta;
-        this.vel.x *= 0.99;
-        this.vel.y *= 0.99;
-
+        this.rotate(this.aVel * delta);
         this.translate(this.vel.x * delta, this.vel.y * delta);
     }
 
@@ -257,57 +329,74 @@ class Shape {
         }
     }
 
-    collideRot(v, obj) {
-        let damping = 0.05;
+    collideRot(v, obj, contacts, delta) {
+    const restitution = 0.04;
+    const n = M.normalise({ x: -v.x, y: -v.y });
 
-        let n = M.normalise({x: -v.x, y: -v.y});
-        let rv = {x: obj.vel.x - this.vel.x, y: obj.vel.y - this.vel.y};
-        let m = rv.x * n.x + rv.y * n.y;
+    this.impulses = [];
+    this.raList = [];
+    this.rbList = [];
 
-        if (m > 0) return;
+    for (let i = 0; i < contacts.length; i++) {
+        const contact = contacts[i];
 
-        let ima = 1 / this.mass;
-        let imb = 1 / obj.mass;
-        let j = -(1 + damping) * m / (ima + imb);
-        let impulse = {x: j * n.x, y: j * n.y};
+        const ra = M.sub(contact, this.centroid);
+        const rb = M.sub(contact, obj.centroid);
 
-        let refEdge = Collision.findRef(this.vertices, n);
-        let iEdge = Collision.findIncident(obj.vertices, n);
+        this.raList[i] = ra;
+        this.rbList[i] = rb;
 
-        let refDir = {x: refEdge[0].x - refEdge[1].x, y: refEdge[0].y - refEdge[1].y};
-        refDir = M.normalise(refDir);
+        const raPerp = { x: -ra.y, y: ra.x };
+        const rbPerp = { x: -rb.y, y: rb.x };
 
-        let edgeNorm = {x: -refDir.y, y: refDir.x};
+        const angularVelA = M.mult(raPerp, this.aVel);
+        const angularVelB = M.mult(rbPerp, obj.aVel);
 
-        let off1 = M.dot(refDir, refEdge[1]);
-        let off2 = -refDir.x * refEdge[0].x - refDir.y * refEdge[0];
+        const velA = M.add(this.vel, angularVelA);
+        const velB = M.add(obj.vel, angularVelB);
 
-        let clipped = Collision.clipPoints(iEdge, refDir, off1);
-        clipped = Collision.clipPoints(clipped, {x: -refDir.x, y: -refDir.y}, -off2);
+        const relativeVelocity = M.sub(velB, velA);
+        const contactVel = M.dot(relativeVelocity, n);
 
-        let pOff = edgeNorm.x * refEdge[1].x + edgeNorm.y * refEdge[1].y;
-        clipped = Collision.clipPoints(clipped, edgeNorm, pOff);
+        if (contactVel > 0) continue;
 
-        /*ctx.beginPath();
-        ctx.fillStyle = 'red';
-        ctx.arc(clipped[0].x, clipped[0].y, 5, 0, 2 * Math.PI);
-        ctx.fill();*/
-        console.log(clipped);
+        const raCrossN = M.dot(raPerp, n);
+        const rbCrossN = M.dot(rbPerp, n);
+
+        const invMassA = 1 / this.mass;
+        const invMassB = 1 / obj.mass;
+        const invInertiaA = 1 / this.inertia;
+        const invInertiaB = 1 / obj.inertia;
+
+        let denom = invMassA + invMassB
+                  + (raCrossN * raCrossN) * invInertiaA
+                  + (rbCrossN * rbCrossN) * invInertiaB;
+
+        let j = -(1 + restitution) * contactVel / denom;
+        j /= contacts.length;
+
+        const impulse = M.mult(n, j);
+        this.impulses[i] = impulse;
+    }
+
+    for (let i = 0; i < this.impulses.length; i++) {
+        const impulse = this.impulses[i];
+        if (!impulse) continue;
+
+        const ra = this.raList[i];
+        const rb = this.rbList[i];
 
         if (!this.isStatic) {
-            this.translate(v.x / 2, v.y / 2);
-            this.vel.x -= impulse.x * ima;
-            this.vel.y -= impulse.y * ima;
+            this.vel = M.sub(this.vel, M.mult(impulse, delta / this.mass));
+            this.aVel -= M.cross(ra, impulse) * delta / this.inertia;
         }
-
+        
         if (!obj.isStatic) {
-            obj.translate(-v.x / 2, -v.y / 2);
-            obj.vel.x += impulse.x * imb;
-            obj.vel.y += impulse.y * imb;
-        } else {
-            this.translate(v.x / 2, v.y / 2);
+            obj.vel = M.add(obj.vel, M.mult(impulse, delta / obj.mass));
+            obj.aVel += M.cross(rb, impulse) * delta / obj.inertia;
         }
     }
+}
 
     translate(x, y) {
         for (let i = 0; i < this.vertices.length; i++) {
@@ -318,23 +407,26 @@ class Shape {
         this.centroid.y += y; 
     }
     
-    rotate(r) {
+    rotate(r, p) {
+        if (p == undefined) p = this.centroid;
+
         for (let i = 0; i < this.vertices.length; i++) {
             let x = this.vertices[i].x;
             let y = this.vertices[i].y;
-            let dx = x - this.centroid.x;
-            let dy = y - this.centroid.y;
+            let dx = x - p.x;
+            let dy = y - p.y;
             let rx = dx * Math.cos(r) + dy * -Math.sin(r);
             let ry = dx * Math.sin(r) + dy * Math.cos(r);
 
-            this.vertices[i].x = rx + this.centroid.x;
-            this.vertices[i].y = ry + this.centroid.y;
+            this.vertices[i].x = rx + p.x;
+            this.vertices[i].y = ry + p.y;
         }
     }
 
     findFurthest(dir) {
         let maxPoint = null;
         let maxDist = -Infinity;
+
         for (let i = 0; i < this.vertices.length; i++) {
             let dist = M.dot(this.vertices[i], dir);
             if (dist > maxDist) {
@@ -344,6 +436,39 @@ class Shape {
         }
 
         return maxPoint;
+    }
+
+    calcArea() {
+        let area = 0;
+        for (let i = 0; i < this.vertices.length - 1; i++) {
+            let p1 = this.vertices[0];
+            let p2 = this.vertices[i];
+            let p3 = this.vertices[i+1];
+            let v1 = {x: p3.x - p1.x, y: p3.y - p1.y};
+            let v2 = {x: p2.x - p1.x, y: p2.y - p1.y};
+            area += M.cross(v1, v2) / 2;
+        }
+
+        return Math.abs(area);
+    }
+
+    calcMomentInertia() {
+        let inertia = 0;
+        let area = 0;
+
+        for (let i = 0; i < this.vertices.length; i++) {
+            let p0 = this.vertices[i];
+            let p1 = this.vertices[(i + 1) % this.vertices.length];
+
+            let cross = M.cross(p0, p1);
+            area += cross;
+            inertia += cross * (p0.x * p0.x + p0.x * p1.x + p1.x * p1.x + p0.y * p0.y + p0.y * p1.y + p1.y * p1.y);
+        }
+
+        area *= 0.5;
+        inertia *= (this.density / 12);
+
+        return Math.abs(inertia);
     }
 }
 
@@ -463,14 +588,81 @@ class Collision {
             let support = this.support(a, b, cEdge.normal);
             let sDist = M.dot(cEdge.normal, support);
 
-            if (sDist - cEdge.dist > 0.00000005) {
+            if (sDist - cEdge.dist > 0.005) {
                 points.splice(cEdge.index, 0, support);
             } else {
-                return {x: cEdge.normal.x * cEdge.dist + 0.00000005, y: cEdge.normal.y * cEdge.dist + 0.00000005};
+                return {x: cEdge.normal.x * cEdge.dist + 0.000005, y: cEdge.normal.y * cEdge.dist + 0.000005};
             }
         }
 
         return {x: 0, y: 0};
+    }
+
+    static findContacts(a, b) {
+        let contacts = [];
+        let minDist = Infinity;
+
+        for (let i = 0; i < a.vertices.length; i++) {
+            let p = a.vertices[i];
+
+            for (let j = 0; j < b.vertices.length; j++) {
+                let va = b.vertices[j];
+                let vb = b.vertices[(j+1) % b.vertices.length];
+
+                let pd = this.pointSegmentDist(p, va, vb);
+
+                if (M.nearEqual(pd.d2, minDist)) {
+                    if (!M.nearEqual(pd.cp, contacts[0])) contacts[1] = pd.cp;
+                } else if (pd.d2 < minDist) {
+                    minDist = pd.d2;
+                    contacts[0] = pd.cp;
+                }
+            }
+        }
+
+        for (let i = 0; i < b.vertices.length; i++) {
+            let p = b.vertices[i];
+
+            for (let j = 0; j < a.vertices.length; j++) {
+                let va = a.vertices[j];
+                let vb = a.vertices[(j+1) % a.vertices.length];
+
+                let pd = this.pointSegmentDist(p, va, vb);
+
+                if (M.nearEqual(pd.d2, minDist)) {
+                    if (!M.nearEqual(pd.cp, contacts[0])) contacts[1] = pd.cp;
+                } else if (pd.d2 < minDist) {
+                    minDist = pd.d2;
+                    contacts[0] = pd.cp;
+                }
+            }
+        }
+
+        return contacts;
+    }
+
+    static pointSegmentDist(p, a, b) {
+        let ab = {x: b.x - a.x, y: b.y - a.y};
+        let ap = {x: p.x - a.x, y: p.y - a.y};
+        let cp = null;
+
+        let proj = M.dot(ap, ab);
+        let l = ab.x * ab.x + ab.y * ab.y;
+        let d = proj / l;
+
+        if (d <= 0) {
+            cp = a;
+        } else if (d >= 1) {
+            cp = b;
+        } else {
+            cp = a + ab * d;
+            cp = {x: a.x + ab.x * d, y: a.y + ab.y * d};
+        }
+
+        let dx = p.x - cp.x;
+        let dy = p.y - cp.y;
+        let d2 = dx * dx + dy * dy;
+        return {d2: d2, cp: cp};
     }
 }
 
@@ -485,8 +677,11 @@ class M {
     }
 
     static dot(v1, v2) {
-        //console.log(v2);
         return (v1.x * v2.x) + (v1.y * v2.y);
+    }
+
+    static cross(v1, v2) {
+        return v1.x * v2.y - v1.y * v2.x;
     }
 
     static normal(v1, v2) {
@@ -502,6 +697,40 @@ class M {
         let mag = Math.sqrt(v.x * v.x + v.y * v.y);
         
         return {x: v.x * (1 / mag), y: v.y * (1 / mag)};
+    }
+
+    static intersectsEdge(a, b, normal, offset) {
+        let ab = {x: b.x - a.x, y: b.y - a.y};
+        let t = (offset - (normal.x * a.x + normal.y * a.y)) / (normal.x * ab.x + normal.y * ab.y);
+
+        return {x: a.x + t * ab.x, y: a.y + t * ab.y};
+    }
+
+    static nearEqual(a, b) {
+        if (a.x) {
+            return this.nearEqual(a.x, b.x) && this.nearEqual(a.y, b.y);
+        } else {
+            return Math.abs(a - b) < 0.0005;
+        }
+    }
+
+    static dist(v1, v2) {
+        v2 = v2 || {x: 0, y: 0};
+        let dx = v1.x - v2.x;
+        let dy = v1.y - v2.y;
+        return dx * dx + dy * dy;
+    }
+
+    static sub(v1, v2) {
+        return {x: v1.x - v2.x, y: v1.y - v2.y};
+    }
+
+    static mult(v, m) {
+        return {x: v.x * m, y: v.y * m};
+    }
+
+    static add(v1, v2) {
+        return {x: v1.x + v2.x, y: v1.y + v2.y};
     }
 }
 
