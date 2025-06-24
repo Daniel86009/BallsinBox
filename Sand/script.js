@@ -83,14 +83,16 @@ function update() {
                     }
 
                     else if (!p.moved && p.type == 'water') {
-                        if (grid[x+1] && grid[x+1][y] && grid[x+1][y].type == '' && !grid[x+1][y].moved) {
-                            grid[x+1][y].type = p.type;
+                        let opt = [1, -1];
+                        let d = opt[Math.floor(Math.random() * opt.length)];
+                        if (grid[x+d] && grid[x+d][y] && grid[x+d][y].type == '' && !grid[x+d][y].moved) {
+                            grid[x+d][y].type = p.type;
                             p.type = '';
-                            grid[x+1][y].moved = true;
-                        } else if (grid[x-1] && grid[x-1][y] && grid[x-1][y].type == '' && !grid[x-1][y].moved) {
-                            grid[x-1][y].type = p.type;
+                            grid[x+d][y].moved = true;
+                        } else if (grid[x-d] && grid[x-d][y] && grid[x-d][y].type == '' && !grid[x-d][y].moved) {
+                            grid[x-d][y].type = p.type;
                             p.type = '';
-                            grid[x-1][y].moved = true;
+                            grid[x-d][y].moved = true;
                         }
                     }
                 }
@@ -110,7 +112,7 @@ function update() {
             let p = grid[x][y];
             switch (p.type) {
                 case 'sand':
-                    ctx.fillStyle = 'yellow';
+                    ctx.fillStyle = 'rgb(255, 255, 0)';
                     break;
                 case 'dirt':
                     ctx.fillStyle = 'rgb(146, 85, 35)';
