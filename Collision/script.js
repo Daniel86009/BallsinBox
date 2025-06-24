@@ -4,10 +4,11 @@ let ctx = c.getContext('2d');
 let shapes = [];
 
 let pressedKeys = [];
-let mouse = {x: 0, y: 0, down: false};
+let mouse = {x: 0, y: 0, down: false, s: null, offset: {x: 0, y: 0}};
+let drawBounds = false;
 
 let damping = 0.01;
-let iter = 4;
+let iter = 8;
 
 let scale = 1;
 
@@ -37,8 +38,9 @@ function start() {
     });
 
     document.addEventListener('mousemove', (event) => {
-        mouse.x = event.clientX;
-        mouse.y = event.clientY;
+        let rect = c.getBoundingClientRect();
+        mouse.x = event.clientX - rect.left;
+        mouse.y = event.clientY - rect.top;
     });
 
     document.addEventListener('mousedown', (event) => {
@@ -47,64 +49,19 @@ function start() {
 
     document.addEventListener('mouseup', (event) => {
         mouse.down = false;
+        mouse.s = null;
+        mouse.offset = {x: 0, y: 0};
     });
 
-    document.addEventListener('wheel', (event) => {
+    /*document.addEventListener('wheel', (event) => {
         console.log(event.deltaY);
         console.log();
         //ctx.scale(scale + event.deltaY / 1000, scale + event.deltaY / 1000);
         scale += event.deltaY / 1000;
         
-    });
+    });*/
 
-    //--------------Bodies--------------
-    shapes.push(new Shape([
-        {x: 100, y: 100},
-        {x: 100, y: 200},
-        {x: 200, y: 200},
-        {x: 200, y: 100}
-    ]));
-
-    shapes.push(new Shape([
-        {x: 200, y: 200},
-        {x: 200, y: 300},
-        {x: 300, y: 300}
-    ]));
-
-    for (let i = 0; i < 5; i++) {
-        shapes.push(new Shape([
-        {x: 200, y: 200},
-        {x: 200, y: 240},
-        {x: 240, y: 240}
-        ]));
-    }
-
-    //--------------Walls--------------
-    shapes.push(new Shape([
-        {x: 20, y: 350},
-        {x: 380, y: 350},
-        {x: 380, y: 380},
-        {x: 20, y: 380}
-    ], true));
-
-    shapes.push(new Shape([
-        {x: 0, y: 380},
-        {x: 30, y: 380},
-        {x: 30, y: 30},
-        {x: 0, y: 30}
-    ], true));
-
-    shapes.push(new Shape([
-        {x: 400, y: 380},
-        {x: 370, y: 380},
-        {x: 370, y: 30},
-        {x: 400, y: 30}
-    ], true));
-
-    shapes[1].density = 0.2;
-    shapes[1].mass = shapes[1].area * shapes[1].density;
-    shapes[0].density = 0.8;
-    shapes[0].mass = shapes[0].area * shapes[0].density;
+    resetShapes();
 }
 
 function update() {
@@ -120,6 +77,7 @@ function update() {
         for (let j = 0; j < shapes.length; j++) {
             shapes[j].colour = 'rgba(220, 220, 220, 0.5)';
             shapes[j].update(delta);
+            shapes[j].createBoundingBox();
         }
 
         for (let j = 0; j < shapes.length; j++) {
@@ -128,7 +86,10 @@ function update() {
             for (let l = 0; l < shapes.length; l++) {
                 let s2 = shapes[l];
 
-                if (s1 == s2) continue
+                if (s1 == s2) continue;
+                if (s1.isStatic && s2.isStatic) continue;
+
+                if (!Collision.AABB(s1.bounds, s2.bounds)) continue;
 
                 let col = Collision.GJK(s1, s2);
 
@@ -144,11 +105,11 @@ function update() {
     }
 
     if (mouse.down) {
-        shapes[0].colour = 'rgba(50, 50, 137, 0.5)';
+        if (mouse.s && !mouse.s.isStatic) mouse.s.colour = 'rgba(123, 123, 219, 0.5)';
         ctx.beginPath();
-        ctx.fillStyle = 'blue';
+        ctx.fillStyle = 'green';
         ctx.arc(mouse.x, mouse.y, 10, 0, 2 * Math.PI);
-        ctx.fill();
+        ctx.stroke();
     }
 
     for (let i = 0; i < shapes.length; i++) {
@@ -162,96 +123,107 @@ function inputs() {
     let maxVel = 4;
     for (let i = 0; i < pressedKeys.length; i++) {
         switch (pressedKeys[i]) {
-            case 'w':
-                if (shapes[0].vel.y >= -maxVel) {
-                    shapes[0].vel.y -= 1;
-                } else {
-                    shapes[0].vel.y = -maxVel;
-                }
-                break;
-            case 'a':
-                if (shapes[0].vel.x >= -maxVel) {
-                    shapes[0].vel.x -= 0.1;
-                } else {
-                    shapes[0].vel.x = -maxVel;
-                }
-                break;
-            case 's':
-                if (shapes[0].vel.y <= maxVel) {
-                    shapes[0].vel.y += 0.1;
-                } else {
-                    shapes[0].vel.y = maxVel;
-                }
-                break;
-            case 'd':
-                if (shapes[0].vel.x <= maxVel) {
-                    shapes[0].vel.x += 0.1;
-                } else {
-                    shapes[0].vel.x = maxVel;
-                }
-                break;
             case 'q':
-                shapes[0].aVel -= 0.01;
+                if (mouse.s) {
+                    if (mouse.s.isStatic) mouse.s.rotate(-0.05);
+                    else mouse.s.aVel -= 0.01;
+                }
                 break;
             case 'e':
-                shapes[0].aVel += 0.01;
-                break;
-
-
-            case 'u':
-                if (shapes[1].vel.y >= -maxVel) {
-                    shapes[1].vel.y -= 1;
-                } else {
-                    shapes[1].vel.y = -maxVel;
+                if (mouse.s) {
+                    if (mouse.s.isStatic) mouse.s.rotate(0.05);
+                    else mouse.s.aVel += 0.01;
                 }
-                break;
-            case 'h':
-                if (shapes[1].vel.x >= -maxVel) {
-                    shapes[1].vel.x -= 0.1;
-                } else {
-                    shapes[1].vel.x = -maxVel;
-                }
-                break;
-            case 'j':
-                if (shapes[1].vel.y <= maxVel) {
-                    shapes[1].vel.y += 0.1;
-                } else {
-                    shapes[1].vel.y = maxVel;
-                }
-                break;
-            case 'k':
-                if (shapes[1].vel.x <= maxVel) {
-                    shapes[1].vel.x += 0.1;
-                } else {
-                    shapes[1].vel.x = maxVel;
-                }
-                break;
-            case 'y':
-                shapes[1].aVel -= 0.01;
-                break;
-            case 'i':
-                shapes[1].aVel += 0.01;
                 break;
 
             case 'r':
-                shapes[0].translate(-shapes[0].vertices[0].x + 100, -shapes[0].vertices[0].y + 100);
-                shapes[1].translate(-shapes[1].vertices[1].x + 200, -shapes[1].vertices[1].y + 200);
-                shapes[0].vel = {x: 0, y: 0};
-                shapes[1].vel = {x: 0, y: 0};
+                resetShapes();
                 break;
             
             case 'z':
-                //---------Debug key---------
-                console.log(shapes[0].momInertia);
+                //Debug Key
+                console.log('');
         }
     }
 
     if (mouse.down) {
-        let dx = mouse.x - shapes[0].centroid.x * scale;
-        let dy = mouse.y - shapes[0].centroid.y * scale;
-        shapes[0].vel.x = dx * 200 / shapes[0].mass;
-        shapes[0].vel.y = dy * 200 / shapes[0].mass;
+        let shape = mouse.s;
+
+        if (!mouse.s) {
+            for (let i = 0; i < shapes.length; i++) {
+                let col = Collision.GJK(mouse, shapes[i]);
+                if (col != 0) {
+                    shape = shapes[i];
+                    mouse.s = shapes[i];
+                    mouse.offset = {x: mouse.x - shape.centroid.x * scale, y: mouse.y - shape.centroid.y * scale}
+                }
+            }
+        }
+
+        if (shape) {
+            let dx = mouse.x - shape.centroid.x * scale;
+            let dy = mouse.y - shape.centroid.y * scale;
+            if (!shape.isStatic) {
+                shape.vel.x = dx //- mouse.offset.x * 1; // shape.mass;
+                shape.vel.y = dy //- mouse.offset.x * 1; // shape.mass;
+            } else {
+                shape.translate(dx - mouse.offset.x, dy - mouse.offset.y);
+            }
+        }
     }
+}
+
+function resetShapes() {
+    shapes = [];
+    //--------------Bodies--------------
+    shapes.push(new Shape([
+        {x: 100, y: 100},
+        {x: 100, y: 200},
+        {x: 200, y: 200},
+        {x: 200, y: 100}
+    ]));
+
+    shapes.push(new Shape([
+        {x: 200, y: 200},
+        {x: 200, y: 300},
+        {x: 300, y: 300}
+    ]));
+
+    for (let i = 0; i < 8; i++) {
+        shapes.push(new Shape([
+        {x: 200, y: 200},
+        {x: 200, y: 240},
+        {x: 240, y: 240}
+        ]));
+        shapes[i+1].density = 0.01
+    }
+
+    //--------------Walls--------------
+    shapes.push(new Shape([
+        {x: 20, y: 350},
+        {x: 380, y: 350},
+        {x: 380, y: 380},
+        {x: 20, y: 380}
+    ], true));
+
+    shapes.push(new Shape([
+        {x: 0, y: 380},
+        {x: 20, y: 380},
+        {x: 20, y: 20},
+        {x: 0, y: 20}
+    ], true));
+
+    shapes.push(new Shape([
+        {x: 400, y: 380},
+        {x: 380, y: 380},
+        {x: 380, y: 20},
+        {x: 400, y: 20}
+    ], true));
+
+    shapes[1].density = 0.2;
+    shapes[1].mass = shapes[1].area * shapes[1].density;
+    shapes[0].density = 0.8;
+    shapes[0].mass = shapes[0].area * shapes[0].density;
 }
 
 class Shape {
@@ -259,6 +231,7 @@ class Shape {
         this.vertices = vertices;
 
         this.centroid = M.calcCentroid(this.vertices);
+        this.bounds = null;
 
         this.vel = {x: 0, y: 0};
         this.aVel = 0;
@@ -288,6 +261,11 @@ class Shape {
         ctx.arc(this.centroid.x, this.centroid.y, 5, 0, 2 * Math.PI);
         ctx.fill();
         ctx.stroke();
+        
+        if (drawBounds) {
+            ctx.beginPath();
+            ctx.strokeRect(this.bounds.x, this.bounds.y, this.bounds.w, this.bounds.h);
+        }
     }
 
     update(delta) {
@@ -324,13 +302,10 @@ class Shape {
             obj.translate(-v.x / 2, -v.y / 2);
             obj.vel.x += impulse.x * imb * delta;
             obj.vel.y += impulse.y * imb * delta;
-        } else {
-            this.translate(v.x / 2, v.y / 2);
         }
     }
 
     collideRot(v, obj, contacts, delta) {
-    const restitution = 0.04;
     const n = M.normalise({ x: -v.x, y: -v.y });
 
     this.impulses = [];
@@ -372,7 +347,7 @@ class Shape {
                   + (raCrossN * raCrossN) * invInertiaA
                   + (rbCrossN * rbCrossN) * invInertiaB;
 
-        let j = -(1 + restitution) * contactVel / denom;
+        let j = -(1 + this.restitution) * contactVel / denom;
         j /= contacts.length;
 
         const impulse = M.mult(n, j);
@@ -470,17 +445,33 @@ class Shape {
 
         return Math.abs(inertia);
     }
+
+    createBoundingBox() {
+        let x1, y1, x2, y2;
+
+        x1 = this.findFurthest({x: -1, y: 0}).x;
+        y1 = this.findFurthest({x: 0, y: -1}).y;
+        x2 = this.findFurthest({x: 1, y: 0}).x;
+        y2 = this.findFurthest({x: 0, y: 1}).y;
+
+        this.bounds = {x: x1, y: y1, w: x2 - x1, h: y2 - y1};
+    }
 }
 
 class Collision {
     static support(a, b, dir) {
         let fa = a.findFurthest(dir);
         let fb = b.findFurthest({x: -dir.x, y: -dir.y});
+        if (fa == null) fa = {x: a.x, y: a.y};
+        if (fb == null) fb = {x: b.x, y: b.y};
 
         return {x: fa.x - fb.x, y: fa.y - fb.y, fa: fa, fb: fb};
     }
 
     static GJK(a, b) {
+        if (!a.vertices) a = new Shape([{x: a.x, y: a.y}]);
+        if (!b.vertices) b = new Shape([{x: b.x, y: b.y}]);
+        
         let simplex = [];
         let dir = {x: 1, y: 0};
         let support = this.support(a, b, dir);
@@ -566,7 +557,7 @@ class Collision {
     static EPA(a, b, points) {
         let iter = 0;
 
-        while (iter++ < 100) {
+        while (iter++ < 10000) {
             let minDist = Infinity;
             let cEdge = {index: -1, normal: null, dist: 0};
 
@@ -663,6 +654,15 @@ class Collision {
         let dy = p.y - cp.y;
         let d2 = dx * dx + dy * dy;
         return {d2: d2, cp: cp};
+    }
+
+    static AABB(a, b) {
+        return (
+            a.x < b.x + b.w &&
+            a.x + a.w > b.x &&
+            a.y < b.y + b.h &&
+            a.y + a.h > b.y
+        );
     }
 }
 

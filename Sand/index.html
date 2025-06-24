@@ -3,13 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Collision</title>
     <link rel="shortcut icon" href="#">
     <link rel="icon" href="../Imgs/Balls.png" type="image/x-icon">
+    <title>Falling Sand</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <canvas id="c"></canvas>
+
+    <div class="buttonContainer">
+        <button onclick="btn('sand')">Sand</button>
+        <button onclick="btn('rock')">Rock</button>
+        <button onclick="btn('water')">Water</button>
+        <button onclick="btn('dirt')">Dirt</button>
+        
+        <input type="range" min="1" max="20" value="20" step="1" id="slider">
+    </div>
 
     <script src="script.js"></script>
 </body>
