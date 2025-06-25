@@ -5,10 +5,11 @@ let shapes = [];
 
 let pressedKeys = [];
 let mouse = {x: 0, y: 0, down: false, s: null, offset: {x: 0, y: 0}};
+let selection = 'triangle';
 let drawBounds = false;
 
 let damping = 0.01;
-let iter = 8;
+let iter = 100;
 
 let scale = 1;
 
@@ -44,13 +45,24 @@ function start() {
     });
 
     document.addEventListener('mousedown', (event) => {
-        mouse.down = true;
+        if (event.which == 1) {
+            mouse.down = true;
+        }
     });
 
     document.addEventListener('mouseup', (event) => {
-        mouse.down = false;
-        mouse.s = null;
-        mouse.offset = {x: 0, y: 0};
+        if (event.which == 1) {
+            mouse.down = false;
+            mouse.s = null;
+            mouse.offset = {x: 0, y: 0};
+        }
+    });
+
+    c.addEventListener('contextmenu', (event) => {
+        event.preventDefault();
+        if (event.which == 3) {
+            createShape(selection);
+        }
     });
 
     /*document.addEventListener('wheel', (event) => {
@@ -189,7 +201,7 @@ function resetShapes() {
         {x: 300, y: 300}
     ]));
 
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < 1; i++) {
         shapes.push(new Shape([
         {x: 200, y: 200},
         {x: 200, y: 240},
@@ -224,6 +236,28 @@ function resetShapes() {
     shapes[1].mass = shapes[1].area * shapes[1].density;
     shapes[0].density = 0.8;
     shapes[0].mass = shapes[0].area * shapes[0].density;
+}
+
+function createShape(type) {
+    switch (type) {
+        case 'triangle':
+            shapes.push(new Shape([
+                {x: 0, y: 0},
+                {x: 0, y: 50},
+                {x: 50, y: 50}
+            ]));
+            shapes[shapes.length - 1].translate(mouse.x, mouse.y);
+            break;
+        case 'square':
+            shapes.push(new Shape([
+                {x: 0, y: 0},
+                {x: 0, y: 100},
+                {x: 100, y: 100},
+                {x: 100, y: 0}
+            ]))
+            shapes[shapes.length - 1].translate(mouse.x, mouse.y);
+            break;
+    }
 }
 
 class Shape {
@@ -272,9 +306,9 @@ class Shape {
         if (this.isStatic) return;
         
         this.vel.y += 0.2 * delta;
-        this.vel.x *= 0.999;
+        /*this.vel.x *= 0.999;
         this.vel.y *= 0.999;
-        this.aVel *= 0.999;
+        this.aVel *= 0.999;*/
 
         this.rotate(this.aVel * delta);
         this.translate(this.vel.x * delta, this.vel.y * delta);

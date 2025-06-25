@@ -80,3 +80,24 @@ body{
 #canvas {
   position: absolute;
 }
+
+#pagesMenu {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  z-index: 1;
+}
+
+#pagesMenu a {
+  text-decoration: underline;
+  color: white;
+  font-family: sans-serif;
+  padding: 10px;
+}
+
+#pagesMenu p {
+  text-decoration: none;
+  color: white;
+  font-family: sans-serif;
+  padding: 10px;
+}

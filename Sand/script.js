@@ -66,22 +66,29 @@ function update() {
                 if (p.type != '' && p.type != 'rock') {
 
                     if (grid[x][y+1] && grid[x][y+1].type == '' && !grid[x][y+1].moved) {
-                        grid[x][y+1].type = p.type;
-                        p.type = '';
+                        let temp = p.type;
+                        p.type = grid[x][y+1].type;
+                        grid[x][y+1].type = temp;
                         grid[x][y+1].moved = true;
-                        p.moved = true
+                        p.moved = true;
                     } else if (grid[x][y+1] && grid[x+1] && grid[x+1][y+1].type == '' && !grid[x+1][y+1].moved) {
                         grid[x+1][y+1].type = p.type;
                         p.type = '';
                         grid[x+1][y+1].moved = true;
-                        p.moved = true
+                        p.moved = true;
                     } else if (grid[x][y+1] && grid[x-1] && grid[x-1][y+1].type == '' && !grid[x-1][y+1].moved) {
                         grid[x-1][y+1].type = p.type;
                         p.type = '';
                         grid[x-1][y+1].moved = true;
-                        p.moved = true
-                    }
-
+                        p.moved = true;
+                    } else if (grid[x][y+1] && grid[x][y+1].type == 'water' && !grid[x][y+1].moved && p.type != 'water') {
+                        let temp = p.type;
+                        p.type = grid[x][y+1].type;
+                        grid[x][y+1].type = temp;
+                        grid[x][y+1].moved = true;
+                        p.moved = true;
+                    } 
+                    
                     else if (!p.moved && p.type == 'water') {
                         let opt = [1, -1];
                         let d = opt[Math.floor(Math.random() * opt.length)];
@@ -137,7 +144,7 @@ function update() {
         ctx.beginPath();
         ctx.fillStyle = 'rgba(102, 255, 0, 0.61)';
         ctx.arc(mouse.x, mouse.y, mouse.r, 0, 2 * Math.PI);
-        ctx.fill();
+        ctx.stroke();
     }
 
     window.requestAnimationFrame(update);
@@ -152,7 +159,7 @@ function input() {
             let cellY = Math.floor(mouse.y / (c.height / numCells));
             if (grid[cellX] && grid[cellX][cellY]) {
                 let cell = grid[cellX][cellY];
-                if (selection != 'rock') {
+                if (selection != 'rock' && selection != '') {
                     if (cell.type === '') cell.type = selection;
                 } else {
                     cell.type = selection;
@@ -164,7 +171,7 @@ function input() {
                 let cellY = Math.floor((mouse.y + Math.random() * (r + r) - r) / (c.height / numCells));
                 if (grid[cellX] && grid[cellX][cellY]) {
                     let cell = grid[cellX][cellY];
-                    if (selection != 'rock') {
+                    if (selection != 'rock' && selection != '') {
                     if (cell.type === '') cell.type = selection;
                     } else {
                         cell.type = selection;

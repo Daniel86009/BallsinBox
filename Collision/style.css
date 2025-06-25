@@ -5,3 +5,8 @@ body {
 #c {
     border: 2px solid black;
 }
+
+.description p {
+    font-family: sans-serif;
+    color: white;
+}
