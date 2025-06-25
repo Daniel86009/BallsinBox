@@ -5,3 +5,8 @@ body {
 #c {
     border: 2px solid black;
 }
+
+.homebutton {
+    color: white;
+    font-family: sans-serif;
+}
