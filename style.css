@@ -81,23 +81,11 @@ body{
   position: absolute;
 }
 
-#pagesMenu {
+.homebutton {
   position: absolute;
-  bottom: 10px;
-  right: 10px;
+  bottom: 0;
+  right: 0;
   z-index: 1;
-}
-
-#pagesMenu a {
-  text-decoration: underline;
-  color: white;
   font-family: sans-serif;
-  padding: 10px;
-}
-
-#pagesMenu p {
-  text-decoration: none;
   color: white;
-  font-family: sans-serif;
-  padding: 10px;
 }

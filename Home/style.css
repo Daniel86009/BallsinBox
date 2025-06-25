@@ -1,0 +1,38 @@
+* {
+  margin: 0;
+  user-select: none;
+  font-family: sans-serif;
+  color: white;
+}
+
+body{
+  padding: 0;
+  background-color: grey;
+  overflow-x: auto;
+  overflow-y: auto;
+}
+
+.title {
+    background: rgb(63, 63, 63);
+    padding: 15px;
+}
+
+.menu {
+    padding: 10px;
+    display: flex;
+    justify-content: flex-start;
+    background-color: rgba(28, 31, 111, 0.772);
+    border-radius: 20px;
+    height: 80vh;
+    margin: 10px;
+}
+
+.menuItem {
+    width: 200;
+    height: 200;
+    margin: 10px;
+}
+
+.menuItem img {
+    border-radius: 10px;
+}
