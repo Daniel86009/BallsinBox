@@ -1,0 +1,55 @@
+* {
+    font-family: sans-serif;
+    color: white;
+}
+
+body {
+    background: #333;
+}
+
+#c {
+    border: 2px solid black;
+}
+
+.canvasContainer {
+    display: flex;
+    flex-direction: row;
+    max-height: 400px;
+}
+
+.controls {
+    display: flex;
+    flex-direction: column;
+    margin-left: 5px;
+}
+
+.controls p {
+    border-bottom: 2px solid white;
+}
+
+.controls a {
+    margin-top: 5px;
+    margin-left: 5px;
+    color: white;
+    user-select: none;
+}
+
+.controls a:hover {
+    color: #939393;
+}
+
+#shapeDropdownMenu, #displayDropdownMenu {
+    display: none;
+}
+
+#shapeDropdown:hover #shapeDropdownMenu {
+    display: block;
+}
+
+#displayDropdown:hover #displayDropdownMenu {
+    display: block;
+}
+
+.selected {
+    border: 2px solid black;
+}

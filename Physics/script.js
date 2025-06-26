@@ -1,3 +1,5 @@
+import("./ui.js");
+
 let c = document.getElementById('c');
 let ctx = c.getContext('2d');
 
@@ -6,16 +8,18 @@ let shapes = [];
 let pressedKeys = [];
 let mouse = {x: 0, y: 0, down: false, s: null, offset: {x: 0, y: 0}};
 let selection = 'triangle';
-let drawBounds = false;
+let selectionSize = 70;
+
+let draw = {bounds: false, centroid: false, outline: false, fill: true};
 
 let damping = 0.01;
 let iter = 100;
 
-let scale = 1;
-
 function start() {
     c.width = 400;
     c.height = 400;
+
+    selectionSize = shapeSizeSlider.value;
 
     document.addEventListener('keydown', (event) => {
         let keyName = event.key;
@@ -65,21 +69,11 @@ function start() {
         }
     });
 
-    /*document.addEventListener('wheel', (event) => {
-        console.log(event.deltaY);
-        console.log();
-        //ctx.scale(scale + event.deltaY / 1000, scale + event.deltaY / 1000);
-        scale += event.deltaY / 1000;
-        
-    });*/
-
     resetShapes();
 }
 
 function update() {
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, c.width, c.height);
-    ctx.scale(scale, scale);
 
     inputs();
 
@@ -167,14 +161,14 @@ function inputs() {
                 if (col != 0) {
                     shape = shapes[i];
                     mouse.s = shapes[i];
-                    mouse.offset = {x: mouse.x - shape.centroid.x * scale, y: mouse.y - shape.centroid.y * scale}
+                    mouse.offset = {x: mouse.x - shape.centroid.x, y: mouse.y - shape.centroid.y};
                 }
             }
         }
 
         if (shape) {
-            let dx = mouse.x - shape.centroid.x * scale;
-            let dy = mouse.y - shape.centroid.y * scale;
+            let dx = mouse.x - shape.centroid.x;
+            let dy = mouse.y - shape.centroid.y;
             if (!shape.isStatic) {
                 shape.vel.x = dx //- mouse.offset.x * 1; // shape.mass;
                 shape.vel.y = dy //- mouse.offset.x * 1; // shape.mass;
@@ -239,22 +233,50 @@ function resetShapes() {
 }
 
 function createShape(type) {
+    let numPoints = 3;
+    let points = [];
+    let angle = 0;
+    let startAngle = 0;
+
     switch (type) {
         case 'triangle':
             shapes.push(new Shape([
                 {x: 0, y: 0},
-                {x: 0, y: 50},
-                {x: 50, y: 50}
+                {x: 0, y: selectionSize / 1},
+                {x: selectionSize / 1, y: selectionSize / 1}
             ]));
             shapes[shapes.length - 1].translate(mouse.x, mouse.y);
             break;
+
         case 'square':
-            shapes.push(new Shape([
-                {x: 0, y: 0},
-                {x: 0, y: 100},
-                {x: 100, y: 100},
-                {x: 100, y: 0}
-            ]))
+            numPoints = 4
+            angle = Math.PI * 2 / numPoints;
+            startAngle = Math.PI / 4;
+
+            for (let i = 0; i < numPoints; i++) {
+                points.push({x: Math.cos(angle * i + startAngle) * selectionSize, y: Math.sin(angle * i + startAngle) * selectionSize});
+            }
+
+            shapes.push(new Shape(points));
+            shapes[shapes.length - 1].translate(mouse.x, mouse.y);
+            break;
+
+        case 'polygon':
+            let angles = [];
+            //let radius = Math.random() * (70 - 40) + 40;
+            numPoints = Math.random() * (8 - 3) + 3;
+
+            for (let i = 0; i < 5; i++) {
+                angles.push(Math.random() * Math.PI * 2);
+            }
+
+            angles.sort();
+
+            for (let i = 0; i < angles.length; i++) {
+                points.push({x: Math.cos(angles[i]) * selectionSize, y: Math.sin(angles[i]) * selectionSize});
+            }
+
+            shapes.push(new Shape(points));
             shapes[shapes.length - 1].translate(mouse.x, mouse.y);
             break;
     }
@@ -283,21 +305,30 @@ class Shape {
     }
 
     draw() {
+        
         ctx.beginPath();
         ctx.fillStyle = this.colour;
+        ctx.lineWidth = 3;
         ctx.moveTo(this.vertices[0].x, this.vertices[0].y);
-        for (let i = 0; i < this.vertices.length; i++) {
-            ctx.lineTo(this.vertices[i].x, this.vertices[i].y);
+        for (let i = 0; i < this.vertices.length + 1; i++) {
+            ctx.lineTo(this.vertices[i % this.vertices.length].x, this.vertices[i % this.vertices.length].y);
         }
-        ctx.fill();
-        ctx.beginPath();
-        ctx.fillStyle = 'red';
-        ctx.arc(this.centroid.x, this.centroid.y, 5, 0, 2 * Math.PI);
-        ctx.fill();
-        ctx.stroke();
+        if (draw.fill) ctx.fill();
+        if (draw.outline) ctx.stroke();
         
-        if (drawBounds) {
+        if (draw.centroid) {
             ctx.beginPath();
+            ctx.fillStyle = 'red';
+            ctx.lineWidth = 3;
+            ctx.arc(this.centroid.x, this.centroid.y, 5, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.stroke();
+        }
+        
+        if (draw.bounds) {
+            ctx.beginPath();
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 1;
             ctx.strokeRect(this.bounds.x, this.bounds.y, this.bounds.w, this.bounds.h);
         }
     }

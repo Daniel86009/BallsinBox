@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="#">
+    <title>Physics</title>
+    <link rel="icon" href="../Imgs/Balls.png" type="image/x-icon">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="canvasContainer">
+        <canvas id="c"></canvas>
+        <div class="controls">
+            <div id="shapeDropdown">
+                <h3>Shape:</h3>
+                <div id="shapeDropdownMenu">
+                    <p>Type:</p>
+                    <a onclick="selection = 'triangle'; shapeButton(this)" class="selected">Triangle</a>
+                    <a onclick="selection = 'square'; shapeButton(this)">Square</a>
+                    <a onclick="selection = 'polygon'; shapeButton(this)">Polygon</a>
+                    <p>Size:</p>
+                    <input type="range" min="20" max="100" value="50" id="shapeSizeSlider">
+                </div>
+            </div>
+            
+            <div id="displayDropdown">
+                <h3>Display:</h3>
+                <div id="displayDropdownMenu">
+                    <p>General:</p>
+                    <a onclick="draw.fill = !draw.fill; displayButton(this, draw.fill);" class="selected">Draw fill</a>
+                    <a onclick="draw.outline = !draw.outline; displayButton(this, draw.outline);">Draw outline</a>
+                    <p>Debug:</p>
+                    <a onclick="draw.centroid = !draw.centroid; displayButton(this, draw.centroid);">Draw centroid</a>
+                    <a onclick="draw.bounds = !draw.bounds; displayButton(this, draw.bounds);">Draw bounds</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+    <div class="description">
+        <h3>Instructions:</h3>
+        <p>Click on shape to pick it up</p>
+        <p>Right click to create a shape</p>
+        <p>"R": Reset</p>
+        <p>"Q/E": Rotate held shape</p>
+    </div>
+
+    <a href="../Home/">Home</a>
+
+    <script src="script.js"></script>
+    <script src="ui.js"></script>
+</body>
+</html>
