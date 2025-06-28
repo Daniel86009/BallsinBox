@@ -20,11 +20,12 @@ body{
 .menu {
     padding: 10px;
     display: flex;
-    justify-content: flex-start;
+    flex-wrap: wrap;
     background-color: rgba(28, 31, 111, 0.772);
     border-radius: 20px;
     height: 80vh;
     margin: 10px;
+    overflow: auto;
 }
 
 .menuItem {

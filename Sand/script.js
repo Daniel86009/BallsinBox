@@ -37,10 +37,28 @@ function start() {
         mouse.down = false;
     });
 
+    c.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        let rect = c.getBoundingClientRect();
+        mouse.x = e.touches[0].clientX - rect.left;
+        mouse.y = e.touches[0].clientY - rect.top;
+        mouse.down = true;
+    });
+
+    c.addEventListener('touchend', function() {
+        mouse.down = false;
+    });
+
     document.addEventListener('mousemove', (e) => {
         let rect = c.getBoundingClientRect();
         mouse.x = e.clientX - rect.left;
         mouse.y = e.clientY - rect.top;
+    });
+
+    document.addEventListener('touchmove', (e) => {
+        let rect = c.getBoundingClientRect();
+        mouse.x = e.touches[0].clientX - rect.left;
+        mouse.y = e.touches[0].clientY - rect.top;
     });
 
     slider.addEventListener('change', function() {

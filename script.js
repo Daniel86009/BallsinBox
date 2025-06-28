@@ -36,17 +36,6 @@ function setUp() {
   useQuadInput.checked = useQuad;
   drawQuadInput.checked = drawQuad;
   drawCheckRangeInput.checked = drawCheck;
-  for (let i = 0; i < cNum; i++) {
-    circles.push(new circleObj());
-  }
-  
-  c.addEventListener("click", function() {
-    if (isMobile) {
-      for (let i = 0; i < 50; i++) {
-        circles.push(new circleObj(event.clientX, event.clientY));
-      } 
-    }
-  });
 
   c.addEventListener("mousedown", function() {
     mouse.down = true;
@@ -55,9 +44,29 @@ function setUp() {
     mouse.down = false;
   });
   
-  document.addEventListener("mousemove", function() {
-    mouse.x = event.clientX;
-    mouse.y = event.clientY;
+  document.addEventListener("mousemove", (e) => {
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
+  });
+
+  c.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      let rect = c.getBoundingClientRect();
+      mouse.x = e.touches[0].clientX - rect.left;
+      mouse.y = e.touches[0].clientY - rect.top;
+      mouse.down = true;
+  });
+
+  c.addEventListener('touchend', function() {
+      mouse.down = false;
+      mouse.s = null;
+      mouse.offset = {x: 0, y: 0};
+  });
+
+  document.addEventListener('touchmove', (e) => {
+      let rect = c.getBoundingClientRect();
+      mouse.x = e.touches[0].clientX - rect.left;
+      mouse.y = e.touches[0].clientY - rect.top;
   });
 
   window.addEventListener("resize", function() {

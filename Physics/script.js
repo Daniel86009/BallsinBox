@@ -1,4 +1,4 @@
-import("./ui.js");
+//import("./ui.js");
 
 let c = document.getElementById('c');
 let ctx = c.getContext('2d');
@@ -60,6 +60,33 @@ function start() {
             mouse.s = null;
             mouse.offset = {x: 0, y: 0};
         }
+    });
+
+    c.addEventListener('touchstart', (e) => {
+        if (e.touches.length > 1) {
+            let rect = c.getBoundingClientRect();
+            mouse.x = e.touches[0].clientX - rect.left;
+            mouse.y = e.touches[0].clientY - rect.top;
+            createShape(selection);
+        } else {
+            e.preventDefault();
+            let rect = c.getBoundingClientRect();
+            mouse.x = e.touches[0].clientX - rect.left;
+            mouse.y = e.touches[0].clientY - rect.top;
+            mouse.down = true;
+        }
+    });
+
+    c.addEventListener('touchend', function() {
+        mouse.down = false;
+        mouse.s = null;
+        mouse.offset = {x: 0, y: 0};
+    });
+
+    document.addEventListener('touchmove', (e) => {
+        let rect = c.getBoundingClientRect();
+        mouse.x = e.touches[0].clientX - rect.left;
+        mouse.y = e.touches[0].clientY - rect.top;
     });
 
     c.addEventListener('contextmenu', (event) => {
