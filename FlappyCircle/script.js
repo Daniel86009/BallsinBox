@@ -172,6 +172,11 @@ class Cloud {
 
     update() {
         this.x -= 0.5;
+
+        if (this.x < -40) {
+            delete this.x;
+            delete this.y;
+        }
     }
 }
 
