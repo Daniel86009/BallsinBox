@@ -15,13 +15,17 @@ function start() {
     //Pipes
     pipes.push(new Pipe(Math.random() * (230 - 70) + 70));
     setInterval(function() {
-        pipes.push(new Pipe(Math.random() * (230 - 70) + 70));
+        if (!player.dead) {
+            pipes.push(new Pipe(Math.random() * (230 - 70) + 70));
+        }
     }, 2000);
 
     //Clouds
     clouds.push(new Cloud(Math.random() * (250 - 40) + 40));
     setInterval(function() {
-        clouds.push(new Cloud(Math.random() * (250 - 40) + 40));
+        if (!player.dead) {
+            clouds.push(new Cloud(Math.random() * (250 - 40) + 40));
+        }
     }, 4200);
 
     window.addEventListener('click', function() {
