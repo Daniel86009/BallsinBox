@@ -2,6 +2,8 @@ let c = document.getElementById('c');
 let ctx = c.getContext('2d');
 let scoreText = document.getElementById('score');
 
+let isMobile = !window.matchMedia('(hover: hover)').matches;
+
 let player;
 let pipes = [];
 let clouds = [];
@@ -38,7 +40,20 @@ function start() {
         } else {
             player.vel.y = -5;
         }
-    });    
+    });
+    if (isMobile) {
+        window.addEventListener('touchend', function() {
+            if (player.dead) {
+                player.dead = false;
+                pipes = [];
+                player.score = 0;
+                scoreText.innerHTML = player.score;
+                update();
+            } else {
+                player.vel.y = -5;
+            }
+        });
+    }
 }
 
 function update() {
