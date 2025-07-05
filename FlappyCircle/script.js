@@ -1,6 +1,7 @@
 let c = document.getElementById('c');
 let ctx = c.getContext('2d');
 let scoreText = document.getElementById('score');
+let highScoreText = document.getElementById('highScore');
 
 let isMobile = !window.matchMedia('(hover: hover)').matches;
 
@@ -8,11 +9,18 @@ let player;
 let pipes = [];
 let clouds = [];
 
+let highScore = 0;
+
 function start() {
     c.width = 500;
     c.height = 300;
 
     player = new Player(100, 200);
+
+    if (localStorage.highScore == undefined) localStorage.highScore = 0;
+
+    highScore = parseInt(localStorage.highScore);
+    highScoreText.innerHTML = `High Score: ${highScore}`;
 
     //Pipes
     pipes.push(new Pipe(Math.random() * (230 - 70) + 70));
@@ -35,6 +43,7 @@ function start() {
             player.dead = false;
             pipes = [];
             player.score = 0;
+            player.canScore = true;
             scoreText.innerHTML = player.score;
             update();
         } else {
@@ -126,9 +135,15 @@ class Player {
             }
 
             if (p.x < 60 && this.canScore) {
+                this.canScore = false;
                 this.score++;
                 scoreText.innerHTML = this.score;
-                this.canScore = false;
+
+                if (this.score > highScore) {
+                    highScore = this.score;
+                    highScoreText.innerHTML = `High Score: ${highScore}`;
+                    localStorage.highScore = highScore;
+                }
             }
         }
     }
