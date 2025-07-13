@@ -37,6 +37,11 @@ function setUp() {
   drawQuadInput.checked = drawQuad;
   drawCheckRangeInput.checked = drawCheck;
 
+  if (isMobile) {
+    document.getElementById('title').style.fontSize = '40px';
+    document.getElementById('title').style.textWrap = 'nowrap';
+  }
+
   c.addEventListener("mousedown", function() {
     mouse.down = true;
   });

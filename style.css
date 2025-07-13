@@ -81,7 +81,7 @@ body{
   position: absolute;
 }
 
-.homebutton {
+#homebutton {
   position: absolute;
   bottom: 0;
   right: 0;
