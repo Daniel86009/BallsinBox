@@ -47,7 +47,7 @@ function start() {
             scoreText.innerHTML = player.score;
             update();
         } else {
-            player.vel.y = -5;
+            player.vel.y = -4;
         }
     });
     if (isMobile) {
@@ -59,7 +59,7 @@ function start() {
                 scoreText.innerHTML = player.score;
                 update();
             } else {
-                player.vel.y = -5;
+                player.vel.y = -4;
             }
         });
     }
