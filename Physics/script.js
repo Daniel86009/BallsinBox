@@ -606,6 +606,14 @@ class Collision {
         let ab = {x: a.x - b.x, y: a.y - b.y};
         let ao = {x: -a.x, y: -a.y};
 
+        let mag = Math.sqrt(ab.x * ab.x + ab.y * ab.y);
+
+        if (mag < 0.0001) {
+            dir.x = -ao.x;
+            dir.y = -ao.y;
+            return false;
+        }
+
         let nDir = M.normal(ab, ao);
 
         dir.x = nDir.x;
