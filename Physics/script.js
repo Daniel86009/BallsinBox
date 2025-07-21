@@ -343,19 +343,21 @@ class Shape {
         if (draw.outline) ctx.stroke();
         
         if (draw.centroid) {
-            /*ctx.beginPath();
-            ctx.fillStyle = 'red';
-            ctx.lineWidth = 3;
-            ctx.arc(this.centroid.x, this.centroid.y, 5, 0, 2 * Math.PI);
-            ctx.fill();
-            ctx.stroke();*/
             let crossWidth = 5;
             ctx.beginPath();
             ctx.lineWidth = 1;
-            ctx.moveTo(this.centroid.x + crossWidth, this.centroid.y);
-            ctx.lineTo(this.centroid.x - crossWidth, this.centroid.y);
-            ctx.moveTo(this.centroid.x, this.centroid.y + crossWidth);
-            ctx.lineTo(this.centroid.x, this.centroid.y - crossWidth);
+            let x = this.centroid.x + crossWidth;
+            let y = this.centroid.y;
+            let dx = x - this.centroid.x;
+            let dy = y - this.centroid.y;
+            let rx = dx * Math.cos(this.rotation) + dy * -Math.sin(this.rotation);
+            let ry = dx * Math.sin(this.rotation) + dy * -Math.cos(this.rotation);
+
+            ctx.moveTo(this.centroid.x + rx, this.centroid.y);
+            ctx.lineTo(this.centroid.x - rx, this.centroid.y);
+
+            ctx.moveTo(this.centroid.x, this.centroid.y + ry);
+            ctx.lineTo(this.centroid.x, this.centroid.y - ry);
             ctx.stroke();
         }
         
@@ -483,6 +485,8 @@ class Shape {
     
     rotate(r, p) {
         if (p == undefined) p = this.centroid;
+
+        this.rotation += r;
 
         for (let i = 0; i < this.vertices.length; i++) {
             let x = this.vertices[i].x;
