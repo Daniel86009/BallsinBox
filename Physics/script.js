@@ -312,6 +312,7 @@ class Shape {
         this.vertices = vertices;
 
         this.centroid = M.calcCentroid(this.vertices);
+        this.rotation = 0;
         this.bounds = null;
 
         this.vel = {x: 0, y: 0};
@@ -342,11 +343,19 @@ class Shape {
         if (draw.outline) ctx.stroke();
         
         if (draw.centroid) {
-            ctx.beginPath();
+            /*ctx.beginPath();
             ctx.fillStyle = 'red';
             ctx.lineWidth = 3;
             ctx.arc(this.centroid.x, this.centroid.y, 5, 0, 2 * Math.PI);
             ctx.fill();
+            ctx.stroke();*/
+            let crossWidth = 5;
+            ctx.beginPath();
+            ctx.lineWidth = 1;
+            ctx.moveTo(this.centroid.x + crossWidth, this.centroid.y);
+            ctx.lineTo(this.centroid.x - crossWidth, this.centroid.y);
+            ctx.moveTo(this.centroid.x, this.centroid.y + crossWidth);
+            ctx.lineTo(this.centroid.x, this.centroid.y - crossWidth);
             ctx.stroke();
         }
         

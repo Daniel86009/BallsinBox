@@ -5,11 +5,14 @@ const gSlider = document.getElementById("gSlider");
 const gText = document.getElementById("gravity");
 const rSlider1 = document.getElementById("rSlider1");
 const rSlider2 = document.getElementById("rSlider2");
+const fSlider = document.getElementById('fSlider');
 const minRText = document.getElementById("minR");
 const maxRText = document.getElementById("maxR");
+const wallFrictionText = document.getElementById('wallFriction');
 const useQuadInput = document.getElementById("useQuad");
 const drawQuadInput = document.getElementById("drawQuad");
 const drawCheckRangeInput = document.getElementById("drawCheckRange");
+
 
 const circles = [];
 var cNum = 0;
@@ -19,7 +22,7 @@ let drawQuad = false;
 let drawCheck = false;
 
 var g = 0.2;
-const wallFriction = 0.7;
+let wallFriction = 0.7;
 var minRadius = 5;
 var maxRadius = 20;
 
@@ -433,6 +436,11 @@ function rSlide2() {
   }
   maxRadius = parseInt(rSlider2.value);
   maxRText.innerHTML = parseInt(rSlider2.value);
+}
+
+function fSlide() {
+  wallFriction = fSlider.value;
+  wallFrictionText.innerHTML = fSlider.value;
 }
 
 setUp();
