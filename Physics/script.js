@@ -11,7 +11,7 @@ let selectionSize = 70;
 let draw = {bounds: false, centroid: false, outline: false, fill: true};
 
 let damping = 0.01;
-let iter = 100;
+let iter = 20;
 
 function start() {
     c.width = 400;
@@ -324,7 +324,7 @@ class Shape {
         this.area = this.calcArea();
         this.density = 0.1;
         this.mass = this.density * this.area;
-        this.inertia = this.calcMomentInertia() / 100000000000000000;
+        this.inertia = this.calcMomentInertia() / 1000000000000000;
         this.restitution = 0.01;
 
         this.colour = 'rgba(220, 220, 220, 0.5)';
@@ -346,18 +346,14 @@ class Shape {
             let crossWidth = 5;
             ctx.beginPath();
             ctx.lineWidth = 1;
-            let x = this.centroid.x + crossWidth;
-            let y = this.centroid.y;
-            let dx = x - this.centroid.x;
-            let dy = y - this.centroid.y;
-            let rx = dx * Math.cos(this.rotation) + dy * -Math.sin(this.rotation);
-            let ry = dx * Math.sin(this.rotation) + dy * -Math.cos(this.rotation);
+            let rx = crossWidth * Math.cos(this.rotation) + crossWidth * -Math.sin(this.rotation);
+            let ry = crossWidth * Math.sin(this.rotation) + crossWidth * -Math.cos(this.rotation);
 
-            ctx.moveTo(this.centroid.x + rx, this.centroid.y);
-            ctx.lineTo(this.centroid.x - rx, this.centroid.y);
+            ctx.moveTo(this.centroid.x + rx, this.centroid.y + ry);
+            ctx.lineTo(this.centroid.x - rx, this.centroid.y - ry);
 
-            ctx.moveTo(this.centroid.x, this.centroid.y + ry);
-            ctx.lineTo(this.centroid.x, this.centroid.y - ry);
+            ctx.moveTo(this.centroid.x - rx, this.centroid.y + ry);
+            ctx.lineTo(this.centroid.x + rx, this.centroid.y - ry);
             ctx.stroke();
         }
         
