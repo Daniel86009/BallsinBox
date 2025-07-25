@@ -347,7 +347,7 @@ class Shape {
             ctx.beginPath();
             ctx.lineWidth = 1;
             let rx = crossWidth * Math.cos(this.rotation) + crossWidth * -Math.sin(this.rotation);
-            let ry = crossWidth * Math.sin(this.rotation) + crossWidth * -Math.cos(this.rotation);
+            let ry = crossWidth * Math.sin(this.rotation) + crossWidth * Math.cos(this.rotation);
 
             ctx.moveTo(this.centroid.x + rx, this.centroid.y + ry);
             ctx.lineTo(this.centroid.x - rx, this.centroid.y - ry);
