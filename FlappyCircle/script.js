@@ -50,6 +50,23 @@ function start() {
             player.vel.y = -4;
         }
     });
+
+    document.addEventListener('keydown', (event) => {
+        let keyName = event.key;
+        if (keyName == ' ') {
+            if (player.dead) {
+                player.dead = false;
+                pipes = [];
+                player.score = 0;
+                player.canScore = true;
+                scoreText.innerHTML = player.score;
+                update();
+            } else {
+                player.vel.y = -4;
+            }
+        }
+    });
+
     if (isMobile) {
         window.addEventListener('touchend', function() {
             if (player.dead) {
