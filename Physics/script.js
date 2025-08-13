@@ -8,10 +8,10 @@ let mouse = {x: 0, y: 0, down: false, s: null, offset: {x: 0, y: 0}};
 let selection = 'triangle';
 let selectionSize = 70;
 
-let draw = {bounds: false, centroid: false, outline: false, fill: true};
+let draw = {bounds: false, centroid: false, outline: false, fill: true, contactColour: false};
 
 let damping = 0.01;
-let iter = 20;
+let iter = 50;
 
 function start() {
     c.width = 400;
@@ -125,9 +125,14 @@ function update() {
                 let col = Collision.GJK(s1, s2);
 
                 if (col != 0) {
-                    s1.colour = 'rgba(207, 44, 44, 0.5)';
-                    s2.colour = 'rgba(207, 44, 44, 0.5)';
+                    if (draw.contactColour) {
+                        s1.colour = 'rgba(207, 44, 44, 0.5)';
+                        s2.colour = 'rgba(207, 44, 44, 0.5)';
+                    }
+
                     let cont = Collision.findContacts(s1, s2);
+
+                    Collision.positionalCorrection(col, s2, s1);
                     s2.collideRot(col, s1, cont, delta);
                     s2.collide(col, s1, delta);
                 }
@@ -336,7 +341,7 @@ class Shape {
         ctx.fillStyle = this.colour;
         ctx.lineWidth = 3;
         ctx.moveTo(this.vertices[0].x, this.vertices[0].y);
-        for (let i = 0; i < this.vertices.length + 1; i++) {
+        for (let i = 1; i < this.vertices.length + 1; i++) {
             ctx.lineTo(this.vertices[i % this.vertices.length].x, this.vertices[i % this.vertices.length].y);
         }
         if (draw.fill) ctx.fill();
@@ -403,42 +408,42 @@ class Shape {
     }
 
     collideRot(v, obj, contacts, delta) {
-    const n = M.normalise({ x: -v.x, y: -v.y });
+    let n = M.normalise({ x: -v.x, y: -v.y });
 
     this.impulses = [];
     this.raList = [];
     this.rbList = [];
 
     for (let i = 0; i < contacts.length; i++) {
-        const contact = contacts[i];
+        let contact = contacts[i];
 
-        const ra = M.sub(contact, this.centroid);
-        const rb = M.sub(contact, obj.centroid);
+        let ra = M.sub(contact, this.centroid);
+        let rb = M.sub(contact, obj.centroid);
 
         this.raList[i] = ra;
         this.rbList[i] = rb;
 
-        const raPerp = { x: -ra.y, y: ra.x };
-        const rbPerp = { x: -rb.y, y: rb.x };
+        let raPerp = { x: -ra.y, y: ra.x };
+        let rbPerp = { x: -rb.y, y: rb.x };
 
-        const angularVelA = M.mult(raPerp, this.aVel);
-        const angularVelB = M.mult(rbPerp, obj.aVel);
+        let angularVelA = M.mult(raPerp, this.aVel);
+        let angularVelB = M.mult(rbPerp, obj.aVel);
 
-        const velA = M.add(this.vel, angularVelA);
-        const velB = M.add(obj.vel, angularVelB);
+        let velA = M.add(this.vel, angularVelA);
+        let velB = M.add(obj.vel, angularVelB);
 
-        const relativeVelocity = M.sub(velB, velA);
-        const contactVel = M.dot(relativeVelocity, n);
+        let relativeVelocity = M.sub(velB, velA);
+        let contactVel = M.dot(relativeVelocity, n);
 
         if (contactVel > 0) continue;
 
-        const raCrossN = M.dot(raPerp, n);
-        const rbCrossN = M.dot(rbPerp, n);
+        let raCrossN = M.dot(raPerp, n);
+        let rbCrossN = M.dot(rbPerp, n);
 
-        const invMassA = 1 / this.mass;
-        const invMassB = 1 / obj.mass;
-        const invInertiaA = 1 / this.inertia;
-        const invInertiaB = 1 / obj.inertia;
+        let invMassA = 1 / this.mass;
+        let invMassB = 1 / obj.mass;
+        let invInertiaA = 1 / this.inertia;
+        let invInertiaB = 1 / obj.inertia;
 
         let denom = invMassA + invMassB
                   + (raCrossN * raCrossN) * invInertiaA
@@ -447,16 +452,16 @@ class Shape {
         let j = -(1 + this.restitution) * contactVel / denom;
         j /= contacts.length;
 
-        const impulse = M.mult(n, j);
+        let impulse = M.mult(n, j);
         this.impulses[i] = impulse;
     }
 
     for (let i = 0; i < this.impulses.length; i++) {
-        const impulse = this.impulses[i];
+        let impulse = this.impulses[i];
         if (!impulse) continue;
 
-        const ra = this.raList[i];
-        const rb = this.rbList[i];
+        let ra = this.raList[i];
+        let rb = this.rbList[i];
 
         if (!this.isStatic) {
             this.vel = M.sub(this.vel, M.mult(impulse, delta / this.mass));
@@ -689,7 +694,12 @@ class Collision {
             if (sDist - cEdge.dist > 0.005) {
                 points.splice(cEdge.index, 0, support);
             } else {
-                return {x: cEdge.normal.x * cEdge.dist + 0.000005, y: cEdge.normal.y * cEdge.dist + 0.000005};
+                let x = cEdge.normal.x * cEdge.dist;
+                let y = cEdge.normal.y * cEdge.dist;
+                if (x == 0 && y == 0) {
+                    return 0;
+                }
+                return {x: x, y: y};
             }
         }
 
@@ -770,6 +780,27 @@ class Collision {
             a.y < b.y + b.h &&
             a.y + a.h > b.y
         );
+    }
+
+    static positionalCorrection(penVec, objA, objB) {
+        let percent = 0.8;
+        let slop = 0.01;
+        let depth = Math.sqrt(penVec.x * penVec.x + penVec.y * penVec.y);
+    
+        if (depth < slop) return;
+    
+        let correctionMag = Math.max(depth - slop, 0) / (objA.isStatic ? 1 : 2 + objB.isStatic ? 1 : 2);
+        let correction = {
+            x: penVec.x / depth * correctionMag * percent,
+            y: penVec.y / depth * correctionMag * percent
+        };
+    
+        if (!objA.isStatic) {
+            objA.translate(correction.x, correction.y);
+        }
+        if (!objB.isStatic) {
+            objB.translate(-correction.x, -correction.y);
+        }
     }
 }
 

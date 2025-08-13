@@ -1,0 +1,81 @@
+:root {
+    --bg: #1E1E1E;
+    --text-primary: #F1F1F1;
+    --text-secondary: #B3B3B3;
+    --accent: #339CFF;
+    --success: #28D17C;
+    --success-hover: #02c965;
+    --warning: #FFD666;
+    --error: #FF6B6B;
+    --border: #2C2C2C;
+    --panel: #2A2A2A;
+    --card-bg: #333333;
+    /* etc */
+}
+
+* {
+    font-family: sans-serif;
+    color: #F1F1F1;
+}
+
+body {
+    background: var(--bg);
+}
+
+.title {
+    border-bottom: 2px solid var(--border);
+}
+
+#questionCont {
+    display: inline;
+}
+
+.buttons button {
+    border: 2px solid var(--accent);
+    border-radius: 10px;
+    min-width: 70px;
+    min-height: 70px;
+}
+
+button {
+    background: #1E1E1E;
+}
+
+button:hover {
+    background: var(--card-bg);
+}
+
+.selected {
+    background: var(--success);
+}
+
+.selected:hover {
+    background: var(--success-hover);
+}
+
+.results {
+    max-height: 0;
+    overflow: hidden;
+}
+
+.pBar {
+    position: relative;
+    text-align: center;
+    width: 80vw;
+    height: 50px;
+    border-radius: 20px;
+    background-color: var(--panel);
+}
+
+.progress {
+    height: 50px;
+    width: 5%;
+    background-color: var(--accent);
+    border-radius: 20px;
+    /*transition: width 3s cubic-bezier(0,0,.5,1);*/
+    transition: width 3s cubic-bezier(.57,1.49,.53,-0.28);
+}
+
+.progressFull {
+    width: 100%;
+}
