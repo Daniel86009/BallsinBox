@@ -1,12 +1,41 @@
+:root {
+    --bg-color: #121212;
+    --text-color: #ffffff;
+    --card-bg: #1e1e1e;
+    --card-border: #333333;
+}
+body.light {
+    --bg-color: #f4f4f4;
+    --text-color: #000000;
+    --card-bg: #ffffff;
+    --card-border: #cccccc;
+}
+
 body {
-    background: #333;
+    background: var(--bg-color);
+    transition: background-color 0.3s, color 0.3s;
 }
 
 #c {
-    border: 2px solid black;
+    border: 1px solid var(--card-border);
 }
 
 .homebutton {
-    color: white;
+    color: var(--text-color);
     font-family: sans-serif;
+}
+
+button {
+    padding: 0.5rem 1rem;
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    border: 1px solid var(--card-border);
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+    position: absolute;
+    right: 10px;
+}
+
+button:hover {
+    background-color: var(--card-border);
 }

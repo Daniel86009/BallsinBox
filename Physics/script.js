@@ -143,7 +143,8 @@ function update() {
     if (mouse.down) {
         if (mouse.s && !mouse.s.isStatic) mouse.s.colour = 'rgba(123, 123, 219, 0.5)';
         ctx.beginPath();
-        ctx.fillStyle = 'green';
+        ctx.strokeStyle = '#000000';
+        ctx.lineWidth = 2;
         ctx.arc(mouse.x, mouse.y, 10, 0, 2 * Math.PI);
         ctx.stroke();
     }
@@ -270,12 +271,12 @@ function createShape(type) {
 
     switch (type) {
         case 'triangle':
-            shapes.push(new Shape([
+            shapes.unshift(new Shape([
                 {x: 0, y: 0},
                 {x: 0, y: selectionSize / 1},
                 {x: selectionSize / 1, y: selectionSize / 1}
             ]));
-            shapes[shapes.length - 1].translate(mouse.x, mouse.y);
+            shapes[0].translate(mouse.x, mouse.y);
             break;
 
         case 'square':
@@ -287,8 +288,8 @@ function createShape(type) {
                 points.push({x: Math.cos(angle * i + startAngle) * selectionSize, y: Math.sin(angle * i + startAngle) * selectionSize});
             }
 
-            shapes.push(new Shape(points));
-            shapes[shapes.length - 1].translate(mouse.x, mouse.y);
+            shapes.unshift(new Shape(points));
+            shapes[0].translate(mouse.x, mouse.y);
             break;
 
         case 'polygon':
@@ -306,8 +307,8 @@ function createShape(type) {
                 points.push({x: Math.cos(angles[i]) * selectionSize, y: Math.sin(angles[i]) * selectionSize});
             }
 
-            shapes.push(new Shape(points));
-            shapes[shapes.length - 1].translate(mouse.x, mouse.y);
+            shapes.unshift(new Shape(points));
+            shapes[0].translate(mouse.x, mouse.y);
             break;
     }
 }
@@ -339,6 +340,7 @@ class Shape {
         
         ctx.beginPath();
         ctx.fillStyle = this.colour;
+        ctx.strokeStyle = '#000000';
         ctx.lineWidth = 3;
         ctx.moveTo(this.vertices[0].x, this.vertices[0].y);
         for (let i = 1; i < this.vertices.length + 1; i++) {
@@ -351,6 +353,7 @@ class Shape {
             let crossWidth = 5;
             ctx.beginPath();
             ctx.lineWidth = 1;
+            ctx.strokeStyle = '#000000';
             let rx = crossWidth * Math.cos(this.rotation) + crossWidth * -Math.sin(this.rotation);
             let ry = crossWidth * Math.sin(this.rotation) + crossWidth * Math.cos(this.rotation);
 
@@ -364,7 +367,7 @@ class Shape {
         
         if (draw.bounds) {
             ctx.beginPath();
-            ctx.strokeStyle = 'black';
+            ctx.strokeStyle = '#000000';
             ctx.lineWidth = 1;
             ctx.strokeRect(this.bounds.x, this.bounds.y, this.bounds.w, this.bounds.h);
         }
@@ -374,9 +377,16 @@ class Shape {
         if (this.isStatic) return;
         
         this.vel.y += 0.2 * delta;
-        /*this.vel.x *= 0.999;
-        this.vel.y *= 0.999;
-        this.aVel *= 0.999;*/
+
+        if (this.centroid.y > c.height + 200) {
+            console.log(shapes.length);
+            let index = 0;
+            for (let i = 0; i < shapes.length; i++) {
+                if (shapes[i] === this) index = i;
+            }
+            shapes.splice(index, 1);
+            console.log(shapes.length);
+        }
 
         this.rotate(this.aVel * delta);
         this.translate(this.vel.x * delta, this.vel.y * delta);

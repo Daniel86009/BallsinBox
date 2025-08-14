@@ -9,34 +9,34 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1 class="title">Home:</h1>
-    <div class="menu">
-        <div class="appMenu">
-            <div class="appMenuItem">
-                <a href="../"><img src="../Imgs/Balls.png" width="320" height="170"></a>
-                <p>Balls in Box</p>
-            </div>
+    <header>
+        <h1>Home</h1>
+        <button id="theme-toggle">Switch to Light Mode</button>
+    </header>
 
-            <div class="appMenuItem">
-                <a href="../Physics/"><img src="../Imgs/PhysicsImage.png" width="320" height="170"></a>
-                <p>Bad Physics Engine</p>
-            </div>
-
-            <div class="appMenuItem">
-                <a href="../Sand/"><img src="../Imgs/SandImage.png" width="320" height="170"></a>
-                <p>Falling Sand</p>
-            </div>
-
-            <div class="appMenuItem">
-                <a href="../Metaballs/"><img src="../Imgs/MetaballsImage.png" width="320" height="170"></a>
-                <p>Metaballs</p>
-            </div>
-
-            <div class="appMenuItem">
-                <a href="../FlappyCircle/"><img src="../Imgs/FlappyCircle.png" width="320" height="170"></a>
-                <p>Flappy Circle</p>
-            </div>
-        </div>
-    </div>
+    <main>
+        <a href="../" class="page-card">
+            <div class="preview" style="background-image: url('../Imgs/Balls.png');"></div>
+            <div class="title">BallsinBox</div>
+        </a>
+        <a href="../Physics/" class="page-card">
+            <div class="preview" style="background-image: url('../Imgs/PhysicsImage.png');"></div>
+            <div class="title">Bad Physics Engine</div>
+        </a>
+        <a href="../Sand/" class="page-card">
+            <div class="preview" style="background-image: url('../Imgs/SandImage.png');"></div>
+            <div class="title">Falling Sand</div>
+        </a>
+        <a href="../Metaballs/" class="page-card">
+            <div class="preview" style="background-image: url('../Imgs/MetaballsImage.png');"></div>
+            <div class="title">Metaballs</div>
+        </a>
+        <a href="../FlappyCircle/" class="page-card">
+            <div class="preview" style="background-image: url('../Imgs/FlappyCircle.png');"></div>
+            <div class="title">Flappy Circle</div>
+        </a>
+    </main>
+    
+    <script src="script.js"></script>
 </body>
 </html>

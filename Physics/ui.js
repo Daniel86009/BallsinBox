@@ -1,6 +1,13 @@
-let shapeSizeSlider = document.getElementById('shapeSizeSlider');
+const shapeSizeSlider = document.getElementById('shapeSizeSlider');
+const toggleButton = document.getElementById('theme-toggle');
+const body = document.body;
 
-let isMobile = !window.matchMedia('(hover: hover)').matches;
+if (localStorage.isLight == undefined) localStorage.isLight = false;
+let t = localStorage.isLight == 'true' ? true : false;
+body.classList.toggle('light', t);
+toggleButton.textContent = t ? 'Switch to Dark Mode' : 'Switch to Light Mode';
+
+const isMobile = !window.matchMedia('(hover: hover)').matches;
 
 function start() {
     shapeSizeSlider.addEventListener('change', function() {
@@ -34,5 +41,13 @@ function displayButton(btn, d) {
     if (d) btn.classList.add('selected');
     else btn.classList.remove('selected');
 }
+
+toggleButton.addEventListener('click', () => {
+    let b = localStorage.isLight == 'true' ? true : false;
+    b = !b;
+    localStorage.isLight = b;
+    body.classList.toggle('light', b);
+    toggleButton.textContent = b ? 'Switch to Dark Mode' : 'Switch to Light Mode';
+});
 
 start();

@@ -1,5 +1,6 @@
 let c = document.getElementById('c');
 let ctx = c.getContext('2d');
+let style = window.getComputedStyle(document.body);
 
 let grid = [];
 let lines = [];
@@ -75,6 +76,7 @@ function update() {
     for (let i = 0; i < lines.length; i++) {
         let l = lines[i];
         ctx.beginPath();
+        ctx.strokeStyle = style.getPropertyValue('--text-color');
         ctx.moveTo(l.a.x, l.a.y);
         ctx.lineTo(l.b.x, l.b.y);
         ctx.stroke();
