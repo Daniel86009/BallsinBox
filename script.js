@@ -139,11 +139,8 @@ function update() {
 
 class circleObj {
   constructor(x, y) {
-    if (x == undefined) x = Math.random() * (c.width - 20) + 10;
-    if (y == undefined) y = Math.random() * (c.width - 20) + 10;
-    
-    this.x = x;
-    this.y = y;
+    this.x = x == undefined ? Math.random() * (c.width - 20) + 10 : x;
+    this.y = y == undefined ? Math.random() * (c.height - 20) + 10 : y;
     
     this.ox = x;
     this.oy = y;

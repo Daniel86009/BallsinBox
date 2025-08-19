@@ -38,7 +38,8 @@ function start() {
         }
     }, 4200);
 
-    window.addEventListener('click', function() {
+    window.addEventListener('click', (event) => {
+        //event.preventDefault();
         if (player.dead) {
             player.dead = false;
             pipes = [];
