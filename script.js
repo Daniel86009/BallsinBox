@@ -21,7 +21,12 @@ let useQuad = true;
 let drawQuad = false;
 let drawCheck = false;
 
+<<<<<<< Updated upstream
 var g = 0.2;
+=======
+let g = {x: 0, y: 0.2};
+let gm = 0.2;
+>>>>>>> Stashed changes
 let wallFriction = 0.7;
 var minRadius = 5;
 var maxRadius = 20;
@@ -87,6 +92,7 @@ function setUp() {
     gText.innerHTML = g;
   });
 
+<<<<<<< Updated upstream
   useQuadInput.addEventListener("change", function() {
     useQuad = useQuadInput.checked;
     drawQuad = useQuadInput.checked;
@@ -96,6 +102,19 @@ function setUp() {
   drawQuadInput.addEventListener("change", function() {
     drawQuad = drawQuadInput.checked;
   });
+=======
+    /*window.addEventListener('deviceorientation', (e) => {
+        const alpha = e.alpha;
+        const beta = e.beta;
+        const gamma = e.gamma;
+        rot.x = alpha;
+        rot.y = beta;
+        rot.z = gamma;
+
+        g = screenGravityFromEuler({xDeg: rot.x, yDeg: rot.y, zDeg: rot.z, g: gm, map: 'yIsPitchAboutX'});
+        console.log(`alpha: ${alpha}, beta: ${beta}, gamma: ${gamma}`);
+    });*/
+>>>>>>> Stashed changes
 
   drawCheckRangeInput.addEventListener("change", function() {
     drawCheck = drawCheckRangeInput.checked;
