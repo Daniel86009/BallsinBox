@@ -46,6 +46,18 @@ function setUp() {
         document.getElementById('title').style.textWrap = 'nowrap';
     }
 
+    /*window.addEventListener('deviceorientation', (e) => {
+        const alpha = e.alpha;
+        const beta = e.beta;
+        const gamma = e.gamma;
+        rot.x = alpha;
+        rot.y = beta;
+        rot.z = gamma;
+
+        g = screenGravityFromEuler({xDeg: rot.x, yDeg: rot.y, zDeg: rot.z, g: gm, map: 'yIsPitchAboutX'});
+        console.log(`alpha: ${alpha}, beta: ${beta}, gamma: ${gamma}`);
+    });*/
+
     c.addEventListener("mousedown", function () {
         mouse.down = true;
     });
