@@ -15,7 +15,7 @@ const drawCheckRangeInput = document.getElementById("drawCheckRange");
 
 
 const circles = [];
-var cNum = 0;
+let cNum = 0;
 const isMobile = !window.matchMedia('(hover: hover)').matches;
 let useQuad = true;
 let drawQuad = false;
@@ -24,17 +24,19 @@ let drawCheck = false;
 let g = {x: 0, y: 0.2};
 let gm = 0.2;
 let wallFriction = 0.7;
-var minRadius = 5;
-var maxRadius = 20;
+let minRadius = 5;
+let maxRadius = 20;
 
-var mouse = {x: 0, y: 0, ox: 0, oy: 0, down: false}
+let mouse = {x: 0, y: 0, ox: 0, oy: 0, down: false};
+let rot = {x: 0, y: 0, z: 0};
 
 
 
 function setUp() {
     c.width = document.documentElement.clientWidth - 0.01;
     c.height = document.documentElement.clientHeight - 0.01;
-    gSlider.value = g;
+    gSlider.value = gm;
+
     rSlider1.value = minRadius;
     rSlider2.value = maxRadius;
     useQuadInput.checked = useQuad;
@@ -96,8 +98,8 @@ function setUp() {
     });
 
     gSlider.addEventListener("input", function () {
-        g = gSlider.value;
-        gText.innerHTML = g;
+        gm = gSlider.value;
+        gText.innerHTML = gm;
     });
 
     useQuadInput.addEventListener("change", function () {
@@ -109,17 +111,6 @@ function setUp() {
     drawQuadInput.addEventListener("change", function () {
         drawQuad = drawQuadInput.checked;
     });
-    /*window.addEventListener('deviceorientation', (e) => {
-        const alpha = e.alpha;
-        const beta = e.beta;
-        const gamma = e.gamma;
-        rot.x = alpha;
-        rot.y = beta;
-        rot.z = gamma;
-
-        g = screenGravityFromEuler({xDeg: rot.x, yDeg: rot.y, zDeg: rot.z, g: gm, map: 'yIsPitchAboutX'});
-        console.log(`alpha: ${alpha}, beta: ${beta}, gamma: ${gamma}`);
-    });*/
 
     drawCheckRangeInput.addEventListener("change", function () {
         drawCheck = drawCheckRangeInput.checked;
@@ -166,6 +157,12 @@ class circleObj {
         this.x = x == undefined ? Math.random() * (c.width - 20) + 10 : x;
         this.y = y == undefined ? Math.random() * (c.height - 20) + 10 : y;
 
+        if (x == undefined) x = Math.random() * (c.width - 20) + 10;
+        if (y == undefined) y = Math.random() * (c.width - 20) + 10;
+
+        this.x = x;
+        this.y = y;
+
         this.ox = x;
         this.oy = y;
 
@@ -189,12 +186,15 @@ class circleObj {
 
     update(delta, tree) {
         delta *= delta;
-        this.ya = g;
+
+        this.xa = g.x;
+        this.ya = gm;
+
         let xv = this.x - this.ox;
         let yv = this.y - this.oy;
         var nx = this.x * 2 - this.ox + this.xa * delta;
         var ny = this.y * 2 - this.oy + this.ya * delta;
-
+        
         this.ox = this.x;
         this.oy = this.y;
 
@@ -441,6 +441,76 @@ class TreeNode {
 
 function dot(x1, y1, x2, y2) {
     return (x1 * x2) + (y1 * y2);
+}
+
+function screenGravityFromEuler({xDeg, yDeg, zDeg, g = gm, map = "standard"}) {
+    const d2r = d => d * Math.PI / 180;
+    const Rx = a => {
+        const c = Math.cos(a), s = Math.sin(a);
+        return [
+            [1, 0, 0],
+            [0, c, -s],
+            [0, s, c]
+        ];
+    };
+    const Ry = a => {
+        const c = Math.cos(a), s = Math.sin(a);
+        return [
+            [c, 0, s],
+            [0, 1, 0],
+            [-s, 0, c]
+        ];
+    };
+    const Rz = a => {
+        const c = Math.cos(a), s = Math.sin(a);
+        return [
+            [c, -s, 0],
+            [s, c, 0],
+            [0, 0, 1]
+        ];
+    };
+
+
+    let ax = xDeg, ay = yDeg, az = zDeg;
+    let buildR = (ax, ay, az) => multiply3(Rz(d2r(az)), multiply3(Ry(d2r(ay)), Rx(d2r(ax))));
+
+    if (map === "yIsPitchAboutX") {
+        ax = yDeg;
+        ay = xDeg;
+        az = zDeg;
+    }
+
+    const R = buildR(ax, ay, az);
+    const gWorld = [0, 0, -g];
+    const Rt = transpose3(R);
+    const gDev = mulMatVec3(Rt, gWorld);
+
+    const gx = gDev[0];
+    const gy = gDev[1];
+
+    return {x: gy, y: -gx};
+}
+function multiply3(A, B) {
+    const C = Array(3).fill(0).map(() => Array(3).fill(0));
+    for (let i = 0; i < 3; i++)
+        for (let j = 0; j < 3; j++)
+            for (let k = 0; k < 3; k++)
+                C[i][j] += A[i][k] * B[k][j];
+    return C;
+}
+function transpose3(M) {
+    return [
+        [M[0][0], M[1][0], M[2][0]],
+        [M[0][1], M[1][1], M[2][1]],
+        [M[0][2], M[1][2], M[2][2]],
+    ];
+}
+function mulMatVec3(M, v) {
+    return [
+        M[0][0] * v[0] + M[0][1] * v[1] + M[0][2] * v[2],
+        M[1][0] * v[0] + M[1][1] * v[1] + M[1][2] * v[2],
+        M[2][0] * v[0] + M[2][1] * v[1] + M[2][2] * v[2],
+    ];
 }
 
 function rSlide1() {

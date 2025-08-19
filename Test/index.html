@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Autism Test</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1 class="title">Are you autistic?</h1>
+
+  <div id="questionCont">
+    <div class="question" id="q1">
+      <h3>Q1: I often find myself walking into walls</h3>
+      <div class="buttons">
+        <button type="button" onclick="clickButton(this);">Very Often</button>
+        <button type="button" onclick="clickButton(this);">Often</button>
+        <button type="button" onclick="clickButton(this);">Sometimes</button>
+        <button type="button" onclick="clickButton(this);">Rarely</button>
+        <button type="button" onclick="clickButton(this);">Never</button>
+      </div>
+    </div>
+
+    <div class="question" id="q2">
+      <h3>Q2: I often get pissed off </h3>
+      <div class="buttons">
+        <button type="button" onclick="clickButton(this);">Very Often</button>
+        <button type="button" onclick="clickButton(this);">Often</button>
+        <button type="button" onclick="clickButton(this);">Sometimes</button>
+        <button type="button" onclick="clickButton(this);">Rarely</button>
+        <button type="button" onclick="clickButton(this);">Never</button>
+      </div>
+    </div>
+
+    <div class="question" id="q3">
+      <h3>Q3: I miss social cues like they're ninjas.</h3>
+      <div class="buttons">
+        <button type="button" onclick="clickButton(this);">Very Often</button>
+        <button type="button" onclick="clickButton(this);">Often</button>
+        <button type="button" onclick="clickButton(this);">Sometimes</button>
+        <button type="button" onclick="clickButton(this);">Rarely</button>
+        <button type="button" onclick="clickButton(this);">Never</button>
+      </div>
+    </div>
+
+    <div class="question" id="q4">
+      <h3>Q4: I get overwhelmed in stores that play music, have fluorescent lights, or exist.</h3>
+      <div class="buttons">
+        <button type="button" onclick="clickButton(this);">Very Often</button>
+        <button type="button" onclick="clickButton(this);">Often</button>
+        <button type="button" onclick="clickButton(this);">Sometimes</button>
+        <button type="button" onclick="clickButton(this);">Rarely</button>
+        <button type="button" onclick="clickButton(this);">Never</button>
+      </div>
+    </div>
+
+    <div class="question" id="q5">
+      <h3>Q5: I get fixated on a random topic and suddenly know more about it than Wikipedia.</h3>
+      <div class="buttons">
+        <button type="button" onclick="clickButton(this);">Very Often</button>
+        <button type="button" onclick="clickButton(this);">Often</button>
+        <button type="button" onclick="clickButton(this);">Sometimes</button>
+        <button type="button" onclick="clickButton(this);">Rarely</button>
+        <button type="button" onclick="clickButton(this);">Never</button>
+      </div>
+    </div>
+
+    <div class="question" id="q6">
+      <h3>Q6: I take jokes literally, and then get confused why people are laughing.</h3>
+      <div class="buttons">
+        <button type="button" onclick="clickButton(this);">Very Often</button>
+        <button type="button" onclick="clickButton(this);">Often</button>
+        <button type="button" onclick="clickButton(this);">Sometimes</button>
+        <button type="button" onclick="clickButton(this);">Rarely</button>
+        <button type="button" onclick="clickButton(this);">Never</button>
+      </div>
+    </div>
+
+    <div class="question" id="q7">
+      <h3>Q7: I wear the same clothes because they're “the good ones.”</h3>
+      <div class="buttons">
+        <button type="button" onclick="clickButton(this);">Very Often</button>
+        <button type="button" onclick="clickButton(this);">Often</button>
+        <button type="button" onclick="clickButton(this);">Sometimes</button>
+        <button type="button" onclick="clickButton(this);">Rarely</button>
+        <button type="button" onclick="clickButton(this);">Never</button>
+      </div>
+    </div>
+
+    <div class="question" id="q8">
+      <h3>Q8: I need a recovery period after a 5-minute phone call.</h3>
+      <div class="buttons">
+        <button type="button" onclick="clickButton(this);">Very Often</button>
+        <button type="button" onclick="clickButton(this);">Often</button>
+        <button type="button" onclick="clickButton(this);">Sometimes</button>
+        <button type="button" onclick="clickButton(this);">Rarely</button>
+        <button type="button" onclick="clickButton(this);">Never</button>
+      </div>
+    </div>
+
+    <div class="question" id="q9">
+      <h3>Q9: I practice how to sit and where to put my hands so I look “natural.”</h3>
+      <div class="buttons">
+        <button type="button" onclick="clickButton(this);">Very Often</button>
+        <button type="button" onclick="clickButton(this);">Often</button>
+        <button type="button" onclick="clickButton(this);">Sometimes</button>
+        <button type="button" onclick="clickButton(this);">Rarely</button>
+        <button type="button" onclick="clickButton(this);">Never</button>
+      </div>
+    </div>
+
+    <div class="question" id="q10">
+      <h3>Q10: I mimic people's accents or speech patterns without realizing it.</h3>
+      <div class="buttons">
+        <button type="button" onclick="clickButton(this);">Very Often</button>
+        <button type="button" onclick="clickButton(this);">Often</button>
+        <button type="button" onclick="clickButton(this);">Sometimes</button>
+        <button type="button" onclick="clickButton(this);">Rarely</button>
+        <button type="button" onclick="clickButton(this);">Never</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="submitCont">
+    <button type="button" onclick="loadResults();">Get Results</button>
+    <button type="button" onclick="testReset();">Reset Anim</button>
+  </div>
+
+  <div class="results" id="rCont">
+    <h3>You are 100% autistic</h3>
+
+    <div class="pBar">
+        <div class="progress" id="p1"></div>
+    </div>
+
+    <button type="button" onclick="retakeTest();">Retake Test</button>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

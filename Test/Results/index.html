@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Autism Test</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1 class="title">You are 100% autistic!</h1>
+
+  <div class="submitCont">
+    <button type="button" onclick="loadResults();">Get Results</button>
+    <button type="button" onclick="testReset();">Reset Anim</button>
+  </div>
+
+  <div class="results" id="rCont">
+    <h3>You are 100% autistic</h3>
+
+    <div class="pBar">
+        <div class="progress" id="p1"></div>
+    </div>
+
+    
+
+    <button type="button" onclick="retakeTest();">Retake Test</button>
+  </div>
+
+  <canvas id="confetti"></canvas>
+
+  <script src="script.js"></script>
+  <script src="confetti.js"></script>
+</body>
+</html>
