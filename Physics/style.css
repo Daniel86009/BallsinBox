@@ -70,7 +70,7 @@ button:hover {
 }
 
 #shapeDropdownMenu, #displayDropdownMenu {
-    display: none;
+    display: block;
 }
 
 #shapeDropdown:hover #shapeDropdownMenu {
