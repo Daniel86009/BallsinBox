@@ -35,7 +35,6 @@ const funSites = [
   "https://thispersondoesnotexist.com",
   "https://thisrentaldoesnotexist.com",
   "https://findtheinvisiblecow.com",
-  "https://randomstreetview.com",
   "https://paperplanes.world",
   "https://zoomquilt2.com",
   "https://patatap.com",
@@ -50,7 +49,12 @@ const funSites = [
   "https://zzzscore.com/color",
   "https://zzzscore.com/1to50",
   "https://rrrgggbbb.com",
-  "https://hmpg.net/"
+  "https://hmpg.net/",
+  "https://maze.toys/mazes/mini/daily/",
+  "https://sliding.toys/mystic-square/8-puzzle/daily/",
+  "https://paint.toys/calligram/",
+  "https://memory.toys/classic/easy/",
+  "https://clicking.toys/flip-grid/neat-nine/3-holes/"
 ];
 
 const iframe = document.getElementById('website');
