@@ -41,7 +41,7 @@ const funSites = [
   "https://musiclab.chromeexperiments.com",
   "https://just-shower-thoughts.xyz",
   "https://mondrianandme.com",
-  "https://paint.toys",
+  "https://paint.toys/one-line",
   "https://weavesilk.com",
   "https://binarypiano.com",
   "https://ncase.me/sight-and-light",
