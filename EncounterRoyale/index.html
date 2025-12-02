@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="#">
+    <link rel="icon" href="../Imgs/Favicon.svg" type="image/svg+xml">
+    <title>Encounter Royale</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <div id="optionsMenu">
+            ☰ Options
+            <div id="optionsMenuInner">
+                <h3>Enemy Settings</h3>
+
+                <label>
+                    Enemy Elixir Multiplier:
+                    <input type="range" id="enemyElixirMult" min="0" max="3" step="0.1" value="1.5">
+                    <span id="enemyElixirValue">1.5</span>
+                </label>
+
+                <br><br>
+
+                <label>
+                    <input type="checkbox" id="enemyRandomCards" checked="true">
+                    Randomise Enemy Cards
+                </label>
+
+                <hr>
+
+                <h3>Debug</h3>
+
+                <label>
+                    <input type="checkbox" id="debugDrawRange">
+                    Draw Range
+                </label>
+                <br>
+                <label>
+                    <input type="checkbox" id="debugDrawViewRange">
+                    Draw View Range
+                </label>
+            </div>
+        </div>
+
+        <canvas id="c" width="500" height="800"></canvas>
+
+        <button id="theme-toggle">Switch to Light Mode</button>
+
+        <div id="playerUI">
+            <div id="elixirBarDiv">
+                <span>Elixir: <span id="elixirNum">5</span>/10</span>
+                <div id="elixirBarOuter">
+                    <div id="elixirBar" style="width: 50%; height: 100%;"></div>
+                </div>
+            </div>
+
+            <div id="cardBar">
+                <!--Cards go here-->
+            </div>
+        </div>
+    </div>
+    
+    <div id="gameoverScreen">
+        <h2 id="gameoverMessage">Choose Cards</h2>
+        <button id="restartButton" onclick="reset()">Play</button>
+        <div id="chosenCards">
+            <div class="card"></div>
+            <div class="card"></div>
+            <div class="card"></div>
+            <div class="card"></div>
+            <div class="card"></div>
+            <div class="card"></div>
+            <div class="card"></div>
+            <div class="card"></div>
+        </div>
+
+        <div id="cardChoices">
+                <!--All cards will go here-->
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script src="ui.js"></script>
+</body>
+</html>
