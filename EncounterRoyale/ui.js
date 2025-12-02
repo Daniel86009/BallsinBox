@@ -110,8 +110,10 @@ infinitePlayerElixir.addEventListener('change', e => {
     window.infinitePlayerElixir = e.target.checked;
     if (e.target.checked) {
         game.playerElixirMult = 999;
+        game.playerStartElixir = 999;
     } else {
-        game.playerElixir = 5;
+        playerElixir = 5;
+        game.playerStartElixir = 5;
         game.playerElixirMult = 1;
     }
 });

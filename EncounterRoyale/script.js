@@ -41,8 +41,8 @@ let game = {
     princessY: 170,
     kingY: 80,
     team: 'player',
-    enemyElixirMult: 0,
-    enemyStartElixir: 0,
+    enemyElixirMult: 1.5,
+    enemyStartElixir: 5,
     playerElixirMult: 1,
     playerStartElixir: 5,
     randomiseEnemyUnits: true
