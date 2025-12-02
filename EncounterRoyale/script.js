@@ -41,17 +41,18 @@ let game = {
     princessY: 170,
     kingY: 80,
     team: 'player',
-    enemyElixirMult: 1.5,
-    enemyStartElixir: 5,
-    playerElixirMult: 1,
-    playerStartElixir: 5,
+    enemyElixirMult: 0,
+    enemyStartElixir: 0,
+    playerElixirMult: 111,
+    playerStartElixir: 100,
     randomiseEnemyUnits: true
 };
 
 let debug = {
     drawViewRange: false,
     drawRange: false,
-    drawDash: false
+    drawDash: false,
+    drawCardsOnce: false
 };
 
 const aoeStats = {
@@ -1329,10 +1330,12 @@ class UnitEntity extends Entity {
             for (let i = 0; i < entities.length; i++) {
                 let e = entities[i];
                 if (e.team == this.team) continue;
+
                 if (e.stats.name == 'princess') {
                     if (e.x < c.width / 2) princessLeft = e;
                     else princessRight = e;
                 }
+
                 if (e.stats.name == 'king') king = e;
             }
 
@@ -1344,14 +1347,16 @@ class UnitEntity extends Entity {
                 return;
             }
 
-            let placeholderStats = {size: -100};
             let bridgeX = onLeft ? game.laneLeftX : game.laneRightX;
+            let bridgeY = (this.team == 'player') ? game.river - game.riverWidth / 2 : game.river + game.riverWidth / 2;
 
-            let onOwnSide = (this.team == 'player') ? this.y > game.river : this.y < game.river;
+            let onOwnSide = (this.team == 'player') ? this.y > game.river + this.stats.size : this.y < game.river - this.stats.size;
 
             if (onOwnSide && this.stats.type != 'flying') {
-                this.target = {x: bridgeX, y: game.river, stats: placeholderStats};
-                return;
+                if (!(M.dist(this.x, this.y, bridgeX, game.river) < this.stats.speed + 1)) {
+                    this.target = {x: bridgeX, y: bridgeY, stats:{size: 0}};
+                    return;
+                }
             }
 
             this.target = king;
@@ -2045,7 +2050,7 @@ function cardChoiceClick(cardElem, stats, inDeck, index) {
         cardElem.classList.remove('occupied');
         cardElem.innerHTML = '';
     } else {
-        if (cardElem.style.opacity == 0.2) return;
+        if (cardElem.style.opacity == 0.2 && debug.drawCardsOnce) return;
         let children = chosenCards.children;
         for (let i = 0; i < children.length; i++) {
             let child = children[i];
