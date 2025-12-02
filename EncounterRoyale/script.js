@@ -8,7 +8,6 @@ ToDo:
     -E-Spirit
     -Tesla
     -Log
-    -Bowler
 -Better mobile support
 -Improve Pathfinding
 */
@@ -807,7 +806,7 @@ const playerUnits = {
     unit8: units.miniPekka
 };
 
-/*const enemyUnits = {
+const enemyUnits = {
     unit1: units.knight,
     unit2: units.archers,
     unit3: units.megaKnight,
@@ -816,17 +815,6 @@ const playerUnits = {
     unit6: units.witch,
     unit7: units.bandit,
     unit8: units.minions
-};*/
-
-const enemyUnits = {
-    unit1: units.knight,
-    unit2: units.knight,
-    unit3: units.knight,
-    unit4: units.knight,
-    unit5: units.knight,
-    unit6: units.knight,
-    unit7: units.knight,
-    unit8: units.knight
 };
 
 const towers = {
@@ -1198,6 +1186,15 @@ class Entity {
             }
         }
     }
+
+    isAttackingTarget() {
+    if (!this.target || this.target.dead) return false;
+
+    let dist = M.dist(this.x, this.y, this.target.x, this.target.y);
+    let inRange = dist - this.target.stats.size <= this.stats.range;
+
+    return inRange || (this.attackCooldown > this.stats.attackSpeed * 0.1);
+}
 }
 
 class UnitEntity extends Entity {
@@ -1207,7 +1204,6 @@ class UnitEntity extends Entity {
         this.dashTime = 0;
         this.dashPauseTime = 0;
         this.distance = 0;
-        this.oldTarget = null;
         this.knockbackVel = {x: 0, y: 0};
 
         if (this.stats.spawnAOEStats) this.aoeAttack(this.x, this.y, this.stats.spawnAOEStats);
@@ -1251,7 +1247,6 @@ class UnitEntity extends Entity {
         this.findTarget();
 
         if (!this.target) return;
-        this.oldTarget = this.target;
 
         let dist = M.dist(this.x, this.y, this.target.x, this.target.y);
         let hasDash = this.stats.dashDamage || this.stats.dashAOEStats;
@@ -1284,6 +1279,13 @@ class UnitEntity extends Entity {
     }
 
     findTarget() {
+        if (this.target && !this.target.dead && this.isAttackingTarget()) {
+            let dist = M.dist(this.x, this.y, this.target.x, this.target.y);
+            if (dist <= this.stats.viewRange) {
+                return;
+            }
+        }
+
         let minDist = Infinity;
         let closestEnemy = null;
         for (let i = 0; i < entities.length; i++) {
@@ -1320,38 +1322,40 @@ class UnitEntity extends Entity {
         if (closestEnemy) {
             this.target = closestEnemy;
         } else {
+            let princessLeft = null;
+            let princessRight = null;
+            let king = null;
+
             for (let i = 0; i < entities.length; i++) {
                 let e = entities[i];
-                let name = e.stats.name;
-                if ((name != 'princess' && name != 'king') || (e.team == this.team)) continue;
-                
-                if (name == 'princess') {
-                    if ((this.x < c.width / 2 + 1 && e.x < c.width / 2 + 1) || (this.x > c.width / 2 && e.x > c.width / 2)) {
-                        this.target = e;
-                        continue;
-                    }
+                if (e.team == this.team) continue;
+                if (e.stats.name == 'princess') {
+                    if (e.x < c.width / 2) princessLeft = e;
+                    else princessRight = e;
                 }
-
-                if (name == 'king') {
-                    let placeholderStats = {size: -100};
-                    if (this.team == 'player') {
-                        if (this.y > game.river + 30) {
-                            if ((this.x < c.width / 2 + 1 && e.x < c.width / 2 + 1) && this.stats.type != 'flying') this.target = {x: game.laneLeftX, y: game.river, stats: placeholderStats};
-                            else this.target = {x: game.laneRightX, y: game.river, stats: placeholderStats};
-                        } else {
-                            this.target = e;
-                        }
-                    } else {
-                        if (this.y < game.river - 30) {
-                            if ((this.x < c.width / 2 + 1 && e.x < c.width / 2 + 1)) this.target = {x: game.laneLeftX, y: game.river, stats: placeholderStats};
-                            else this.target = {x: game.laneRightX, y: game.river, stats: placeholderStats};
-                        } else {
-                            this.target = e;
-                        }
-                    }
-                    continue;
-                }
+                if (e.stats.name == 'king') king = e;
             }
+
+            let onLeft = this.x < c.width / 2;
+            let princess = onLeft ? princessLeft : princessRight;
+
+            if (princess) {
+                this.target = princess;
+                return;
+            }
+
+            let placeholderStats = {size: -100};
+            let bridgeX = onLeft ? game.laneLeftX : game.laneRightX;
+
+            let onOwnSide = (this.team == 'player') ? this.y > game.river : this.y < game.river;
+
+            if (onOwnSide && this.stats.type != 'flying') {
+                this.target = {x: bridgeX, y: game.river, stats: placeholderStats};
+                return;
+            }
+
+            this.target = king;
+            return;
         }
     }
 
@@ -1472,7 +1476,6 @@ class UnitEntity extends Entity {
                 this.attackCooldown = this.stats.attackSpeed;
                 return;
             } else {
-                if (this.target != this.oldTarget) this.dashTime = 0;
                 this.moveTowards(this.target, this.stats.dashSpeed);
             }
             this.dashTime -= 1000 / 60;
@@ -1542,6 +1545,13 @@ class TowerEntity extends Entity {
     }
 
     findTarget() {
+        if (this.target && !this.target.dead && this.isAttackingTarget()) {
+            let dist = M.dist(this.x, this.y, this.target.x, this.target.y);
+            if (dist <= this.stats.viewRange) {
+                return;
+            }
+        }
+
         let minDist = Infinity;
         let closestEnemy = null;
         for (let i = 0; i < entities.length; i++) {
@@ -1885,6 +1895,8 @@ function reset() {
 
     playerElixir = game.playerStartElixir;
     enemyElixir = game.enemyStartElixir;
+    playerKingActivated = false;
+    enemyKingActivated = false;
     updateElixirUI();
 
     if (game.randomiseEnemyUnits) randomiseEnemyUnits();
