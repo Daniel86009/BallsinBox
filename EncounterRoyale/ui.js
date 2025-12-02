@@ -37,68 +37,88 @@ if (window.innerWidth < 800) {
 
 //Options Menu
 function updateOptionsMenuVisibility() {
-    const gameoverVisible = getComputedStyle(document.getElementById("gameoverScreen")).visibility === "visible";
-    document.getElementById("optionsMenu").style.display = gameoverVisible ? "block" : "none";
+    const gameoverVisible = getComputedStyle(document.getElementById('gameoverScreen')).visibility === 'visible';
+    document.getElementById('optionsMenu').style.display = gameoverVisible ? 'block' : 'none';
 }
 
 updateOptionsMenuVisibility();
 
 
-const optionsMenu = document.getElementById("optionsMenu");
-const optionsInner = document.getElementById("optionsMenuInner");
+const optionsMenu = document.getElementById('optionsMenu');
+const optionsInner = document.getElementById('optionsMenuInner');
 
-optionsMenu.addEventListener("click", (e) => {
-    if (e.target.closest("#optionsMenuInner")) return;
+optionsMenu.addEventListener('click', (e) => {
+    if (e.target.closest('#optionsMenuInner')) return;
 
-    const isOpen = optionsInner.style.display === "block";
-    optionsInner.style.display = isOpen ? "none" : "block";
+    const isOpen = optionsInner.style.display === 'block';
+    optionsInner.style.display = isOpen ? 'none' : 'block';
 
     e.stopPropagation();
 });
 
 function handleOutsideClick(e) {
-    if (optionsInner.style.display !== "block") return;
+    if (optionsInner.style.display !== 'block') return;
 
-    if (e.target.closest("#optionsMenu")) return;
+    if (e.target.closest('#optionsMenu')) return;
 
-    optionsInner.style.display = "none";
+    optionsInner.style.display = 'none';
 }
 
-window.addEventListener("click", handleOutsideClick);
+window.addEventListener('click', handleOutsideClick);
 
-window.addEventListener("touchstart", handleOutsideClick);
+window.addEventListener('touchstart', handleOutsideClick);
 
 
-const elixirMultSlider = document.getElementById("enemyElixirMult");
-const elixirMultValue = document.getElementById("enemyElixirValue");
+const elixirMultSlider = document.getElementById('enemyElixirMult');
+const elixirMultValue = document.getElementById('enemyElixirValue');
 
-const enemyRandomCards = document.getElementById("enemyRandomCards");
-const debugDrawRange = document.getElementById("debugDrawRange");
-const debugDrawViewRange = document.getElementById("debugDrawViewRange")
+const enemyRandomCards = document.getElementById('enemyRandomCards');
+const debugDrawRange = document.getElementById('debugDrawRange');
+const debugDrawViewRange = document.getElementById('debugDrawViewRange');
+
+const infinitePlayerElixir = document.getElementById('infinitePlayerElixir');
+const pickSameCards = document.getElementById('pickSameCards');
 
 elixirMultSlider.value = game.enemyElixirMult;
 enemyRandomCards.checked = game.randomiseEnemyUnits;
 debugDrawRange.checked = debug.drawRange;
 debugDrawViewRange.checked = debug.drawViewRange;
+infinitePlayerElixir.checked = game.playerElixirMult > 10;
+pickSameCards.checked = debug.pickSameCards;
 
-elixirMultSlider.addEventListener("input", () => {
+elixirMultSlider.addEventListener('input', () => {
     elixirMultValue.textContent = elixirMultSlider.value;
     game.enemyElixirMult = Number(elixirMultSlider.value);
 });
 
-enemyRandomCards.addEventListener("change", e => {
+enemyRandomCards.addEventListener('change', e => {
     window.randomiseEnemyCards = e.target.checked;
     game.randomiseEnemyUnits = e.target.checked;
 });
 
-debugDrawRange.addEventListener("change", e => {
+debugDrawRange.addEventListener('change', e => {
     window.debugDrawRange = e.target.checked;
     debug.drawRange = e.target.checked;
 });
 
-debugDrawViewRange.addEventListener("change", e => {
+debugDrawViewRange.addEventListener('change', e => {
     window.debugDrawViewRange = e.target.checked;
     debug.drawViewRange = e.target.checked;
+});
+
+infinitePlayerElixir.addEventListener('change', e => {
+    window.infinitePlayerElixir = e.target.checked;
+    if (e.target.checked) {
+        game.playerElixirMult = 999;
+    } else {
+        game.playerElixir = 5;
+        game.playerElixirMult = 1;
+    }
+});
+
+pickSameCards.addEventListener('change', e => {
+    window.pickSameCards = e.target.checked;
+    debug.pickSameCards = e.target.checked;
 });
 
 

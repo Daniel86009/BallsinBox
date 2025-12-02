@@ -43,8 +43,8 @@ let game = {
     team: 'player',
     enemyElixirMult: 0,
     enemyStartElixir: 0,
-    playerElixirMult: 111,
-    playerStartElixir: 100,
+    playerElixirMult: 1,
+    playerStartElixir: 5,
     randomiseEnemyUnits: true
 };
 
@@ -52,7 +52,7 @@ let debug = {
     drawViewRange: false,
     drawRange: false,
     drawDash: false,
-    drawCardsOnce: false
+    pickSameCards: false
 };
 
 const aoeStats = {
@@ -2050,7 +2050,7 @@ function cardChoiceClick(cardElem, stats, inDeck, index) {
         cardElem.classList.remove('occupied');
         cardElem.innerHTML = '';
     } else {
-        if (cardElem.style.opacity == 0.2 && debug.drawCardsOnce) return;
+        if (cardElem.style.opacity == 0.2 && !debug.pickSameCards) return;
         let children = chosenCards.children;
         for (let i = 0; i < children.length; i++) {
             let child = children[i];
