@@ -979,8 +979,10 @@ function update() {
                 if (e.stats.name == 'princess') {
                     if (e.team == 'player') {
                         playerKingActivated = true;
+                        console.log('Player king tower acitvated');
                     } else {
                         enemyKingActivated = true;
+                        console.log('Enemy king tower acitvated');
                     }
                 }
             }
