@@ -10,6 +10,7 @@ ToDo:
     -Log
 -Better mobile support
 -Improve Pathfinding
+-Add proper icons
 */
 
 //1 range ≈ 24
@@ -344,7 +345,7 @@ const units = {
     },
     fireball: {
         name: 'Fireball',
-        symbol: '🔥',
+        symbol: '☄️',
         cost: 4,
         type: 'spell',
         radius: 70,
@@ -609,7 +610,7 @@ const units = {
     },
     freeze: {
         name: 'Freeze',
-        symbol: '❄️',
+        symbol: '🧊',
         cost: 4,
         type: 'spell',
         radius: 80,
@@ -791,6 +792,21 @@ const units = {
         viewRange: 150,
         size: 30,
         speed: 0.7,
+        targetPriority: 'ground',
+        type: 'unit'
+    },
+    guards: {
+        name: 'Guards',
+        symbol: '☠️',
+        cost: 3,
+        hp: 81,
+        sheildHP: 256,
+        damage: 117,
+        attackSpeed: 1000,
+        range: 25,
+        viewRange: 150,
+        size: 15,
+        speed: 1.4,
         targetPriority: 'ground',
         type: 'unit'
     }
@@ -1021,6 +1037,7 @@ class Entity {
         this.stats = stats;
         this.attackCooldown = 0;
         this.hp = stats.hp;
+        this.sheildHP = stats.sheildHP || 0;
         this.dead = false;
         this.freezeTime = 0;
         this.slowTime = 0;
@@ -1049,7 +1066,8 @@ class Entity {
 
         //Symbol
         ctx.fillStyle = '#ffffff';
-        ctx.font = `${this.stats.size + 5}px Arial`;
+        if (this.stats.symbol.match(/./gu).length > 2) ctx.font = `${(this.stats.size + 5) / 2}px Arial`;
+        else ctx.font = `${this.stats.size + 5}px Arial`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(this.stats.symbol, this.x, this.y);
@@ -1062,7 +1080,11 @@ class Entity {
         ctx.fillStyle = '#009607ff';
         ctx.fillRect(this.x - this.stats.size + 2, this.y + this.stats.size + 5, (this.stats.size * (this.hp / this.stats.hp) * 2)- 4, 6);
 
-        
+        //Draw shield
+        if (this.sheildHP > 1) {
+            ctx.fillStyle = '#b1a500ff';
+            ctx.fillRect(this.x - this.stats.size + 2, this.y + this.stats.size + 5, (this.stats.size * (this.sheildHP / this.stats.sheildHP) * 2)- 4, 6);
+        }
         
 
         //Draw if frozen
@@ -1128,6 +1150,12 @@ class Entity {
     }
 
     takeDamage(amount) {
+        if (this.sheildHP > 0) {
+            this.sheildHP -= amount;
+            if (Number.isNaN(this.sheildHP)) console.log(amount);
+            return;
+        }
+
         if (this.hp <= amount) {
             this.dead = true;
         } else {
@@ -1280,7 +1308,7 @@ class UnitEntity extends Entity {
     }
 
     findTarget() {
-        if (this.target && !this.target.dead && this.isAttackingTarget()) {
+        if ((this.target && !this.target.dead && this.isAttackingTarget() && this.target.stats.type != 'waypoint')) {
             let dist = M.dist(this.x, this.y, this.target.x, this.target.y);
             if (dist <= this.stats.viewRange) {
                 return;
@@ -1350,11 +1378,11 @@ class UnitEntity extends Entity {
             let bridgeX = onLeft ? game.laneLeftX : game.laneRightX;
             let bridgeY = (this.team == 'player') ? game.river - game.riverWidth / 2 : game.river + game.riverWidth / 2;
 
-            let onOwnSide = (this.team == 'player') ? this.y > game.river + this.stats.size : this.y < game.river - this.stats.size;
+            let onOwnSide = (this.team == 'player') ? this.y > game.river : this.y < game.river;
 
             if (onOwnSide && this.stats.type != 'flying') {
                 if (!(M.dist(this.x, this.y, bridgeX, game.river) < this.stats.speed + 1)) {
-                    this.target = {x: bridgeX, y: bridgeY, stats:{size: 0}};
+                    this.target = {x: bridgeX, y: bridgeY, stats:{size: 0, type: 'waypoint'}};
                     return;
                 }
             }
@@ -1841,12 +1869,13 @@ function spawnUnit(x, y, index, team) {
         enemyCycles.splice(0, 1);
     }
 
+    let spawnThree = ['Skeletons', 'Minions', 'Goblin Barrel', 'Guards'];
 
     updateElixirUI();
     if (stats.name == 'Archers' || stats.name == 'Wall Breakers') {
         entities.push(new UnitEntity(x - 10, y, team, stats));
         entities.push(new UnitEntity(x + 10, y, team, stats));
-    } else if (stats.name == 'Skeletons' || stats.name == 'Minions' || stats.name == 'Goblin Barrel') {
+    } else if (spawnThree.includes(stats.name)) {
         entities.push(new UnitEntity(x + 10, y, team, stats));
         entities.push(new UnitEntity(x, y + 10, team, stats));
         entities.push(new UnitEntity(x - 10, y, team, stats));
