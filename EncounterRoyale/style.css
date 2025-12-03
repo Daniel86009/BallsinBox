@@ -138,11 +138,21 @@ body {
     border: #960096 3px solid;
     height: 25px;
     width: 500px;
+    position: relative;
 }
 
 #elixirBar {
     transition: width 0.1s linear;
     background-color: #df00df;
+}
+
+.divider-line {
+    position: absolute;
+    top: 0;
+    width: 1px;
+    height: 100%;
+    background: rgba(176, 176, 176, 0.769);
+    pointer-events: none;
 }
 
 #cardBar {

@@ -874,11 +874,17 @@ let enemyCycles = [];
 
 let elixirIntervalID = null;
 let runAIIntervalID = null;
+let timerIntervalID = null;
 
 let playerKingActivated = false;
 let enemyKingActivated = false;
 
 let gameFinished = false;
+
+let timePassed = 0;
+let timeLeft = 180;
+let overTimeLeft = 120;
+let elixirMult = 1;
 
 function start() {
     document.addEventListener('mousemove', (e) => {
@@ -1025,6 +1031,17 @@ function update() {
         ctx.arc(mouse.x, mouse.y, 10, 0, 2 * Math.PI);
         ctx.stroke();
     }
+
+    if (timePassed > 60) elixirMult = 2;
+    if (timePassed > 120) elixirMult = 3;
+
+    ctx.fillStyle = '#000';
+    ctx.font = '20px Arial';
+    ctx.textAlign = 'left';
+    ctx.fillText(`${Math.round(timePassed)}s`, 10, 10);
+
+    ctx.textAlign = 'right';
+    ctx.fillText(`${elixirMult}x`, c.width - 10, 10);
 
     window.requestAnimationFrame(update);
 }
@@ -1829,8 +1846,8 @@ function runAI() {
 }
 
 function updateElixir() {
-    if (playerElixir < game.maxElixir) playerElixir += game.playerElixirMult;
-    if (enemyElixir < game.maxElixir) enemyElixir += game.enemyElixirMult;
+    if (playerElixir < game.maxElixir) playerElixir += game.playerElixirMult * elixirMult;
+    if (enemyElixir < game.maxElixir) enemyElixir += game.enemyElixirMult * elixirMult;
 
     updateElixirUI();
 }
@@ -1916,9 +1933,11 @@ function gameover(loser) {
     aoes = [];
 
     mouse.selection = -1;
+    timePassed = 0;
 
     clearInterval(elixirIntervalID);
     clearInterval(runAIIntervalID);
+    clearInterval(timerIntervalID);
 }
 
 function reset() {
@@ -1931,6 +1950,9 @@ function reset() {
     enemyElixir = game.enemyStartElixir;
     playerKingActivated = false;
     enemyKingActivated = false;
+
+    elixirMult = 1;
+
     updateElixirUI();
 
     if (game.randomiseEnemyUnits) randomiseEnemyUnits();
@@ -1962,6 +1984,7 @@ function reset() {
 
     elixirIntervalID = setInterval(updateElixir, game.elixirRate);
     runAIIntervalID = setInterval(runAI, 1000);
+    timerIntervalID = setInterval(stepTimer, 100);
 }
 
 function randomiseEnemyUnits() {
@@ -2101,4 +2124,9 @@ function cardChoiceClick(cardElem, stats, inDeck, index) {
         }
         
     }
+}
+
+function stepTimer() {
+    let amount = 0.1;
+    timePassed += amount;
 }
