@@ -189,6 +189,10 @@ const projectileStats = {
         targetPriority: 'ground',
         lifetime: 2000,
         knockback: 3
+    },
+    musketeerBullet: {
+        damage: 217,
+        speed: 16
     }
 };
 
@@ -769,14 +773,14 @@ const units = {
     },
     mArcher: {
         name: 'Magic Archer',
-        symbol: '🏹',
+        symbol: '💠',
         cost: 4,
         hp: 529,
         projectileStats: projectileStats.mArcherArrow,
         attackSpeed: 1100,
         range: 190,
         viewRange: 190,
-        size: 25,
+        size: 20,
         speed: 1.0,
         targetPriority: 'all',
         type: 'unit'
@@ -808,6 +812,65 @@ const units = {
         size: 15,
         speed: 1.4,
         targetPriority: 'ground',
+        type: 'unit'
+    },
+    recruits: {
+        name: 'Royal Recruits',
+        symbol: '🪣',
+        cost: 7,
+        hp: 547,
+        sheildHP: 240,
+        damage: 133,
+        attackSpeed: 1300,
+        range: 35,
+        viewRange: 150,
+        size: 25,
+        speed: 1.4,
+        targetPriority: 'ground',
+        type: 'unit'
+    },
+    barbarians: {
+        name: 'Barbarians',
+        symbol: '😡',
+        cost: 5,
+        hp: 670,
+        damage: 192,
+        attackSpeed: 1300,
+        range: 25,
+        viewRange: 150,
+        size: 20,
+        speed: 1.0,
+        targetPriority: 'ground',
+        type: 'unit'
+    },
+    log: {
+        name: 'Log',
+        symbol: '🪵',
+        cost: 2,
+        type: 'unit',
+        pierce: 9999,
+        width: 100,
+        height: 30,
+        damage: 266,
+        distance: 300,
+        knockback: 4,
+        targetPriority: 'ground',
+        speed: 1.5,
+        colour: '#b16800ff',
+        lifetime: 99999
+    },
+    musketeer: {
+        name: 'Musketeer',
+        symbol: '🔫',
+        cost: 4,
+        hp: 721,
+        projectileStats: projectileStats.musketeerBullet,
+        attackSpeed: 1000,
+        range: 140,
+        viewRange: 150,
+        size: 22,
+        speed: 1.0,
+        targetPriority: 'all',
         type: 'unit'
     }
 };
@@ -882,8 +945,6 @@ let enemyKingActivated = false;
 let gameFinished = false;
 
 let timePassed = 0;
-let timeLeft = 180;
-let overTimeLeft = 120;
 let elixirMult = 1;
 
 function start() {
@@ -1032,8 +1093,8 @@ function update() {
         ctx.stroke();
     }
 
-    if (timePassed > 60) elixirMult = 2;
-    if (timePassed > 120) elixirMult = 3;
+    if (timePassed > 120) elixirMult = 2;
+    if (timePassed > 240) elixirMult = 3;
 
     ctx.fillStyle = '#000';
     ctx.font = '20px Arial';
@@ -1083,8 +1144,7 @@ class Entity {
 
         //Symbol
         ctx.fillStyle = '#ffffff';
-        if (this.stats.symbol.match(/./gu).length > 2) ctx.font = `${(this.stats.size + 5) / 2}px Arial`;
-        else ctx.font = `${this.stats.size + 5}px Arial`;
+        ctx.font = `${this.stats.size + 5}px Arial`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(this.stats.symbol, this.x, this.y);
@@ -1157,7 +1217,7 @@ class Entity {
         if (this.stats.dashRange && debug.drawDash) {
             ctx.beginPath();
             ctx.lineWidth = 2;
-            ctx.strokeStyle = 'red';
+            ctx.strokeStyle = 'blue';
             ctx.arc(this.x, this.y, this.stats.dashRange.min, 0, 2 * Math.PI);
             ctx.stroke();
             ctx.beginPath();
@@ -1234,13 +1294,13 @@ class Entity {
     }
 
     isAttackingTarget() {
-    if (!this.target || this.target.dead) return false;
+        if (!this.target || this.target.dead) return false;
 
-    let dist = M.dist(this.x, this.y, this.target.x, this.target.y);
-    let inRange = dist - this.target.stats.size <= this.stats.range;
+        let dist = M.dist(this.x, this.y, this.target.x, this.target.y);
+        let inRange = dist - this.target.stats.size <= this.stats.range;
 
-    return inRange || (this.attackCooldown > this.stats.attackSpeed * 0.1);
-}
+        return inRange || (this.attackCooldown > this.stats.attackSpeed * 0.1);
+    }
 }
 
 class UnitEntity extends Entity {
@@ -1557,8 +1617,10 @@ class UnitEntity extends Entity {
     }
 
     applyKnockback(dir, amount) {
-        this.knockbackVel.x += dir.x * amount;
-        this.knockbackVel.y += dir.y * amount;
+        if (this.stats.type != 'building') {
+            this.knockbackVel.x += dir.x * amount;
+            this.knockbackVel.y += dir.y * amount;
+        }
     }
 }
 
@@ -1720,11 +1782,20 @@ class Projectile {
     }
 
     draw() {
-        ctx.beginPath();
-        if (this.stats.colour) ctx.fillStyle = this.stats.colour;
-        else ctx.fillStyle = '#000';
-        ctx.arc(this.x, this.y, this.stats.size, 0, 2*Math.PI);
-        ctx.fill();
+        if (this.stats.width) {
+            ctx.beginPath();
+            if (this.stats.colour) ctx.fillStyle = this.stats.colour;
+            else ctx.fillStyle = '#000';
+            let x = -this.stats.width / 2 + this.x;
+            let y = this.stats.height / 2 + this.y;
+            ctx.fillRect(x, y, this.stats.width, this.stats.height);
+        } else {
+            ctx.beginPath();
+            if (this.stats.colour) ctx.fillStyle = this.stats.colour;
+            else ctx.fillStyle = '#000';
+            ctx.arc(this.x, this.y, this.stats.size, 0, 2*Math.PI);
+            ctx.fill();
+        }
     }
 
     update() {
@@ -1764,23 +1835,26 @@ class Projectile {
                 }
                 if (isHit) continue;
 
-                let minDist = u.stats.size + this.stats.size;
-                let dist = M.dist(this, u);
-                if (dist < minDist) {
-                    if (this.pierce > 0) {
-                        this.pierce -= 1;
-                        u.takeDamage(this.stats.damage);
-                        this.hitTargets.push(u);
-                    } else {
-                        if (this.stats.aoeStats) {
-                            aoes.push(new AOE(this.x, this.y, this.stats.aoeStats, this.team));
-                        } else {
-                            u.takeDamage(this.stats.damage);
-                        }
-                        this.dead = true;
+                if (this.stats.width) {
+                    let x = -this.stats.width / 2 + this.x;
+                    let y = this.stats.height / 2 + this.y;
+
+                    let closestX = Math.max(x, Math.min(u.x, x + this.stats.width));
+                    let closestY = Math.max(y, Math.min(u.y, y + this.stats.height));
+
+                    //let dist = M.dist(u.x - closestX, u.y - closestY);
+                    let dx = u.x - closestX;
+                    let dy = u.y - closestY;
+
+                    if (Math.sqrt(dx * dx + dy * dy)  <= u.stats.size) {
+                        console.log('Collided');
+                        this.damage(u);
                     }
-                    if (this.stats.knockback && u.knockbackVel) {
-                        u.applyKnockback(this.direction, this.stats.knockback);
+                } else {
+                    let minDist = u.stats.size + this.stats.size;
+                    let dist = M.dist(this, u);
+                    if (dist < minDist) {
+                        this.damage(u);
                     }
                 }
             }
@@ -1797,6 +1871,24 @@ class Projectile {
             }
         }
         
+    }
+
+    damage(u) {
+        if (this.pierce > 0) {
+            this.pierce -= 1;
+            u.takeDamage(this.stats.damage);
+            this.hitTargets.push(u);
+        } else {
+            if (this.stats.aoeStats) {
+                aoes.push(new AOE(this.x, this.y, this.stats.aoeStats, this.team));
+            } else {
+                u.takeDamage(this.stats.damage);
+            }
+            this.dead = true;
+        }
+        if (this.stats.knockback && u.knockbackVel) {
+            u.applyKnockback(this.direction, this.stats.knockback);
+        }
     }
 }
 
@@ -1887,6 +1979,7 @@ function spawnUnit(x, y, index, team) {
     }
 
     let spawnThree = ['Skeletons', 'Minions', 'Goblin Barrel', 'Guards'];
+    let spawnAOE = ['Fireball', 'Arrows', 'Freeze', 'Rage'];
 
     updateElixirUI();
     if (stats.name == 'Archers' || stats.name == 'Wall Breakers') {
@@ -1898,18 +1991,27 @@ function spawnUnit(x, y, index, team) {
         entities.push(new UnitEntity(x - 10, y, team, stats));
     } else if (stats.name == 'Skeleton Army') {
         for (let i = 0; i < 15; i++) {
-            entities.push(new UnitEntity(x + i, y + i, team, stats));
+            entities.push(new UnitEntity(x + i, y, team, stats));
         }
     } else if (stats.name == 'Minion Horde') {
         for (let i = 0; i < 6; i++) {
-            entities.push(new UnitEntity(x + i, y + i, team, stats));
+            entities.push(new UnitEntity(x + i, y, team, stats));
         }
-    } else if (stats.name == 'Bats') {
-        for (let i = 0; i < 5; i++) {
-            entities.push(new UnitEntity(x + i, y + i, team, stats));
+    } else if (stats.name == 'Bats' || stats.name == 'Barbarians') {
+        entities.push(new UnitEntity(x + 30, y, team, stats));
+        entities.push(new UnitEntity(x - 30, y, team, stats));
+        entities.push(new UnitEntity(x, y + 30, team, stats));
+        entities.push(new UnitEntity(x - 20, y - 20, team, stats));
+        entities.push(new UnitEntity(x + 20, y - 20, team, stats));
+    } else if (stats.name == 'Royal Recruits') {
+        for (let i = 0; i < 6; i++) {
+            entities.push(new UnitEntity(x - c.width / 2 + (c.width / 6 * i), y, team, stats));
         }
-    } else if (stats.name == 'Fireball' || stats.name == 'Arrows' || stats.name == 'Freeze' || stats.name == 'Rage') {
+    } else if (spawnAOE.includes(stats.name)) {
         aoes.push(new AOE(x, y, stats, team));
+    } else if (stats.name == 'Log') {
+        let dir = (team == 'player') ? {x: 0, y: -1} : {x: 0, y: 1};
+        projectiles.push(new Projectile(x, y, stats, dir, team));
     } else {
         entities.push(new UnitEntity(x, y, team, stats));
     }
