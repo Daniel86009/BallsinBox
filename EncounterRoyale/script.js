@@ -46,7 +46,8 @@ let game = {
     enemyStartElixir: 5,
     playerElixirMult: 1,
     playerStartElixir: 5,
-    randomiseEnemyUnits: true
+    randomiseEnemyUnits: true,
+    randomisePlayerUnits: false
 };
 
 let debug = {
@@ -1356,8 +1357,13 @@ class UnitEntity extends Entity {
 
         let dist = M.dist(this.x, this.y, this.target.x, this.target.y);
         let hasDash = this.stats.dashDamage || this.stats.dashAOEStats;
+        let canDash = hasDash 
+                    && dist > this.stats.dashRange.min + this.target.stats.size 
+                    && dist < this.stats.dashRange.max + this.target.stats.size 
+                    && this.target 
+                    && this.target.stats.type != 'waypoint';
 
-        if (hasDash && dist > this.stats.dashRange.min  + this.target.stats.size && dist < this.stats.dashRange.max + this.target.stats.size && this.target && this.target.stats.type) {
+        if (canDash) {
             if (this.dashTime < 100) {
                 this.dashTime = 1000 + this.stats.dashPauseTime;
                 this.dashPauseTime = this.stats.dashPauseTime;
@@ -2058,6 +2064,7 @@ function reset() {
     updateElixirUI();
 
     if (game.randomiseEnemyUnits) randomiseEnemyUnits();
+    if (game.randomisePlayerUnits) randomisePlayerUnits();
 
     let playerUnitsArr = Object.keys(playerUnits);
     let enemyUnitsArr = Object.keys(enemyUnits);
@@ -2097,6 +2104,19 @@ function randomiseEnemyUnits() {
         let u = units[unitsArr[index]];
 
         enemyUnits['unit' + (i+1)] = u;
+
+        unitsArr.splice(index, 1);
+    }
+}
+
+function randomisePlayerUnits() {
+    let unitsArr = Object.keys(units);
+
+    for (let i = 0; i < 8; i++) {
+        let index = Math.floor(Math.random() * unitsArr.length);
+        let u = units[unitsArr[index]];
+
+        playerUnits['unit' + (i+1)] = u;
 
         unitsArr.splice(index, 1);
     }
