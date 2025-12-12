@@ -14,9 +14,14 @@ toggleButton.addEventListener('click', () => {
     toggleButton.textContent = b ? 'Switch to Dark Mode' : 'Switch to Light Mode';
 });
 
+//Crown display
+const totalCrownDisplay = document.getElementById('totalCrownDisplay');
+totalCrownDisplay.innerHTML = `${localStorage.crowns || 0} 👑`;
+
 //Change card size on mobile
 if (window.innerWidth < 800) {
     const cards = document.getElementsByClassName('card');
+    const nextCard = document.getElementById('nextCard');
     const c = document.getElementById('c');
 
     for (let i = 0; i < cards.length; i++) {
@@ -24,6 +29,10 @@ if (window.innerWidth < 800) {
         cards[i].style.height = '62px';
         cards[i].style.fontSize = '7px';
     }
+
+    nextCard.style.width = '25px';
+    nextCard.style.height = '31px';
+    nextCard.style.fontSize = '3.5px';
 
     c.style.width = `${window.innerWidth - 10}px`;
     c.style.height = `${window.innerHeight - 120}px`;

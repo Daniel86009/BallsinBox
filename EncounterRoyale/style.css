@@ -57,23 +57,28 @@ body {
 }
 
 #gameoverMessage {
-    font-size: 3rem; /* text-5xl ≈ 3rem */
+    font-size: 3rem;
     font-weight: 700;
-    margin-bottom: 1.5rem; /* mb-6 */
+    margin-bottom: 0;
     color: var(--text-color);
 }
 
+#newCrownDisplay {
+    color: var(--text-color);
+    display: none;
+}
+
 #restartButton {
-    padding: 0.75rem 1.5rem; /* py-3 px-6 */
-    background-color: #059669; /* emerald-600 */
-    border-radius: 0.5rem; /* rounded-lg */
-    font-size: 1.5rem; /* text-2xl */
+    padding: 0.75rem 1.5rem;
+    background-color: #059669;
+    border-radius: 0.5rem;
+    font-size: 1.5rem;
     font-weight: 600;
     transition: background-color 150ms;
 }
 
 #restartButton:hover {
-    background-color: #047857; /* emerald-700 */
+    background-color: #047857;
 }
 
 #chosenCards {
@@ -173,7 +178,7 @@ button {
     border: 1px solid var(--card-border);
     padding: 8px 12px;
     border-radius: 6px;
-    position: absolute;
+    position: fixed;
     top: 10px;
     left: 10px;
     cursor: pointer;
@@ -197,10 +202,32 @@ button {
     color: var(--text-color);
 }
 
+#totalCrownDisplay {
+    margin: 0;
+    position: fixed;
+    top: 10px;
+    left: 140px;
+    color: white;
+    z-index: 52;
+    font-size: 25px;
+}
+
 #optionsMenuInner h3 {
     margin-top: 0;
 }
 
 #optionsMenuInner input[type="range"] {
     width: 100%;
+}
+
+#cardUI {
+    justify-content: space-between;
+}
+
+#nextCard {
+    position: relative;
+    width: 50px;
+    height: 61px;
+    font-size: 7px;
+    bottom: -40px;
 }

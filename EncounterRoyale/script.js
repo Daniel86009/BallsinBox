@@ -1,19 +1,20 @@
 /*
 ToDo:
--Fix bridge collision
 -Improve AI
     -Add spell support
--Add options menu
--Add more units and buildings
-    -E-Spirit
-    -Tesla
-    -Log
--Better mobile support
--Improve Pathfinding
+    -Make more responsive
+-Add more units, buildings and spells
+    -Tornado
 -Add proper icons
+-Add better visuals and particle effects
+-Add next card display
+-Add deploy time
+-Add first attack time
+-Add total crown score
 */
 
 //1 range ≈ 24
+//x = cos(anle) y = sin(angle)
 
 const c = document.getElementById('c');
 const ctx = c.getContext('2d');
@@ -38,7 +39,8 @@ let game = {
     river: c.height / 2,
     riverWidth: 50,
     bridgeWidth: 100,
-    deployMaxY: 10,
+    deployMaxY: 0,
+    deployMaxY2: -175,
     princessY: 170,
     kingY: 80,
     team: 'player',
@@ -64,7 +66,8 @@ const aoeStats = {
         damage: 179,
         lifetime: 5500,
         shrink: false,
-        rageBoost: 1.3
+        rageBoost: 1.3,
+        ctDamage: 54
     },
     valkyrieAOE: {
         radius: 60,
@@ -122,6 +125,100 @@ const aoeStats = {
     golemiteDeathAOE: {
         radius: 60,
         damage: 99
+    },
+    skeletonDragonAOE: {
+        radius: 45,
+        damage: 161
+    },
+    bombTowerBombAOE: {
+        radius: 72,
+        damage: 222
+    },
+    bombTowerAOE: {
+        radius: 36,
+        damage: 222
+    },
+    royalGhostAOE: {
+        radius: 26,
+        damage: 261,
+        target: 'ground'
+    },
+    princessAOE: {
+        radius: 50,
+        damage: 168
+    },
+    babyDragonAOE: {
+        radius: 36,
+        damage: 161
+    },
+    darkPrinceAOE: {
+        radius: 26,
+        damage: 266,
+        target: 'ground'
+    },
+    darkPrinceChargeAOE: {
+        radius: 26,
+        damage: 532,
+        target: 'ground'
+    },
+    bomberAOE: {
+        radius: 36,
+        damage: 225
+    },
+    eWizardSpawnAOE: {
+        radius: 72,
+        damage: 192,
+        stunDuration: 500
+    },
+    battleHealerSpawnAOE: {
+        radius: 60,
+        damage: 0,
+        heal: 202
+    },
+    battleHealerAOE: {
+        radius: 96,
+        damage: 0,
+        heal: 102
+    },
+    wizardAOE: {
+        radius: 36,
+        damage: 281
+    },
+    mortarAOE: {
+        radius: 48,
+        damage: 266,
+        target: 'ground'
+    },
+    skeletonBarrelDeathAOE: {
+        radius: 48,
+        damage: 145
+    },
+    eGiantAOE: {
+        radius: 72,
+        damage: 192,
+        stunDuration: 500,
+        ctDamage: 128
+    },
+    healSpiritAOE: {
+        radius: 36,
+        damage: 110
+    },
+    healSpiritHealAOE: {
+        radius: 60,
+        damage: 0,
+        heal: 401
+    },
+    iceWizardAOE: {
+        radius: 36,
+        damage: 89,
+        slowDuration: 2500,
+        slowAmount: 0.7
+    },
+    iceWizardSpawnAOE: {
+        radius: 72,
+        damage: 84,
+        slowDuration: 1000,
+        slowAmount: 0.7
     }
 };
 
@@ -139,13 +236,15 @@ const projectileStats = {
         size: 15,
         aoeStats: aoeStats.fireSpiritAOE,
         colour: '#ff9100ff',
-        distance: 90
+        distance: 90,
+        aoeOnDeath: true
     },
     iceSpirit: {
         size: 15,
         aoeStats: aoeStats.iceSpiritAOE,
         colour: '#00fafeff',
-        distance: 90
+        distance: 90,
+        aoeOnDeath: true
     },
     dartGoblinDart: {
         damage: 156,
@@ -194,6 +293,120 @@ const projectileStats = {
     musketeerBullet: {
         damage: 217,
         speed: 16
+    },
+    skeletonDragonFireBall: {
+        aoeStats: aoeStats.skeletonDragonAOE,
+        colour: '#ff8400ff',
+        size: 8,
+        speed: 9,
+        aoeOnDeath: true
+    },
+    spearGoblinSpear: {
+        damage: 81
+    },
+    eSpiritLightning: {
+        damage: 99,
+        type: 'lightning',
+        stunDuration: 500,
+        chainAmount: 9,
+        range: 100
+    },
+    eDragonLightning: {
+        damage: 192,
+        type: 'lightning',
+        stunDuration: 500,
+        chainAmount: 3,
+        range: 70
+    },
+    xBowBullet: {
+        damage: 43,
+        speed: 16,
+        size: 4,
+        distance: 300
+    },
+    bombTowerBullet: {
+        aoeStats: aoeStats.bombTowerAOE,
+        size: 10
+    },
+    princessArrows: {
+        aoeStats: aoeStats.princessAOE,
+        distance: 250
+    },
+    babyDragonFire: {
+        colour: '#ff8800da',
+        aoeStats: aoeStats.babyDragonAOE,
+        size: 10
+    },
+    bomberBomb: {
+        aoeStats: aoeStats.babyDragonAOE,
+        speed: 8,
+        size: 10,
+        aoeOnDeath: true
+    },
+    eWizardLightning: {
+        damage: 230,
+        type: 'lightning',
+        stunDuration: 500,
+        chainAmount: 1,
+        range: 1
+    },
+    motherWitchBullet: {
+        damage: 133,
+        speed: 12,
+        pigCurseDuration: 5000,
+        colour: '#bf00ffff'
+    },
+    wizardFireball: {
+        aoeStats: aoeStats.wizardAOE,
+        colour: '#ff8800da',
+        size: 10
+    },
+    mortarRock: {
+        aoeStats: aoeStats.mortarAOE,
+        colour: '#a0a0a0',
+        size: 13,
+        speed: 6,
+        lifetime: 9999,
+        distance: 300,
+        aoeOnDeath: true
+    },
+    teslaLightning: {
+        damage: 220,
+        type: 'lightning',
+        chainAmount: 1,
+        range: 1
+    },
+    healSpirit: {
+        size: 15,
+        aoeStats: aoeStats.healSpiritAOE,
+        aoeStats2: aoeStats.healSpiritHealAOE,
+        colour: '#ffdd00e2',
+        distance: 90,
+        aoeOnDeath: true
+    },
+    iceWizardBullet: {
+        aoeStats: aoeStats.iceWizardAOE,
+        colour: '#00fbffa6',
+        size: 8,
+        speed: 14
+    },
+    firecrackerBullet: {
+        damage: 64,
+        size: 10,
+        distance: 144,
+        colour: '#ff00f2ff',
+        speed: 11,
+        splitNumber: 5,
+        splitSpread: Math.PI / 4,
+        splitStats: {damage: 64, size: 8, distance: 120, colour: '#7e4100ff', pierce: 9999, targetPriority: 'all'}
+    },
+    eGiantZap: {
+        damage: 192,
+        stunDuration: 500,
+        type: 'lightning',
+        ctDamage: 128,
+        chainAmount: 1,
+        range: 1
     }
 };
 
@@ -274,6 +487,72 @@ const otherUnits = {
         lifetime: 5500,
         shrink: false,
         rageBoost: 1.3
+    },
+    bombTowerBomb: {
+        name: 'Bomb Tower Bomb',
+        symbol: '💣',
+        hp: 3000,
+        deathAOEStats: aoeStats.bombTowerBombAOE,
+        attackSpeed: 2000,
+        range: 20,
+        viewRange: 150,
+        size: 15,
+        speed: 0,
+        targetPriority: 'ground',
+        type: 'bomb',
+        hpLostPerSecond: 400
+    },
+    barbarian: {
+        name: 'Barbarian',
+        symbol: '😡',
+        hp: 670,
+        damage: 192,
+        attackSpeed: 1300,
+        range: 25,
+        viewRange: 150,
+        size: 20,
+        speed: 1,
+        targetPriority: 'ground',
+        type: 'unit'
+    },
+    cursedPig: {
+        name: 'Cursed Pig',
+        symbol: '🐷',
+        hp: 629,
+        damage: 53,
+        attackSpeed: 1200,
+        range: 25,
+        viewRange: 150,
+        size: 20,
+        speed: 1.7,
+        targetPriority: 'buildings',
+        type: 'unit'
+    },
+    bushGoblin: {
+        name: 'Bush Goblin',
+        symbol: '🌲',
+        hp: 304,
+        damage: 256,
+        attackSpeed: 1400,
+        range: 20,
+        viewRange: 150,
+        size: 15,
+        speed: 1.4,
+        targetPriority: 'ground',
+        type: 'unit'
+    },
+    goblin: {
+        name: 'Goblin',
+        symbol: '🤢',
+        hp: 202,
+        damage: 120,
+        attackSpeed: 1100,
+        range: 20,
+        viewRange: 150,
+        size: 18,
+        speed: 1.7,
+        targetPriority: 'ground',
+        type: 'spell'
     }
 };
 
@@ -288,7 +567,7 @@ const units = {
         range: 30,
         viewRange: 150,
         size: 25,
-        speed: 1.0,
+        speed: 1,
         targetPriority: 'ground',
         type: 'unit'
     },
@@ -303,6 +582,7 @@ const units = {
         viewRange: 150,
         size: 20,
         speed: 1.0,
+        count: 2,
         targetPriority: 'all',
         type: 'unit'
     },
@@ -314,7 +594,7 @@ const units = {
         damage: 253, 
         attackSpeed: 1500, 
         range: 35, 
-        viewRange: 150,
+        viewRange: 175,
         size: 30,
         speed: 0.7, 
         targetPriority: 'buildings', 
@@ -331,6 +611,7 @@ const units = {
         viewRange: 150,
         size: 15,
         speed: 1.4,
+        count: 3,
         targetPriority: 'ground',
         type: 'unit'
     },
@@ -345,6 +626,7 @@ const units = {
         viewRange: 150,
         size: 15,
         speed: 1.4,
+        count: 15,
         targetPriority: 'ground',
         type: 'unit'
     },
@@ -353,9 +635,9 @@ const units = {
         symbol: '☄️',
         cost: 4,
         type: 'spell',
-        radius: 70,
+        radius: 60,
         damage: 688,
-        lifetime: 250
+        ctDamage: 207
     },
     arrows: {
         name: 'Arrows',
@@ -364,7 +646,8 @@ const units = {
         type: 'spell',
         radius: 120,
         damage: 366,
-        lifetime: 500
+        lifetime: 500,
+        ctDamage: 93
     },
     rage: {
         name: 'Rage',
@@ -375,7 +658,40 @@ const units = {
         damage: 179,
         lifetime: 4500,
         shrink: false,
-        rageBoost: 1.3
+        rageBoost: 1.3,
+        ctDamage: 54
+    },
+    zap: {
+        name: 'Zap',
+        symbol: '🌩️',
+        cost: 2,
+        type: 'spell',
+        radius: 60,
+        damage: 192,
+        lifetime: 500,
+        stunDuration: 500,
+        ctDamage: 58
+    },
+    rocket: {
+        name: 'Rocket',
+        symbol: '🚀',
+        cost: 6,
+        type: 'spell',
+        radius: 48,
+        damage: 1484,
+        ctDamage: 371
+    },
+    snowball: {
+        name: 'Giant Snowball',
+        symbol: '❅',
+        cost: 2,
+        type: 'spell',
+        radius: 60,
+        damage: 179,
+        slowDuration: 3000,
+        slowAmount: 0.7,
+        ctDamage: 54,
+        knockback: 4
     },
     valkyrie: {
         name: 'Valkyrie',
@@ -415,7 +731,7 @@ const units = {
         range: 30,
         viewRange: 150,
         size: 25,
-        speed: 0.8,
+        speed: 1,
         targetPriority: 'ground',
         type: 'unit'
     },
@@ -440,15 +756,15 @@ const units = {
         name: 'Goblin Barrel',
         symbol: '🤢',
         cost: 3,
-        hp: 202,
-        damage: 120,
-        attackSpeed: 1100,
-        range: 20,
-        viewRange: 150,
-        size: 15,
-        speed: 1.7,
-        targetPriority: 'ground',
-        type: 'spell'
+        type: 'spell',
+        damage: 0,
+        distance: 9999,
+        size: 20,
+        speed: 4,
+        colour: '#b16800ff',
+        lifetime: 9999,
+        deathSpawnStats: otherUnits.goblin,
+        deathSpawnNum: 3 
     },
     fireSpirit: {
         name: 'Fire Spirit',
@@ -473,7 +789,7 @@ const units = {
         damage: 816,
         attackSpeed: 1800,
         range: 35,
-        viewRange: 150,
+        viewRange: 175,
         size: 30,
         speed: 0.8,
         targetPriority: 'ground',
@@ -519,6 +835,7 @@ const units = {
         viewRange: 150,
         size: 15,
         speed: 1.5,
+        count: 3,
         targetPriority: 'all',
         type: 'flying'
     },
@@ -533,6 +850,7 @@ const units = {
         viewRange: 150,
         size: 15,
         speed: 1.5,
+        count: 6,
         targetPriority: 'all',
         type: 'flying'
     },
@@ -561,7 +879,7 @@ const units = {
         deathSpawnStats: otherUnits.golemite,
         attackSpeed: 2500,
         range: 40,
-        viewRange: 150,
+        viewRange: 175,
         size: 35,
         speed: 0.5,
         targetPriority: 'buildings',
@@ -578,6 +896,7 @@ const units = {
         viewRange: 150,
         size: 15,
         speed: 2,
+        count: 2,
         targetPriority: 'buildings',
         type: 'unit',
         aoeStats: aoeStats.wallBreakerAOE
@@ -592,7 +911,7 @@ const units = {
         deathSpawnStats: otherUnits.lavaPup,
         attackSpeed: 1300,
         range: 75,
-        viewRange: 150,
+        viewRange: 175,
         size: 30,
         speed: 0.7,
         targetPriority: 'buildings',
@@ -622,7 +941,8 @@ const units = {
         damage: 115,
         lifetime: 4000,
         freezeDuration: 4000,
-        shrink: false
+        shrink: false,
+        canHitHidden: true
     },
     witch: {
         name: 'Witch',
@@ -649,7 +969,7 @@ const units = {
         projectileStats: projectileStats.royalGiantBullet,
         attackSpeed: 1700, 
         range: 120, 
-        viewRange: 150,
+        viewRange: 175,
         size: 30,
         speed: 0.7, 
         targetPriority: 'buildings', 
@@ -703,6 +1023,7 @@ const units = {
         viewRange: 150,
         size: 15,
         speed: 1.7,
+        count: 5,
         targetPriority: 'all',
         type: 'flying'
     },
@@ -762,7 +1083,6 @@ const units = {
         damage: 391,
         chargeDamage: 783,
         chargeSpeed: 1.7,
-        chargeCooldown: 1000,
         chargeTriggerDistance: 60,
         attackSpeed: 1400,
         range: 40,
@@ -779,8 +1099,8 @@ const units = {
         hp: 529,
         projectileStats: projectileStats.mArcherArrow,
         attackSpeed: 1100,
-        range: 190,
-        viewRange: 190,
+        range: 156,
+        viewRange: 160,
         size: 20,
         speed: 1.0,
         targetPriority: 'all',
@@ -812,6 +1132,7 @@ const units = {
         viewRange: 150,
         size: 15,
         speed: 1.4,
+        count: 3,
         targetPriority: 'ground',
         type: 'unit'
     },
@@ -825,8 +1146,9 @@ const units = {
         attackSpeed: 1300,
         range: 35,
         viewRange: 150,
-        size: 25,
+        size: 22,
         speed: 1.4,
+        count: 6,
         targetPriority: 'ground',
         type: 'unit'
     },
@@ -840,7 +1162,8 @@ const units = {
         range: 25,
         viewRange: 150,
         size: 20,
-        speed: 1.0,
+        speed: 1,
+        count: 5,
         targetPriority: 'ground',
         type: 'unit'
     },
@@ -857,8 +1180,9 @@ const units = {
         knockback: 4,
         targetPriority: 'ground',
         speed: 1.5,
-        colour: '#b16800ff',
-        lifetime: 99999
+        colour: '#b16800',
+        lifetime: 9999,
+        ctDamage: 40
     },
     musketeer: {
         name: 'Musketeer',
@@ -873,6 +1197,523 @@ const units = {
         speed: 1.0,
         targetPriority: 'all',
         type: 'unit'
+    },
+    eBarbarians: {
+        name: 'Elite Barbarians',
+        symbol: '🗡️',
+        cost: 6,
+        hp: 1341,
+        damage: 384,
+        attackSpeed: 1400,
+        range: 25,
+        viewRange: 150,
+        size: 20,
+        speed: 1.4,
+        count: 2,
+        targetPriority: 'ground',
+        type: 'unit'
+    },
+    skeletonDragons: {
+        name: 'Skeleton Dragons',
+        symbol: '🦎',
+        cost: 4,
+        hp: 560,
+        projectileStats: projectileStats.skeletonDragonFireBall,
+        attackSpeed: 1900,
+        range: 84,
+        viewRange: 150,
+        size: 20,
+        speed: 1.7,
+        count: 2,
+        targetPriority: 'all',
+        type: 'flying'
+    },
+    spearGoblins: {
+        name: 'Spear Goblins',
+        symbol: '👺',
+        cost: 2,
+        hp: 133,
+        projectileStats: projectileStats.spearGoblinSpear,
+        attackSpeed: 1700,
+        range: 120,
+        viewRange: 150,
+        size: 18,
+        speed: 1.7,
+        count: 3,
+        targetPriority: 'all',
+        type: 'unit'
+    },
+    goblins: {
+        name: 'Goblins',
+        symbol: '🤢',
+        cost: 2,
+        hp: 202,
+        damage: 120,
+        attackSpeed: 1100,
+        range: 23,
+        viewRange: 150,
+        size: 18,
+        speed: 1.7,
+        count: 4,
+        targetPriority: 'ground',
+        type: 'unit'
+    },
+    eSpirit: {
+        name: 'Electro Spirit',
+        symbol: '⚡️',
+        cost: 1,
+        hp: 230,
+        projectileStats: projectileStats.eSpiritLightning,
+        attackSpeed: 2000,
+        range: 60,
+        viewRange: 150,
+        size: 15,
+        speed: 1.7,
+        targetPriority: 'all',
+        type: 'unit',
+        dieOnAttack: true
+    },
+    eDragon: {
+        name: 'Electro Dragon',
+        symbol: '🎸',
+        cost: 5,
+        hp: 949,
+        projectileStats: projectileStats.eDragonLightning,
+        attackSpeed: 2100,
+        range: 84,
+        viewRange: 150,
+        size: 25,
+        speed: 1,
+        targetPriority: 'all',
+        type: 'flying'
+    },
+    iDragon: {
+        name: 'Inferno Dragon',
+        symbol: '🐲',
+        cost: 4,
+        hp: 1295,
+        beamDamage: [35, 120, 422],
+        damageStageTime: 2000,
+        attackSpeed: 400,
+        range: 84,
+        viewRange: 150,
+        size: 25,
+        speed: 1,
+        targetPriority: 'all',
+        type: 'flying'
+    },
+    xBow: {
+        name: 'X-Bow',
+        symbol: '💘',
+        cost: 6,
+        hp: 1600,
+        projectileStats: projectileStats.xBowBullet,
+        attackSpeed: 300,
+        range: 276,
+        viewRange: 276,
+        size: 25,
+        speed: 0,
+        targetPriority: 'all',
+        type: 'building',
+        hpLostPerSecond: 27.4
+    },
+    infernoTower: {
+        name: 'Inferno Tower',
+        symbol: '💥',
+        cost: 5,
+        hp: 1748,
+        beamDamage: [43, 158, 847],
+        damageStageTime: 2000,
+        attackSpeed: 400,
+        range: 144,
+        viewRange: 150,
+        size: 25,
+        speed: 0,
+        targetPriority: 'all',
+        type: 'building'
+    },
+    bombTower: {
+        name: 'Bomb Tower',
+        symbol: '🧯',
+        cost: 4,
+        hp: 1356,
+        projectileStats: projectileStats.bombTowerBullet,
+        deathSpawnNum: 1,
+        deathSpawnStats: otherUnits.bombTowerBomb,
+        attackSpeed: 1800,
+        range: 144,
+        viewRange: 150,
+        size: 25,
+        speed: 0,
+        targetPriority: 'all',
+        type: 'building'
+    },
+    royalGhost: {
+        name: 'Royal Ghost',
+        symbol: '👻',
+        cost: 3,
+        hp: 1210,
+        aoeStats: aoeStats.royalGhostAOE,
+        attackSpeed: 1800,
+        range: 30,
+        viewRange: 150,
+        size: 25,
+        speed: 1.4,
+        targetPriority: 'ground',
+        type: 'unit',
+        invisTime: 1800,
+        spawnInvis: true
+    },
+    princess: {
+        name: 'Princess',
+        symbol: '🎉',
+        cost: 3,
+        hp: 261,
+        projectileStats: projectileStats.princessArrows,
+        attackSpeed: 3000,
+        range: 216,
+        viewRange: 216,
+        size: 20,
+        speed: 1.0,
+        targetPriority: 'all',
+        type: 'unit'
+    },
+    babyDragon: {
+        name: 'Baby Dragon',
+        symbol: '🐉',
+        cost: 4,
+        hp: 1152,
+        projectileStats: projectileStats.babyDragonFire,
+        attackSpeed: 1500,
+        range: 84,
+        viewRange: 150,
+        size: 20,
+        speed: 1.4,
+        targetPriority: 'all',
+        type: 'flying'
+    },
+    darkPrince: {
+        name: 'Dark Prince',
+        symbol: '🪻',
+        cost: 4,
+        hp: 1200,
+        sheildHP: 240,
+        aoeStats: aoeStats.darkPrinceAOE,
+        chargeAOEStats: aoeStats.darkPrinceAOE,
+        chargeSpeed: 1.7,
+        chargeTriggerDistance: 60,
+        attackSpeed: 1300,
+        range: 40,
+        viewRange: 150,
+        size: 25,
+        speed: 1.0,
+        targetPriority: 'ground',
+        type: 'unit'
+    },
+    beserker: {
+        name: 'Beserker',
+        symbol: '👧',
+        cost: 2,
+        hp: 896,
+        damage: 102,
+        attackSpeed: 600,
+        range: 25,
+        viewRange: 150,
+        size: 20,
+        speed: 1.4,
+        targetPriority: 'ground',
+        type: 'unit'
+    },
+    miner: {
+        name: 'Miner',
+        symbol: '🪏',
+        cost: 3,
+        hp: 1210,
+        damage: 194,
+        attackSpeed: 1300,
+        range: 40,
+        viewRange: 150,
+        size: 22,
+        speed: 1.4,
+        targetPriority: 'ground',
+        type: 'spell'
+    },
+    battleRam: {
+        name: 'Battle Ram',
+        symbol: '🐏',
+        cost: 4,
+        hp: 967,
+        damage: 286,
+        deathSpawnNum: 2,
+        deathSpawnStats: otherUnits.barbarian,
+        chargeDamage: 573,
+        chargeSpeed: 1.7,
+        chargeTriggerDistance: 60,
+        attackSpeed: 9999,
+        range: 30,
+        viewRange: 150,
+        size: 25,
+        speed: 1,
+        targetPriority: 'buildings',
+        type: 'unit',
+        dieOnAttack: true
+    },
+    bomber: {
+        name: 'Bomber',
+        symbol: '💣',
+        cost: 2,
+        hp: 304,
+        projectileStats: projectileStats.bomberBomb,
+        attackSpeed: 1800,
+        range: 108,
+        viewRange: 150,
+        size: 20,
+        speed: 1,
+        targetPriority: 'all',
+        type: 'unit'
+    },
+    royalHogs: {
+        name: 'Royal Hogs',
+        symbol: '🐷',
+        cost: 5,
+        hp: 837,
+        damage: 74,
+        attackSpeed: 1200,
+        range: 25,
+        viewRange: 150,
+        size: 20,
+        speed: 1.7,
+        count: 4,
+        targetPriority: 'buildings',
+        type: 'unit'
+    },
+    eWizard: {
+        name: 'Electro Wizard',
+        symbol: '🔌',
+        cost: 4,
+        hp: 714,
+        projectileStats: projectileStats.eWizardLightning,
+        attackSpeed: 1800,
+        range: 120,
+        viewRange: 150,
+        size: 20,
+        speed: 1.4,
+        targetPriority: 'all',
+        type: 'unit',
+        spawnAOEStats: aoeStats.eWizardSpawnAOE
+    },
+    goblinGang: {
+        name: 'Goblin Gang',
+        cost: 3,
+        symbol: '🤢👺'
+    },
+    barbarianBarrel: {
+        name: 'Barbarian Barrel',
+        symbol: '🛢️',
+        cost: 2,
+        type: 'unit',
+        pierce: 9999,
+        width: 70,
+        height: 40,
+        damage: 240,
+        distance: 150,
+        targetPriority: 'ground',
+        speed: 2,
+        colour: '#b16800ff',
+        lifetime: 99999,
+        deathSpawnStats: otherUnits.barbarian
+    },
+    motherWitch: {
+        name: 'Mother Witch',
+        symbol: '🧙‍♀️',
+        cost: 4,
+        hp: 529,
+        projectileStats: projectileStats.motherWitchBullet,
+        attackSpeed: 900,
+        range: 132,
+        viewRange: 150,
+        size: 20,
+        speed: 1.0,
+        targetPriority: 'all',
+        type: 'unit'
+    },
+    battleHealer: {
+        name: 'Battle Healer',
+        symbol: '❤️‍🩹',
+        cost: 4,
+        hp: 1717,
+        damage: 148,
+        attackAOE: aoeStats.battleHealerAOE,
+        attackSpeed: 1500,
+        range: 38,
+        viewRange: 150,
+        size: 25,
+        speed: 1,
+        targetPriority: 'ground',
+        type: 'unit',
+        spawnAOEStats: aoeStats.battleHealerSpawnAOE
+    },
+    wizard: {
+        name: 'Wizard',
+        symbol: '🪄',
+        cost: 5,
+        hp: 755,
+        projectileStats: projectileStats.wizardFireball,
+        attackSpeed: 1400,
+        range: 132,
+        viewRange: 150,
+        size: 20,
+        speed: 1,
+        targetPriority: 'all',
+        type: 'unit'
+    },
+    mortar: {
+        name: 'Mortar',
+        symbol: '🪨',
+        cost: 4,
+        hp: 1369,
+        projectileStats: projectileStats.mortarRock,
+        attackSpeed: 5000,
+        range: {min: 84, max: 276},
+        viewRange: {min: 84, max: 276},
+        size: 25,
+        speed: 0,
+        targetPriority: 'ground',
+        type: 'building',
+        hpLostPerSecond: 45.6
+    },
+    tesla: {
+        name: 'Tesla',
+        symbol: '🧂',
+        cost: 4,
+        hp: 1152,
+        projectileStats: projectileStats.teslaLightning,
+        attackSpeed: 1100,
+        range: 132,
+        viewRange: 132,
+        size: 25,
+        speed: 0,
+        targetPriority: 'all',
+        type: 'building',
+        hpLostPerSecond: 38.4,
+        canHide: true
+    },
+    skeletonBarrel: {
+        name: 'Skeleton Barrel',
+        symbol: '🛢️',
+        cost: 3,
+        hp: 532,
+        damage: 312,
+        deathAOEStats: aoeStats.golemDeathAOE,
+        deathSpawnNum: 7,
+        deathSpawnStats: otherUnits.skeleton,
+        attackSpeed: 2500,
+        range: 26,
+        viewRange: 175,
+        size: 22,
+        speed: 1.4,
+        targetPriority: 'buildings',
+        type: 'flying',
+        dieOnAttack: true
+    },
+    eGiant: {
+        name: 'Electro Giant', 
+        symbol: '💪🏿',
+        cost: 7, 
+        hp: 3855, 
+        damage: 163,
+        reflectedStats: projectileStats.eGiantZap,
+        reflectionRadius: 72,
+        attackSpeed: 2100, 
+        range: 35, 
+        viewRange: 175,
+        size: 30,
+        speed: 0.7, 
+        targetPriority: 'buildings', 
+        type: 'unit'
+    },
+    healSpirit: {
+        name: 'Heal Spirit',
+        symbol: '✚',
+        cost: 1,
+        hp: 230,
+        projectileStats: projectileStats.healSpirit,
+        attackSpeed: 2000,
+        range: 60,
+        viewRange: 150,
+        size: 15,
+        speed: 1.7,
+        targetPriority: 'all',
+        type: 'unit',
+        dieOnAttack: true
+    },
+    iceWizard: {
+        name: 'Ice Wizard',
+        symbol: '🥶',
+        cost: 3,
+        hp: 688,
+        projectileStats: projectileStats.iceWizardBullet,
+        attackSpeed: 1700,
+        range: 132,
+        viewRange: 150,
+        size: 20,
+        speed: 1,
+        targetPriority: 'all',
+        type: 'unit',
+        spawnAOEStats: aoeStats.iceWizardSpawnAOE
+    },
+    firecracker: {
+        name: 'Firecracker',
+        symbol: '🎉',
+        cost: 3,
+        hp: 304,
+        projectileStats: projectileStats.firecrackerBullet,
+        attackSpeed: 3000,
+        range: 144,
+        viewRange: 150,
+        size: 20,
+        speed: 1.4,
+        targetPriority: 'all',
+        type: 'unit',
+        recoil: 4
+    },
+    suspiciousBush: {
+        name: 'Suspicious Bush',
+        symbol: '🌳',
+        cost: 2,
+        hp: 81,
+        damage: 0,
+        deathSpawnNum: 2,
+        deathSpawnStats: otherUnits.bushGoblin,
+        attackSpeed: 2000,
+        range: 30,
+        viewRange: 150,
+        size: 22,
+        speed: 1,
+        targetPriority: 'buildings',
+        type: 'unit',
+        invisTime: 1,
+        spawnInvis: true,
+        dieOnAttack: true
+    },
+    tombstone: {
+        name: 'Tombstone',
+        symbol: '🪦',
+        cost: 3,
+        hp: 529,
+        damage: 0,
+        supportSpawnNum: 2,
+        supportSpawnSpeed: 3500,
+        supportStats: otherUnits.skeleton,
+        deathSpawnNum: 4,
+        deathSpawnStats: otherUnits.skeleton,
+        range: 132,
+        viewRange: 150,
+        size: 25,
+        speed: 0,
+        targetPriority: 'ground',
+        type: 'building',
+        hpLostPerSecond: 17.6
     }
 };
 
@@ -887,7 +1728,7 @@ const playerUnits = {
     unit8: units.miniPekka
 };
 
-const enemyUnits = {
+/*const enemyUnits = {
     unit1: units.knight,
     unit2: units.archers,
     unit3: units.megaKnight,
@@ -896,6 +1737,17 @@ const enemyUnits = {
     unit6: units.witch,
     unit7: units.bandit,
     unit8: units.minions
+};*/
+
+const enemyUnits = {
+    unit1: units.goblinBarrel,
+    unit2: units.goblinBarrel,
+    unit3: units.goblinBarrel,
+    unit4: units.goblinBarrel,
+    unit5: units.goblinBarrel,
+    unit6: units.goblinBarrel,
+    unit7: units.goblinBarrel,
+    unit8: units.goblinBarrel
 };
 
 const towers = {
@@ -941,12 +1793,19 @@ let runAIIntervalID = null;
 let timerIntervalID = null;
 
 let playerKingActivated = false;
+let playerTowerDead = {left: false, right: false, king: false};
+
 let enemyKingActivated = false;
+let enemyTowerDead = {left: false, right: false, king: false};
 
 let gameFinished = false;
 
 let timePassed = 0;
+let timeLeft = 120;
+let overtimeLeft = 180;
 let elixirMult = 1;
+
+let crowns = Number(localStorage.crowns) || 0;
 
 function start() {
     document.addEventListener('mousemove', (e) => {
@@ -1029,7 +1888,20 @@ function update() {
         let p = projectiles[i];
 
         p.draw();
-        if (p.dead) projectiles.splice(i, 1);
+        if (p.dead) {
+            let y = p.stats.height ? p.y + p.stats.height : p.y;
+            if (p.stats.deathSpawnStats) {
+                if (p.stats.deathSpawnNum == 3) {
+                    entities.push(new UnitEntity(p.x + 10, y, p.team, p.stats.deathSpawnStats));
+                    entities.push(new UnitEntity(p.x, y + 10, p.team, p.stats.deathSpawnStats));
+                    entities.push(new UnitEntity(p.x - 10, y, p.team, p.stats.deathSpawnStats));
+                } else {
+                    entities.push(new UnitEntity(p.x, y, p.team, p.stats.deathSpawnStats));
+                }
+            }
+            if (p.stats.splitStats) p.split();
+            projectiles.splice(i, 1);
+        }
         else p.update();
     }
 
@@ -1038,7 +1910,11 @@ function update() {
         
         if (e.dead) {
             if (e.stats) {
-                if (e.stats.name == 'king') gameover(e.team);
+                if (e.stats.name == 'king') {
+                    if (e.team == 'player') playerTowerDead = {left: true, right: true, king: true};
+                    else enemyTowerDead = {left: true, right: true, king: true};
+                    gameover(e.team);
+                }
 
                 if (e.stats.deathAOEStats) {
                     aoes.push(new AOE(e.x, e.y, e.stats.deathAOEStats, e.team));
@@ -1052,12 +1928,17 @@ function update() {
                 if (e.stats.name == 'princess') {
                     if (e.team == 'player') {
                         playerKingActivated = true;
-                        console.log('Player king tower acitvated');
+                        (e.x < c.width / 2) ? playerTowerDead.left = true : playerTowerDead.right = true;
                     } else {
                         enemyKingActivated = true;
-                        console.log('Enemy king tower acitvated');
+                        (e.x < c.width / 2) ? enemyTowerDead.left = true : enemyTowerDead.right = true;
                     }
                 }
+            }
+
+            if (e.pigCurseTime > 0) {
+                let team = (e.team == 'player') ? 'enemy' : 'player';
+                entities.push(new UnitEntity(e.x, e.y, team, otherUnits.cursedPig));
             }
 
             entities.splice(i, 1);
@@ -1087,23 +1968,59 @@ function update() {
     }
 
     if (mouse.selection != -1) {
-        ctx.beginPath();
+        let stats = playerUnits[playerHand[mouse.selection]];
+
+        let x = mouse.x;
+        let y = mouse.y;
+
+        if (stats.type != 'spell') {
+            let newPos = findMax(x, y);
+            if (newPos.x) x = newPos.x;
+            if (newPos.y) y = newPos.y;
+        }
+
         ctx.lineWidth = 1;
-        ctx.strokeStyle = 'black';
-        ctx.arc(mouse.x, mouse.y, 10, 0, 2 * Math.PI);
-        ctx.stroke();
+        ctx.fillStyle = '#a5a5a574';
+
+        if (stats.range) {
+            if (stats.range.max) {
+                ctx.beginPath();
+                ctx.arc(x, y, stats.range.max, 0, 2 * Math.PI);
+                ctx.fill();
+            } else {
+                ctx.beginPath();
+                ctx.arc(x, y, stats.range, 0, 2 * Math.PI);
+                ctx.fill();
+            }
+        }
+        
+        if (stats.width) {
+            ctx.beginPath();
+            ctx.fillRect(x - stats.width / 2, y - stats.distance, stats.width, stats.distance + stats.height / 2);
+            ctx.fill();
+        }
+
+        if (stats.type == 'spell' && !stats.hp && !stats.width) {
+            ctx.beginPath();
+            ctx.arc(x, y, stats.radius, 0, 2 * Math.PI);
+            ctx.fill();
+        }
+
+        if (stats.spawnAOEStats) {
+            ctx.beginPath();
+            ctx.strokeStyle = '#ff0000';
+            ctx.lineWidth = 3;
+            ctx.arc(x, y, stats.spawnAOEStats.radius, 0, 2 * Math.PI);
+            ctx.stroke();
+        }
+
+        ctx.beginPath();
+        ctx.fillStyle = '#000000';
+        ctx.arc(x, y, 5, 0, 2 * Math.PI);
+        ctx.fill();
     }
 
-    if (timePassed > 120) elixirMult = 2;
-    if (timePassed > 240) elixirMult = 3;
-
-    ctx.fillStyle = '#000';
-    ctx.font = '20px Arial';
-    ctx.textAlign = 'left';
-    ctx.fillText(`${Math.round(timePassed)}s`, 10, 10);
-
-    ctx.textAlign = 'right';
-    ctx.fillText(`${elixirMult}x`, c.width - 10, 10);
+    runGameTime();
 
     window.requestAnimationFrame(update);
 }
@@ -1122,9 +2039,17 @@ class Entity {
         this.slowTime = 0;
         this.slowAmount = 1;
         this.rageBoost = 1;
-        this.supportSpawnCooldown = this.stats.supportSpawnSpeed / 3;
+        this.stunTime = 0;
+        this.supportSpawnCooldown = this.stats.supportSpawnSpeed / 4;
         this.charging = false;
+        this.isAttacking = false;
+        this.attackTime = 0;
+        this.nonAttackTime = 0;
+        this.invisible = false;
+        this.hidden = false;
+        this.pigCurseTime = 0;
 
+        if (stats.spawnInvis) this.invisible = true;
         if (!stats) this.dead = true;
     }
 
@@ -1137,26 +2062,54 @@ class Entity {
             ctx.fill();
         }
 
+        if (this.stats.reflectionRadius) {
+            ctx.beginPath();
+            ctx.fillStyle = (this.team == 'player') ? '#00e1ff3c' : '#b900003c';
+            ctx.arc(this.x, this.y, this.stats.reflectionRadius, 0, 2 * Math.PI);
+            ctx.fill();
+        }
+
         //Circle
-        ctx.fillStyle = this.team == 'player' ? '#3845ffa1' : '#ff4343a1';
+        let opacity = this.invisible ? '30' : 'a1';
+        ctx.fillStyle = (this.team == 'player') ? ('#3845ff' + opacity) : ('#ff4343' + opacity);
         ctx.beginPath();
-        ctx.arc(this.x, this.y, this.stats.size, 0, 2*Math.PI);
+        ctx.arc(this.x, this.y, this.stats.size, 0, 2 * Math.PI);
         ctx.fill();
 
         //Symbol
-        ctx.fillStyle = '#ffffff';
+        ctx.fillStyle = this.invisible ? '#ffffff63' : '#ffffff';
         ctx.font = `${this.stats.size + 5}px Arial`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(this.stats.symbol, this.x, this.y);
 
-        //Heathbar outer
-        ctx.fillStyle = '#000000';
-        ctx.fillRect(this.x - this.stats.size, this.y + this.stats.size + 3, this.stats.size * 2, 10);
+        
 
-        //Healthbar inner
-        ctx.fillStyle = '#009607ff';
-        ctx.fillRect(this.x - this.stats.size + 2, this.y + this.stats.size + 5, (this.stats.size * (this.hp / this.stats.hp) * 2)- 4, 6);
+        //Draw crown tower hp
+        if (this.stats.name == 'king' || this.stats.name == 'princess') {
+            //Heathbar outer
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(this.x - this.stats.size, this.y + this.stats.size + 3, this.stats.size * 2, 15);
+
+            //Healthbar inner
+            ctx.fillStyle = '#009607ff';
+            ctx.fillRect(this.x - this.stats.size + 2, this.y + this.stats.size + 5, (this.stats.size * (this.hp / this.stats.hp) * 2)- 4, 11);
+
+            //Health Number
+            ctx.fillStyle = (this.team == 'player') ? '#3845ff' : '#fa1d1dff';
+            ctx.font = 'bold 14px Arial';
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'top';
+            ctx.fillText(Math.round(this.hp).toString(), this.x - this.stats.size + 2, this.y + this.stats.size + 4);
+        } else {
+            //Heathbar outer
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(this.x - this.stats.size, this.y + this.stats.size + 3, this.stats.size * 2, 10);
+
+            //Healthbar inner
+            ctx.fillStyle = '#009607ff';
+            ctx.fillRect(this.x - this.stats.size + 2, this.y + this.stats.size + 5, (this.stats.size * (this.hp / this.stats.hp) * 2)- 4, 6);
+        }
 
         //Draw shield
         if (this.sheildHP > 1) {
@@ -1164,23 +2117,22 @@ class Entity {
             ctx.fillRect(this.x - this.stats.size + 2, this.y + this.stats.size + 5, (this.stats.size * (this.sheildHP / this.stats.sheildHP) * 2)- 4, 6);
         }
         
-
         //Draw if frozen
         if (this.freezeTime > 1) {
             ctx.beginPath();
-            ctx.fillStyle = '#3fdfff93'
+            ctx.fillStyle = '#3fdfff93';
             ctx.arc(this.x, this.y, this.stats.size, 0, 2*Math.PI);
             ctx.fill();
         } else if (this.slowTime > 1) {
             ctx.beginPath();
-            ctx.fillStyle = '#3fdfff35'
+            ctx.fillStyle = '#3fdfff35';
             ctx.arc(this.x, this.y, this.stats.size, 0, 2*Math.PI);
             ctx.fill();
         } 
         //Draw if rage boosted
         else if (this.rageBoost > 1) {
             ctx.beginPath();
-            ctx.fillStyle = '#e600ff93'
+            ctx.fillStyle = '#e600ff93';
             ctx.arc(this.x, this.y, this.stats.size, 0, 2*Math.PI);
             ctx.fill();
         }
@@ -1189,8 +2141,45 @@ class Entity {
         if (this.charging) {
             ctx.beginPath();
             ctx.fillStyle = '#fbff0055';
-            ctx.arc(this.x, this.y, this.stats.size, 0, 2*Math.PI);
+            ctx.arc(this.x, this.y, this.stats.size, 0, 2 * Math.PI);
             ctx.fill();
+        }
+
+        //Draw pig curse
+        if (this.pigCurseTime > 1) {
+            ctx.beginPath();
+            ctx.fillStyle = '#fb00ff55';
+            ctx.arc(this.x, this.y, this.stats.size, 0, 2 * Math.PI);
+            ctx.fill();
+        }
+
+        if (this.hidden) {
+            ctx.beginPath();
+            ctx.fillStyle = '#b16800';
+            ctx.arc(this.x, this.y, this.stats.size, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.strokeStyle = '#623900ff';
+            ctx.moveTo(this.x, this.y - this.stats.size);
+            ctx.lineTo(this.x, this.y + this.stats.size);
+            ctx.stroke();
+        }
+
+        //Draw beam
+        if (this.stats.beamDamage && this.isAttacking) {
+            ctx.beginPath();
+            ctx.lineWidth = 5;
+            ctx.strokeStyle = '#ffa200ff';
+            ctx.moveTo(this.x, this.y);
+            ctx.lineTo(this.target.x, this.target.y);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#ff0000ff';
+            ctx.moveTo(this.x, this.y);
+            ctx.lineTo(this.target.x, this.target.y);
+            ctx.stroke();
         }
 
 
@@ -1227,10 +2216,10 @@ class Entity {
         }
     }
 
-    takeDamage(amount) {
+    takeDamage(amount, e = null) {
         if (this.sheildHP > 0) {
             this.sheildHP -= amount;
-            if (Number.isNaN(this.sheildHP)) console.log(amount);
+            if (Number.isNaN(this.sheildHP)) console.error('Damage is NaN. Unit: ', e);
             return;
         }
 
@@ -1238,18 +2227,50 @@ class Entity {
             this.dead = true;
         } else {
             this.hp -= amount;
-            if (Number.isNaN(this.hp)) console.log(amount);
+            if (Number.isNaN(this.hp)) console.error('Damage is NaN. Unit: ', e);
+        }
+
+        if (this.stats.reflectedStats && e) {
+            let dist = M.dist(this, e);
+            if (dist - e.stats.size < this.stats.reflectionRadius) {
+                projectiles.push(new ChainLighning(e.x, e.y, this.x, this.y, this.stats.reflectedStats, this.team, e, this));
+            }
+        }
+    }
+
+    heal(amount) {
+        if (this.stats.name == 'princess' || this.stats.name == 'king') return;
+        if (amount + this.hp < this.stats.hp) {
+            this.hp += amount;
+        } else {
+            this.hp = this.stats.hp;
         }
     }
 
     attack(target) {
         if (target && this.attackCooldown < 1) {
-            if (this.charging) {
-                target.takeDamage(this.stats.chargeDamage);
+            if (this.stats.beamDamage) {
+                if (this.attackTime < this.stats.damageStageTime) {
+                    target.takeDamage(this.stats.beamDamage[0], this);
+                } else if (this.attackTime < this.stats.damageStageTime) {
+                    target.takeDamage(this.stats.beamDamage[1], this);
+                } else {
+                    target.takeDamage(this.stats.beamDamage[2], this);
+                }
+                
             } else {
-                target.takeDamage(this.stats.damage);
+                if (this.charging) {
+                    target.takeDamage(this.stats.chargeDamage, this);
+                } else {
+                    target.takeDamage(this.stats.damage, this);
+                }
             }
 
+            if (this.stats.attackAOE) {
+                aoes.push(new AOE(this.x, this.y, this.stats.attackAOE, this.team));
+            }
+
+            this.attackTime += this.stats.attackSpeed;
             this.attackCooldown = this.stats.attackSpeed;
         }
     }
@@ -1259,7 +2280,7 @@ class Entity {
             if (this.stats.name == 'Wall Breakers') {
                 aoes.push(new AOE(this.target.x, this.target.y, stats, this.team));
                 this.dead = true;
-            } else if (this.stats.name == 'Witch' || (this.stats.name == 'Mega Knight' && stats.id == 'attack')) {
+            } else if ((this.stats.name == 'Mega Knight' && stats.id == 'attack') || this.stats.name == 'Royal Ghost' || this.stats.name == 'Dark Prince') {
                 aoes.push(new AOE(this.target.x, this.target.y, stats, this.team));
                 this.attackCooldown = this.stats.attackSpeed;
             } else {
@@ -1273,34 +2294,54 @@ class Entity {
         let dir = M.normalise(target.x - this.x, target.y - this.y);
 
         if (this.attackCooldown < 1) {
-            if (this.stats.projectileStats.targetPriority == 'all' || this.stats.projectileStats.targetPriority == 'ground') {
-                projectiles.push(new Projectile(this.x, this.y, this.stats.projectileStats, dir, this.team));
+            if (this.stats.projectileStats.type == 'lightning') {
+                projectiles.push(new ChainLighning(this.target.x, this.target.y, this.x, this.y, this.stats.projectileStats, this.team, 'all', this));
             } else {
-                projectiles.push(new Projectile(this.x, this.y, this.stats.projectileStats, dir, this.team, this.target));
+                if (this.stats.projectileStats.targetPriority == 'all' || this.stats.projectileStats.targetPriority == 'ground') {
+                    projectiles.push(new Projectile(this.x, this.y, this.stats.projectileStats, dir, this.team, 'all', this));
+                } else {
+                    projectiles.push(new Projectile(this.x, this.y, this.stats.projectileStats, dir, this.team, this.target, this));
+                }
             }
+
+            if (this.stats.recoil && this.knockbackVel) {
+                this.knockbackVel.x -= dir.x * this.stats.recoil;
+                this.knockbackVel.y -= dir.y * this.stats.recoil;
+            }
+
             this.attackCooldown = this.stats.attackSpeed;
         }
     }
 
     spawnSupport() {
         if (this.supportSpawnCooldown < 1) {
-            if (this.stats.name == 'Witch') {
+            if (this.stats.supportSpawnNum == 4) {
                 entities.push(new UnitEntity(this.x + 50, this.y, this.team, this.stats.supportStats));
                 entities.push(new UnitEntity(this.x - 50, this.y, this.team, this.stats.supportStats));
                 entities.push(new UnitEntity(this.x, this.y + 50, this.team, this.stats.supportStats));
                 entities.push(new UnitEntity(this.x, this.y - 50, this.team, this.stats.supportStats));
-                this.supportSpawnCooldown = this.stats.supportSpawnSpeed;
+            } else if (this.stats.supportSpawnNum == 2) {
+                entities.push(new UnitEntity(this.x, this.y, this.team, this.stats.supportStats));
+                entities.push(new UnitEntity(this.x, this.y, this.team, this.stats.supportStats));
             }
+
+            this.supportSpawnCooldown = this.stats.supportSpawnSpeed;
         }
     }
 
-    isAttackingTarget() {
-        if (!this.target || this.target.dead) return false;
+    checkRageBoost() {
+        let isBoosted = false;
+        for (let i = 0; i < aoes.length; i++) {
+            let p = aoes[i];
 
-        let dist = M.dist(this.x, this.y, this.target.x, this.target.y);
-        let inRange = dist - this.target.stats.size <= this.stats.range;
+            if (!p.stats.rageBoost || p.team != this.team) continue;
 
-        return inRange || (this.attackCooldown > this.stats.attackSpeed * 0.1);
+            if (M.dist(this, p) < this.stats.size + p.stats.radius) {
+                isBoosted = true;
+                this.rageBoost = p.stats.rageBoost;
+            }
+        }
+        if (!isBoosted) this.rageBoost = 1;
     }
 }
 
@@ -1314,6 +2355,7 @@ class UnitEntity extends Entity {
         this.knockbackVel = {x: 0, y: 0};
 
         if (this.stats.spawnAOEStats) this.aoeAttack(this.x, this.y, this.stats.spawnAOEStats);
+        if (this.stats.spawnInvis) this.nonAttackTime = this.stats.invisTime;
     }
 
     update() {
@@ -1322,8 +2364,22 @@ class UnitEntity extends Entity {
             return;
         }
 
-        if (this.attackCooldown > 0) this.attackCooldown -= 1000 / 60 * this.slowAmount * this.rageBoost;
-        if (this.supportSpawnCooldown > 0 && this.stats.supportSpawnSpeed) this.supportSpawnCooldown -= 1000 / 60 * this.slowAmount * this.rageBoost;
+        if (this.target && this.target.invisible) this.target = null;
+
+        if (!this.target || this.target.dead) {
+            this.attackTime = 0;
+            this.attacking = false;
+        }
+
+        if (this.stunTime > 0) {
+            this.stunTime -= 1000 / 60;
+            if (this.dashTime) this.dashTime = 0;
+            this.charging = false;
+            this.distance = 0;
+            this.attackTime = 0;
+            this.isAttacking = false;
+            return;
+        }
 
         if (this.slowTime > 0) this.slowTime -= 1000 / 60;
         else this.slowAmount = 1;
@@ -1332,12 +2388,24 @@ class UnitEntity extends Entity {
             if (this.dashTime) this.dashTime = 0;
             this.distance = 0;
             this.charging = false;
+            this.attackTime = 0;
+            this.isAttacking = false;
             return;
         }
+
+        if (!this.isAttacking) this.nonAttackTime += 1000 / 60;
+        if (this.stats.invisTime && this.nonAttackTime > this.stats.invisTime) this.invisible = true;
+        else this.invisible = false;
+
+        if (this.attackCooldown > 0) this.attackCooldown -= 1000 / 60 * this.slowAmount * this.rageBoost;
+        if (this.supportSpawnCooldown > 0 && this.stats.supportSpawnSpeed) this.supportSpawnCooldown -= 1000 / 60 * this.slowAmount * this.rageBoost;
+        if (this.pigCurseTime > 0) this.pigCurseTime -= 1000 / 60;
 
         if (this.stats.hpLostPerSecond) {
             this.takeDamage(this.stats.hpLostPerSecond / (1000 / 60) / 4);
         }
+
+        if (this.stats.type == 'bomb') return;
 
         //Apply knockback
         if (this.knockbackVel && (this.knockbackVel.x != 0 || this.knockbackVel.y != 0)) {
@@ -1345,6 +2413,9 @@ class UnitEntity extends Entity {
             this.y += this.knockbackVel.y;
             this.knockbackVel.x *= 0.9;
             this.knockbackVel.y *= 0.9;
+
+            this.charging = false;
+            this.distance = 0;
         }
 
         this.checkDash();
@@ -1355,6 +2426,9 @@ class UnitEntity extends Entity {
 
         if (!this.target) return;
 
+        let minRange = this.stats.range.min || 0;
+        let maxRange = this.stats.range.max || this.stats.range;
+
         let dist = M.dist(this.x, this.y, this.target.x, this.target.y);
         let hasDash = this.stats.dashDamage || this.stats.dashAOEStats;
         let canDash = hasDash 
@@ -1362,27 +2436,37 @@ class UnitEntity extends Entity {
                     && dist < this.stats.dashRange.max + this.target.stats.size 
                     && this.target 
                     && this.target.stats.type != 'waypoint';
+        let distCheck = false;
+        if (minRange > 0) distCheck = (dist - this.target.stats.size < maxRange && dist - this.target.stats.size > minRange);
+        else distCheck = dist - this.target.stats.size < maxRange;
 
         if (canDash) {
             if (this.dashTime < 100) {
                 this.dashTime = 1000 + this.stats.dashPauseTime;
                 this.dashPauseTime = this.stats.dashPauseTime;
             }
-        } else if (dist - this.target.stats.size < this.stats.range && this.target.stats.size > 0) {
+        } else if (distCheck && this.target.stats.size > 0) {
             if (this.stats.aoeStats) {
-                this.aoeAttack(this.x, this.y, this.stats.aoeStats);
+                if (this.charging) this.aoeAttack(this.x, this.y, this.stats.chargeAOEStats);
+                else this.aoeAttack(this.x, this.y, this.stats.aoeStats);
             } else if (this.stats.projectileStats) {
                 this.shoot(this.target);
-                if (this.stats.dieOnAttack) {
-                    this.dead = true;
-                    return;
-                }
+            } else if (this.stats.beamDamage) {
+                this.attack(this.target);
             } else {
                 this.attack(this.target);
             }
+            if (this.stats.dieOnAttack) {
+                this.dead = true;
+                return;
+            }
+            this.isAttacking = true;
             this.charging = false;
             this.distance = 0;
+            this.nonAttackTime = 0;
         } else {
+            this.isAttacking = false;
+            this.attackTime = 0;
             if (this.dashTime <= 1 && !this.charging) this.moveTowards(this.target);
         }
 
@@ -1391,25 +2475,23 @@ class UnitEntity extends Entity {
     }
 
     findTarget() {
-        if ((this.target && !this.target.dead && this.isAttackingTarget() && this.target.stats.type != 'waypoint')) {
-            let dist = M.dist(this.x, this.y, this.target.x, this.target.y);
-            if (dist <= this.stats.viewRange) {
-                return;
-            }
-        }
+        if (this.target && !this.target.dead && this.isAttacking && this.target.stats.type != 'waypoint') return;
 
         let minDist = Infinity;
         let closestEnemy = null;
         for (let i = 0; i < entities.length; i++) {
             let e = entities[i];
-            if (e.team == this.team) continue;
-            if (e.stats.type == 'bomb') continue;
+            if (e.team == this.team || e.stats.type == 'bomb' || e.invisible || e.hidden) continue;
 
-            let dist = M.dist(this.x, this.y, e.x, e.y);
+            let dist = M.dist(this.x, this.y, e.x, e.y) - e.stats.size;
 
-            if (e.stats.name == 'princess') dist += 40;
-
-            if (dist < minDist && dist < this.stats.viewRange) {
+            let minRange = this.stats.viewRange.min || 0;
+            let maxRange = this.stats.viewRange.max || this.stats.viewRange;
+            let check = false;
+            if (minRange > 0) check = (dist < minDist && dist < maxRange && dist > minRange);
+            else check = (dist < minDist && dist < maxRange);
+            
+            if (check) {
                 if (this.stats.targetPriority == 'buildings') {
                     if (e.stats.type == 'building') {
                         minDist = dist;
@@ -1432,8 +2514,10 @@ class UnitEntity extends Entity {
         }
 
         if (closestEnemy) {
+            this.hidden = false;
             this.target = closestEnemy;
         } else {
+            if (this.stats.canHide) this.hidden = true;
             let princessLeft = null;
             let princessRight = null;
             let king = null;
@@ -1453,11 +2537,6 @@ class UnitEntity extends Entity {
             let onLeft = this.x < c.width / 2;
             let princess = onLeft ? princessLeft : princessRight;
 
-            if (princess) {
-                this.target = princess;
-                return;
-            }
-
             let bridgeX = onLeft ? game.laneLeftX : game.laneRightX;
             let bridgeY = (this.team == 'player') ? game.river - game.riverWidth / 2 : game.river + game.riverWidth / 2;
 
@@ -1468,6 +2547,11 @@ class UnitEntity extends Entity {
                     this.target = {x: bridgeX, y: bridgeY, stats:{size: 0, type: 'waypoint'}};
                     return;
                 }
+            }
+
+            if (princess) {
+                this.target = princess;
+                return;
             }
 
             this.target = king;
@@ -1513,16 +2597,6 @@ class UnitEntity extends Entity {
                 let sepX = (dx / Math.sqrt(d2)) * o * c;
                 let sepY = (dy / Math.sqrt(d2)) * o * c;
 
-                /*if (obj.stats.type == 'building') {
-                    this.x += sepX;
-                    this.y += sepY;
-                } else {
-                    this.x += sepX / 2;
-                    this.y += sepY / 2;
-                    obj.x -= sepX / 2;
-                    obj.y -= sepY / 2;
-                }*/
-
                 this.x += sepX;
                 this.y += sepY;
             }
@@ -1560,14 +2634,17 @@ class UnitEntity extends Entity {
                 this.x < game.laneRightX + game.bridgeWidth / 2;
 
             if (!onLeftBridge && !onRightBridge) {
-                if (this.y > riverTop - this.stats.size && this.y < riverTop) {
+                if (this.y + this.stats.size > riverTop && this.y < riverTop) {
                     this.y = riverTop - this.stats.size;
                 }
-                if (this.y < riverBottom + this.stats.size && this.y > riverBottom) {
+                if (this.y - this.stats.size < riverBottom && this.y > riverBottom) {
                     this.y = riverBottom + this.stats.size;
                 }
+                if (!(this.y + this.stats.size < riverTop) && !(this.y - this.stats.size > riverBottom)) {
+                    this.y = this.y > game.river ? riverBottom + this.stats.size : riverTop - this.stats.size;
+                }
             }
-        }   
+        }
     }
 
     checkDash() {
@@ -1586,7 +2663,7 @@ class UnitEntity extends Entity {
                 if (this.stats.dashAOEStats) {
                     aoes.push(new AOE(this.x, this.y, this.stats.dashAOEStats, this.team));
                 } else {
-                    this.target.takeDamage(this.stats.dashDamage);
+                    this.target.takeDamage(this.stats.dashDamage, this);
                 }
                 this.dashTime = 0;
                 this.attackCooldown = this.stats.attackSpeed;
@@ -1605,21 +2682,6 @@ class UnitEntity extends Entity {
             this.charging = true;
             this.moveTowards(this.target, this.stats.chargeSpeed);
         }
-    }
-
-    checkRageBoost() {
-        let isBoosted = false;
-        for (let i = 0; i < aoes.length; i++) {
-            let p = aoes[i];
-
-            if (!p.stats.rageBoost || p.team != this.team) continue;
-
-            if (M.dist(this, p) < this.stats.size + p.stats.radius) {
-                isBoosted = true;
-                this.rageBoost = p.stats.rageBoost;
-            }
-        }
-        if (!isBoosted) this.rageBoost = 1;
     }
 
     applyKnockback(dir, amount) {
@@ -1641,19 +2703,33 @@ class TowerEntity extends Entity {
             return;
         }
 
-        if (this.attackCooldown > 0) {
-            this.attackCooldown -= 1000 / 60;
+        if (this.target && this.target.invisible) this.target = null;
+
+        if (this.stunTime > 0) {
+            this.stunTime -= 1000 / 60;
+            return;
         }
 
         if (this.slowTime > 0) this.slowTime -= 1000 / 60;
+        else this.slowAmount = 1;
         if (this.freezeTime > 0) {
             this.freezeTime -= 1000 / 60;
             return;
         } 
 
+        if (this.attackCooldown > 0) {
+            this.attackCooldown -= 1000 / 60 * this.slowAmount * this.rageBoost;
+        }
+
+        if (this.target && M.dist(this, this.target) + this.target.stats.size > this.stats.range) {
+            this.isAttacking = false;
+        }
+
+        this.checkRageBoost();
         this.findTarget();
 
         if (this.target) {
+            this.isAttacking = true;
             if (this.team == 'player') {
                 if (playerKingActivated || this.stats.name != 'king') this.shoot(this.target);
             } else {
@@ -1663,18 +2739,13 @@ class TowerEntity extends Entity {
     }
 
     findTarget() {
-        if (this.target && !this.target.dead && this.isAttackingTarget()) {
-            let dist = M.dist(this.x, this.y, this.target.x, this.target.y);
-            if (dist <= this.stats.viewRange) {
-                return;
-            }
-        }
+        if (this.target && !this.target.dead && this.isAttacking) return;
 
         let minDist = Infinity;
         let closestEnemy = null;
         for (let i = 0; i < entities.length; i++) {
             let e = entities[i];
-            if (e.team == this.team || e.stats.type == 'bomb') continue;
+            if (e.team == this.team || e.stats.type == 'bomb' || e.invisible || e.hidden) continue;
 
             let dist = M.dist(this.x, this.y, e.x, e.y);
 
@@ -1687,7 +2758,7 @@ class TowerEntity extends Entity {
         this.target = closestEnemy;
     }
 
-    takeDamage(amount) {
+    takeDamage(amount, e = null) {
         if (this.team == 'player') {
             if (!playerKingActivated && this.stats.name == 'king') playerKingActivated = true;
         } else {
@@ -1702,7 +2773,7 @@ class TowerEntity extends Entity {
 }
 
 class AOE {
-    constructor(x, y, stats, team) {
+    constructor(x, y, stats, team, owner = null) {
         this.x = x;
         this.y = y;
         this.stats = stats;
@@ -1712,6 +2783,7 @@ class AOE {
         this.team = team;
         this.dead = false;
         this.target = stats.target || 'all';
+        this.owner = owner;
 
         if (!this.stats.lifetime) this.stats.lifetime = 250;
 
@@ -1719,17 +2791,13 @@ class AOE {
     }
 
     draw() {
-        if (this.stats.rageBoost > 1) {
-            ctx.beginPath();
-            ctx.fillStyle = '#ff32f85d';
-            ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
-            ctx.fill();
-        } else {
-            ctx.beginPath();
-            ctx.fillStyle = this.team === 'player' ? '#00046f79' : '#ff840059';
-            ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI); 
-            ctx.fill();
-        }
+        ctx.beginPath();
+        if (this.stats.rageBoost > 1) ctx.fillStyle = '#ff32f85d';
+        else if (this.stats.freezeDuration > 1) ctx.fillStyle = '#00c8ffc5';
+        else if (this.stats.heal) ctx.fillStyle = '#30b40071';
+        else ctx.fillStyle = this.team === 'player' ? '#00046f79' : '#ff840059';
+        ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI); 
+        ctx.fill();
     }
 
     update() {
@@ -1747,29 +2815,42 @@ class AOE {
     aoeDamage() {
         for (let i = 0; i < entities.length; i++) {
             let e = entities[i];
-            if (e.team === this.team || e.stats.type === 'bomb') continue;
+            if (e.stats.type == 'bomb') continue;
+            if (e.hidden && !this.stats.canHitHidden) continue;
 
-            if (this.stats.target === 'ground' && e.stats.type === 'flying') continue;
+            if (this.stats.target == 'ground' && e.stats.type == 'flying') continue;
 
             let minDist = this.radius + e.stats.size;
 
             if (M.dist(this, e) < minDist) {
-                if (this.stats.freezeDuration)
-                    e.freezeTime += this.stats.freezeDuration;
+                if (e.team != this.team) {
+                    if (this.stats.freezeDuration) e.freezeTime += this.stats.freezeDuration;
 
-                if (this.stats.slowDuration) {
-                    e.slowTime += this.stats.slowDuration;
-                    e.slowAmount = this.stats.slowAmount;
+                    if (this.stats.slowDuration) {
+                        e.slowTime += this.stats.slowDuration;
+                        e.slowAmount = this.stats.slowAmount;
+                    }
+
+                    if (this.stats.stunDuration) e.stunTime += this.stats.stunDuration;
+
+                    if (this.stats.ctDamage && (e.stats.name == 'king' || e.stats.name == 'princess')) e.takeDamage(this.stats.ctDamage, this.owner);
+                    else e.takeDamage(this.stats.damage, this.owner);
+                    if (this.stats.stunDuration) e.stunTime = this.stats.stunDuration;
+
+                    if (this.stats.knockback && e.knockbackVel) {
+                        let dir = M.normalise(e.x - this.x, e.y - this.y);
+                        e.applyKnockback(dir, this.stats.knockback);
+                    }
+                } else {
+                    if (this.stats.heal) e.heal(this.stats.heal);
                 }
-
-                e.takeDamage(this.stats.damage);
             }
         }
     }
 }
 
 class Projectile {
-    constructor(x, y, stats, direction, team, target = 'all') {
+    constructor(x, y, stats, direction, team, target = 'all', owner = null) {
         this.x = x;
         this.y = y;
         this.stats = stats;
@@ -1781,6 +2862,7 @@ class Projectile {
         this.target = target;
         this.pierce = this.stats.pierce || 0;
         this.hitTargets = [];
+        this.owner = owner;
 
         if (!this.stats.size) this.stats.size = 5;
         if (!this.stats.speed) this.stats.speed = 10;
@@ -1807,9 +2889,14 @@ class Projectile {
     update() {
         if (this.lifetime > 0) {
             this.lifetime -= 1000 / 60;
-        } else this.dead = true;
+        } else {
+            this.dead = true;
+            if (this.stats.aoeOnDeath) aoes.push(new AOE(this.x, this.y, this.stats.aoeStats, this.team, this.owner));
+            return;
+        }
         if (this.distance > this.stats.distance) {
             this.dead = true;
+            if (this.stats.aoeOnDeath) aoes.push(new AOE(this.x, this.y, this.stats.aoeStats, this.team, this.owner));
             return;
         }
 
@@ -1829,6 +2916,7 @@ class Projectile {
                 let u = entities[i];
 
                 if (u.team == this.team || u.stats.type == 'bomb') continue;
+                if (u.hidden && !this.stats.canHitHidden) continue;
                 if (this.stats.targetPriority == 'ground' && u.stats.type == 'flying') continue;
                 if (this.stats.target == 'buildings' && (u.stats.type == 'unit' || u.stats.type == 'flying')) continue;
 
@@ -1853,7 +2941,6 @@ class Projectile {
                     let dy = u.y - closestY;
 
                     if (Math.sqrt(dx * dx + dy * dy)  <= u.stats.size) {
-                        console.log('Collided');
                         this.damage(u);
                     }
                 } else {
@@ -1865,35 +2952,146 @@ class Projectile {
                 }
             }
         } else {
-            let minDist = this.target.stats.size + this.stats.size;
+            let minDist = this.target.stats ? this.target.stats.size + this.stats.size : 10;
             let dist = M.dist(this, this.target);
             if (dist < minDist) {
                 if (this.stats.aoeStats) {
-                    aoes.push(new AOE(this.x, this.y, this.stats.aoeStats, this.team));
+                    aoes.push(new AOE(this.x, this.y, this.stats.aoeStats, this.team, this.owner));
+                    if (this.stats.aoeStats2) aoes.push(new AOE(this.x, this.y, this.stats.aoeStats2, this.team, this.owner));
                 } else {
-                    this.target.takeDamage(this.stats.damage);
+                    if (this.target.stats) this.damage(this.target);
                 }
                 this.dead = true;
             }
         }
-        
     }
 
     damage(u) {
+        if (this.stats.pigCurseDuration && u.stats.name != 'princess' && u.stats.name != 'king') {
+            u.pigCurseTime = this.stats.pigCurseDuration;
+        }
+
         if (this.pierce > 0) {
             this.pierce -= 1;
-            u.takeDamage(this.stats.damage);
+            if (this.stats.ctDamage && (u.stats.name == 'king' || u.stats.name == 'princess')) u.takeDamage(this.stats.ctDamage, this.owner);
+            else u.takeDamage(this.stats.damage, this.owner);
             this.hitTargets.push(u);
         } else {
             if (this.stats.aoeStats) {
                 aoes.push(new AOE(this.x, this.y, this.stats.aoeStats, this.team));
             } else {
-                u.takeDamage(this.stats.damage);
+                if (this.stats.ctDamage && (u.stats.name == 'king' || u.stats.name == 'princess')) u.takeDamage(this.stats.ctDamage, this.owner);
+                else u.takeDamage(this.stats.damage, this.owner);
             }
             this.dead = true;
         }
         if (this.stats.knockback && u.knockbackVel) {
             u.applyKnockback(this.direction, this.stats.knockback);
+        }
+    }
+
+    split() {
+        if (!this.stats.splitStats) return;
+
+        let angleBetween = this.stats.splitSpread / (this.stats.splitNumber - 1);
+        let currentAngle = Math.atan2(this.direction.y, this.direction.x);
+
+        for (let i = -this.stats.splitNumber / 2; i < this.stats.splitNumber / 2; i++) {
+            let newAngle = angleBetween * (i + 0.5);
+            let angle = currentAngle + newAngle;
+            let dir = {x: Math.cos(angle), y: Math.sin(angle)};
+
+            projectiles.push(new Projectile(this.x, this.y, this.stats.splitStats, dir, this.team, 'all', this.owner));
+        }
+    }
+}
+
+class ChainLighning {
+    constructor(x, y, ox, oy, stats, team, target = 'all', owner) {
+        this.x = x;
+        this.y = y;
+        this.ox = ox;
+        this.oy = oy;
+        this.stats = stats;
+        this.coolDown = 0;
+        this.chainsLeft = stats.chainAmount;
+        this.dead = false;
+        this.team = team;
+        this.target = target;
+        this.attacked = [];
+        this.owner = owner;
+    }
+
+    draw() {
+        ctx.beginPath();
+        ctx.lineWidth = 5;
+        ctx.strokeStyle = '#00e1ff';
+        ctx.moveTo(this.x, this.y);
+        ctx.lineTo(this.ox, this.oy);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#ffffff';
+        ctx.moveTo(this.x, this.y);
+        ctx.lineTo(this.ox, this.oy);
+        ctx.stroke();
+    }
+
+    update() {
+        if (this.coolDown > 0) {
+            this.coolDown -= 1000 / 60;
+            return;
+        }
+
+        let minDist = Infinity;
+        let closestEnemy = null;
+        for (let i = 0; i < entities.length; i++) {
+            let e = entities[i];
+            if (e.team == this.team) continue;
+            if (e.stats.type == 'bomb') continue;
+            if (this.attacked.includes(e)) continue;
+
+            let dist = M.dist(this.x, this.y, e.x, e.y);
+
+            if (dist < minDist && dist < this.stats.range) {
+                if (this.stats.targetPriority == 'buildings') {
+                    if (e.stats.type == 'building') {
+                        minDist = dist;
+                        closestEnemy = e;
+                    } else {
+                        continue;
+                    }
+                } else if (this.stats.targetPriority == 'ground') {
+                    if (e.stats.type != 'flying') {
+                        minDist = dist;
+                        closestEnemy = e;
+                    } else {
+                        continue;
+                    }
+                } else {
+                    minDist = dist;
+                    closestEnemy = e;
+                }
+            }
+        }
+
+        if (closestEnemy) {
+            if (this.chainsLeft != this.stats.chainAmount) {
+                this.ox = this.x;
+                this.oy = this.y;
+            }
+            this.x = closestEnemy.x;
+            this.y = closestEnemy.y;
+            this.attacked.push(closestEnemy);
+            closestEnemy.stunTime = this.stats.stunDuration;
+            if (this.stats.ctDamage && (closestEnemy.stats.name == 'king' || closestEnemy.stats.name == 'princess')) closestEnemy.takeDamage(this.stats.ctDamage, this.owner);
+            else closestEnemy.takeDamage(this.stats.damage, this.owner);
+            this.coolDown = 150;
+            if (this.chainsLeft > 1) this.chainsLeft--;
+            else this.dead = true;
+        } else {
+            this.dead = true;
         }
     }
 }
@@ -1937,6 +3135,11 @@ function runAI() {
     if (Math.random() < 0.5) return;
     let spawnPoints = [{x: c.width / 2, y: 300}, {x: game.laneLeftX, y: game.princessY + 50}, {x: game.laneRightX, y: game.princessY + 50}];
     let i = Math.floor(Math.random() * enemyHand.length);
+    let stats = enemyUnits[enemyHand[i]];
+
+    if (stats.name == 'Goblin Barrel') {
+        spawnPoints = [{x: game.laneLeftX, y: c.height - game.princessY}, {x: game.laneRightX, y: c.height - game.princessY}];
+    } 
 
     let spawnPoint = spawnPoints[Math.floor(Math.random() * spawnPoints.length)];
 
@@ -1944,8 +3147,10 @@ function runAI() {
 }
 
 function updateElixir() {
-    if (playerElixir < game.maxElixir) playerElixir += game.playerElixirMult * elixirMult;
-    if (enemyElixir < game.maxElixir) enemyElixir += game.enemyElixirMult * elixirMult;
+    if (playerElixir + game.playerElixirMult * elixirMult < game.maxElixir) playerElixir += game.playerElixirMult * elixirMult;
+    else if (game.playerElixirMult < 10) playerElixir = game.maxElixir;
+    if (enemyElixir + game.enemyElixirMult * elixirMult < game.maxElixir) enemyElixir += game.enemyElixirMult * elixirMult;
+    else enemyElixir = game.maxElixir;
 
     updateElixirUI();
 }
@@ -1972,7 +3177,11 @@ function spawnUnit(x, y, index, team) {
         playerHand[index] = playerCycles[0];
         playerCycles.splice(0, 1);
 
-        if (y < game.river + game.riverWidth + game.deployMaxY && stats.type != 'spell') y = game.river + game.riverWidth + game.deployMaxY;
+        if (stats.type != 'spell' || stats.width) {
+            let newPos = findMax(x, y);
+            if (newPos.x) x = newPos.x;
+            if (newPos.y) y = newPos.y;
+        }
     } else {
         stats = enemyUnits[enemyHand[index]];
 
@@ -1984,40 +3193,57 @@ function spawnUnit(x, y, index, team) {
         enemyCycles.splice(0, 1);
     }
 
-    let spawnThree = ['Skeletons', 'Minions', 'Goblin Barrel', 'Guards'];
-    let spawnAOE = ['Fireball', 'Arrows', 'Freeze', 'Rage'];
-
     updateElixirUI();
-    if (stats.name == 'Archers' || stats.name == 'Wall Breakers') {
+    if (stats.count == 2) {
         entities.push(new UnitEntity(x - 10, y, team, stats));
         entities.push(new UnitEntity(x + 10, y, team, stats));
-    } else if (spawnThree.includes(stats.name)) {
+    } else if (stats.count == 3) {
         entities.push(new UnitEntity(x + 10, y, team, stats));
         entities.push(new UnitEntity(x, y + 10, team, stats));
         entities.push(new UnitEntity(x - 10, y, team, stats));
-    } else if (stats.name == 'Skeleton Army') {
+    } else if (stats.count == 15) {
         for (let i = 0; i < 15; i++) {
             entities.push(new UnitEntity(x + i, y, team, stats));
         }
-    } else if (stats.name == 'Minion Horde') {
+    } else if (stats.name == 'Royal Recruits') {
+        for (let i = 0; i < 6; i++) {
+            entities.push(new UnitEntity(x - c.width / 2 + (c.width / 6 * i) + c.width / 12, y, team, stats));
+        }
+    } else if (stats.count == 6) {
         for (let i = 0; i < 6; i++) {
             entities.push(new UnitEntity(x + i, y, team, stats));
         }
-    } else if (stats.name == 'Bats' || stats.name == 'Barbarians') {
+    } else if (stats.count == 5) {
         entities.push(new UnitEntity(x + 30, y, team, stats));
         entities.push(new UnitEntity(x - 30, y, team, stats));
         entities.push(new UnitEntity(x, y + 30, team, stats));
         entities.push(new UnitEntity(x - 20, y - 20, team, stats));
         entities.push(new UnitEntity(x + 20, y - 20, team, stats));
-    } else if (stats.name == 'Royal Recruits') {
-        for (let i = 0; i < 6; i++) {
-            entities.push(new UnitEntity(x - c.width / 2 + (c.width / 6 * i), y, team, stats));
-        }
-    } else if (spawnAOE.includes(stats.name)) {
+    } else if (stats.count == 4) {
+        entities.push(new UnitEntity(x + 10, y + 10, team, stats));
+        entities.push(new UnitEntity(x - 10, y + 10, team, stats));
+        entities.push(new UnitEntity(x + 10, y - 10, team, stats));
+        entities.push(new UnitEntity(x - 10, y - 10, team, stats));
+    } else if (stats.type == 'spell' && !stats.hp && !stats.distance) {
         aoes.push(new AOE(x, y, stats, team));
-    } else if (stats.name == 'Log') {
+    } else if (stats.name == 'Log' || stats.name == 'Barbarian Barrel') {
         let dir = (team == 'player') ? {x: 0, y: -1} : {x: 0, y: 1};
         projectiles.push(new Projectile(x, y, stats, dir, team));
+    } else if (stats.name == 'Goblin Gang') {
+        let dir = (this.team == 'player') ? -10 : 10;
+        entities.push(new UnitEntity(x + 30, y - dir, team, units.goblins));
+        entities.push(new UnitEntity(x, y - dir * 2.5, team, units.goblins));
+        entities.push(new UnitEntity(x - 30, y - dir, team, units.goblins));
+        entities.push(new UnitEntity(x + 30, y + dir, team, units.spearGoblins));
+        entities.push(new UnitEntity(x, y + dir * 2.5, team, units.spearGoblins));
+        entities.push(new UnitEntity(x - 30, y + dir, team, units.spearGoblins));
+    } else if (stats.name == 'Goblin Barrel') {
+        let startX = c.width / 2;
+        let startY = (team == 'player') ? c.height - game.kingY : game.kingY;
+        let dir = {x: x - startX, y: y - startY};
+
+        dir = M.normalise(dir);
+        projectiles.push(new Projectile(startX, startY, stats, dir, team, {x: x, y: y}));
     } else {
         entities.push(new UnitEntity(x, y, team, stats));
     }
@@ -2038,14 +3264,19 @@ function gameover(loser) {
     gameoverScreen.style.opacity = '1';
 
     entities = [];
+    projectiles = [];
     aoes = [];
 
     mouse.selection = -1;
     timePassed = 0;
+    timeLeft = 120;
+    overtimeLeft = 180;
 
     clearInterval(elixirIntervalID);
     clearInterval(runAIIntervalID);
     clearInterval(timerIntervalID);
+
+    getCrowns();
 }
 
 function reset() {
@@ -2057,7 +3288,9 @@ function reset() {
     playerElixir = game.playerStartElixir;
     enemyElixir = game.enemyStartElixir;
     playerKingActivated = false;
+    playerTowerDead = {left: false, right: false, king: false};
     enemyKingActivated = false;
+    enemyTowerDead = {left: false, right: false, king: false};
 
     elixirMult = 1;
 
@@ -2078,6 +3311,11 @@ function reset() {
     M.shuffle(enemyDeck);
     enemyHand = enemyDeck.slice(0, 4);
     enemyCycles = enemyDeck.slice(4);
+
+    /*console.log('Enemy Units:');
+    for (let i = 0; i < enemyUnitsArr.length; i++) {
+        console.log(enemyUnits[enemyUnitsArr[i]].name);
+    }*/
 
     drawHandUI();
 
@@ -2148,6 +3386,18 @@ function drawHandUI() {
         cardElem.addEventListener('click', () => cardClick(cardElem, cardStats, i));
         cardBar.appendChild(cardElem);
     }
+
+    /*const nextCard = document.getElementById('nextCard');
+
+    let nextCardStats = playerUnits[playerCycles[0]];
+
+    if (nextCardStats) {
+        nextCard.innerHTML = `
+            <h2>${nextCardStats.symbol}</h2>
+            <div style="font-weight: 700;">${nextCardStats.name}</div>
+            <div style="font-weight: 700;">Cost: <span style="color: #df00df;">${nextCardStats.cost}</span></div>
+        `;
+    }*/
 }
 
 function cardClick(cardElem, cardStats, index) {
@@ -2187,13 +3437,49 @@ function drawMap() {
     ctx.fillRect(game.laneRightX - (game.bridgeWidth / 2), game.river - (game.riverWidth / 2), game.bridgeWidth, game.riverWidth);
     ctx.strokeRect(game.laneRightX - (game.bridgeWidth / 2), game.river - (game.riverWidth / 2), game.bridgeWidth, game.riverWidth);
 
-    //Draw no place area
+    //Draw no deploy area
     if (mouse.selection != -1 && playerUnits[playerHand[mouse.selection]].type != 'spell') {
         ctx.fillStyle = '#d700005c';
         ctx.strokeStyle = '#7f0000ff';
-        lineWidth = 4;
-        ctx.fillRect(0, 0, c.width, game.river + game.riverWidth + game.deployMaxY);
-        ctx.strokeRect(0, 0, c.width, game.river + game.riverWidth + game.deployMaxY);
+        ctx.lineWidth = 4;
+
+        if (enemyTowerDead.left && enemyTowerDead.right) {
+            ctx.fillRect(0, 0, c.width, game.river + (game.riverWidth / 2) + game.deployMaxY2);
+            ctx.strokeRect(0, 0, c.width, game.river + (game.riverWidth / 2) + game.deployMaxY2);
+        }
+        
+        if (enemyTowerDead.left && !enemyTowerDead.right) {
+            ctx.fillRect(0, 0, c.width, game.river + (game.riverWidth / 2) + game.deployMaxY2);
+            ctx.fillRect(c.width / 2, game.river + (game.riverWidth / 2) + game.deployMaxY2, c.width / 2, (game.river + (game.riverWidth / 2) + game.deployMaxY) - (game.river + (game.riverWidth / 2) + game.deployMaxY2));
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(c.width, 0);
+            ctx.lineTo(c.width, game.river + (game.riverWidth / 2) + game.deployMaxY);
+            ctx.lineTo(c.width / 2, game.river + (game.riverWidth / 2) + game.deployMaxY);
+            ctx.lineTo(c.width / 2, game.river + (game.riverWidth / 2) + game.deployMaxY2);
+            ctx.lineTo(0, game.river + (game.riverWidth / 2) + game.deployMaxY2);
+            ctx.lineTo(0, 0);
+            ctx.stroke();
+        }
+
+        if (!enemyTowerDead.left && enemyTowerDead.right) {
+            ctx.fillRect(0, 0, c.width, game.river + (game.riverWidth / 2) + game.deployMaxY2);
+            ctx.fillRect(0, game.river + (game.riverWidth / 2) + game.deployMaxY2, c.width / 2, (game.river + (game.riverWidth / 2) + game.deployMaxY) - (game.river + (game.riverWidth / 2) + game.deployMaxY2));
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(c.width, 0);
+            ctx.lineTo(c.width, game.river + (game.riverWidth / 2) + game.deployMaxY2);
+            ctx.lineTo(c.width / 2, game.river + (game.riverWidth / 2) + game.deployMaxY2);
+            ctx.lineTo(c.width / 2, game.river + (game.riverWidth / 2));
+            ctx.lineTo(0, game.river + (game.riverWidth / 2) + game.deployMaxY);
+            ctx.lineTo(0, 0);
+            ctx.stroke();
+        }
+
+        if (!enemyTowerDead.left && !enemyTowerDead.right) {
+            ctx.fillRect(0, 0, c.width, game.river + (game.riverWidth / 2) + game.deployMaxY);
+            ctx.strokeRect(0, 0, c.width, game.river + (game.riverWidth / 2) + game.deployMaxY);
+        }
     }
 }
 
@@ -2251,4 +3537,134 @@ function cardChoiceClick(cardElem, stats, inDeck, index) {
 function stepTimer() {
     let amount = 0.1;
     timePassed += amount;
+    if (timeLeft > 0) timeLeft -= amount;
+    else overtimeLeft -= amount;
+}
+
+function findMax(x, y) {
+    let nx = null;
+    let ny = null;
+
+    //Both Dead
+    if (enemyTowerDead.left && enemyTowerDead.right) {
+        if (y < game.river + (game.riverWidth / 2) + game.deployMaxY2) ny = game.river + (game.riverWidth / 2) + game.deployMaxY2;
+    }
+
+    //Both Alive
+    if (!enemyTowerDead.left && !enemyTowerDead.right) {
+        if (y < game.river + (game.riverWidth / 2) + game.deployMaxY) ny = game.river + (game.riverWidth / 2) + game.deployMaxY;
+    }
+
+    //Left Dead
+    if (enemyTowerDead.left && !enemyTowerDead.right) {
+        
+        if (x <= c.width / 2) {
+            //On dead side
+            if (y < game.river + (game.riverWidth / 2) + game.deployMaxY2) ny = game.river + (game.riverWidth / 2) + game.deployMaxY2;
+        } else {
+            let dx = 0;
+            let dy = 0;
+
+            dx = x - c.width / 2;
+            dy = game.river + (game.riverWidth / 2) + game.deployMaxY - y;
+
+            if (y < game.river + (game.riverWidth / 2) + game.deployMaxY2) {
+                nx = c.width / 2;
+                ny = game.river + (game.riverWidth / 2) + game.deployMaxY2;
+            } else {
+                if (dx < dy) {
+                    nx = c.width / 2;
+                } else {
+                    if (y < game.river + (game.riverWidth / 2) + game.deployMaxY) ny = game.river + (game.riverWidth / 2) + game.deployMaxY;
+                }
+            }
+        }
+    }
+
+    //Right Dead
+    if (!enemyTowerDead.left && enemyTowerDead.right) {
+        if (x >= c.width / 2) {
+            //On dead side
+            if (y < game.river + (game.riverWidth / 2) + game.deployMaxY2) ny = game.river + (game.riverWidth / 2) + game.deployMaxY2;
+        } else {
+            let dx = 0;
+            let dy = 0;
+
+            dx = c.width / 2 - x;
+            dy = game.river + (game.riverWidth / 2) + game.deployMaxY - y;
+
+            if (y < game.river + (game.riverWidth / 2) + game.deployMaxY2) {
+                nx = c.width / 2;
+                ny = game.river + (game.riverWidth / 2) + game.deployMaxY2;
+            } else {
+                if (dx < dy) {
+                    nx = c.width / 2;
+                } else {
+                    if (y < game.river + (game.riverWidth / 2) + game.deployMaxY) ny = game.river + (game.riverWidth / 2) + game.deployMaxY;
+                }
+            }
+        }
+    }
+
+    return {x: nx, y: ny};
+}
+
+function runGameTime() {
+    let playerTowersDestroyed = 0;
+    let enemyTowersDestroyed = 0;
+
+    if (enemyTowerDead.left) playerTowersDestroyed++;
+    if (enemyTowerDead.right) playerTowersDestroyed++;
+
+    if (playerTowerDead.left) enemyTowersDestroyed++;
+    if (playerTowerDead.right) enemyTowersDestroyed++;
+
+    let displayTime = timeLeft;
+    if (timeLeft <= 60) {
+        elixirMult = 2;
+    }
+    if (timeLeft <= 0) {
+        displayTime = overtimeLeft;
+        if (playerTowersDestroyed > enemyTowersDestroyed) gameover('enemy');
+        if (enemyTowersDestroyed > playerTowersDestroyed) gameover('player');
+    }
+    if (overtimeLeft <= 60) {
+        elixirMult = 3;
+    }
+
+    let minutes = displayTime / 60;
+    let seconds = displayTime - Math.floor(minutes) * 60;
+
+    ctx.fillStyle = (timeLeft <=0) ? '#ff2f00ff' : '#000';
+    ctx.font = '20px Arial';
+    ctx.textAlign = 'left';
+    if (Math.round(seconds) == 60 && minutes > 1) ctx.fillText(`2m 0s`, 10, 10);
+    else if (Math.floor(minutes) > 0) ctx.fillText(`${Math.floor(minutes)}m ${Math.round(seconds)}s`, 10, 10);
+    else ctx.fillText(`${Math.round(seconds)}s`, 10, 10);
+
+    ctx.textAlign = 'right';
+    ctx.fillText(`${elixirMult}x`, c.width - 10, 10);
+}
+
+function getCrowns() {
+    if (game.playerElixirMult > 1 || debug.pickSameCards || game.enemyElixirMult < 1) return;
+    const totalCrownDisplay = document.getElementById('totalCrownDisplay');
+    const newCrownDisplay = document.getElementById('newCrownDisplay');
+    totalCrownDisplay.innerHTML = `${localStorage.crowns || 0} 👑`;
+    let crownAmount = 3;
+
+    if (playerTowerDead.left) crownAmount--;
+    if (playerTowerDead.right) crownAmount--;
+    if (playerTowerDead.king) crownAmount--;
+    
+    if (enemyTowerDead.left) crownAmount++;
+    if (enemyTowerDead.right) crownAmount++;
+    if (enemyTowerDead.king) crownAmount++;
+
+    crowns += crownAmount;
+    localStorage.crowns = crowns;
+
+    totalCrownDisplay.innerHTML = `${localStorage.crowns || 0} 👑`;
+    newCrownDisplay.innerHTML = `+${crownAmount}👑`;
+    newCrownDisplay.style.display = 'block';
 }
