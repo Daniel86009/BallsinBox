@@ -7,9 +7,6 @@ ToDo:
     -Tornado
 -Add proper icons
 -Add better visuals and particle effects
--Add next card display
--Add deploy time
--Add first attack time
 */
 
 //1 range ≈ 24
@@ -30,7 +27,7 @@ const cardBar = document.getElementById('cardBar');
 const chosenCards = document.getElementById('chosenCards');
 const cardChoices = document.getElementById('cardChoices');
 
-let game = {
+const game = {
     maxElixir: 10,
     elixirRate: 2800,
     laneLeftX: c.width * 0.25,
@@ -51,7 +48,7 @@ let game = {
     randomisePlayerUnits: false
 };
 
-let debug = {
+const debug = {
     drawViewRange: false,
     drawRange: false,
     drawDash: false,
@@ -236,14 +233,16 @@ const projectileStats = {
         aoeStats: aoeStats.fireSpiritAOE,
         colour: '#ff9100ff',
         distance: 90,
-        aoeOnDeath: true
+        aoeOnDeath: true,
+        groundProj: true
     },
     iceSpirit: {
         size: 15,
         aoeStats: aoeStats.iceSpiritAOE,
         colour: '#00fafeff',
         distance: 90,
-        aoeOnDeath: true
+        aoeOnDeath: true,
+        groundProj: true
     },
     dartGoblinDart: {
         damage: 156,
@@ -298,7 +297,8 @@ const projectileStats = {
         colour: '#ff8400ff',
         size: 8,
         speed: 9,
-        aoeOnDeath: true
+        aoeOnDeath: true,
+        groundProj: true
     },
     spearGoblinSpear: {
         damage: 81
@@ -325,22 +325,29 @@ const projectileStats = {
     },
     bombTowerBullet: {
         aoeStats: aoeStats.bombTowerAOE,
-        size: 10
+        size: 10,
+        aoeOnDeath: true,
+        groundProj: true
     },
     princessArrows: {
         aoeStats: aoeStats.princessAOE,
-        distance: 250
+        distance: 250,
+        aoeOnDeath: true,
+        groundProj: true
     },
     babyDragonFire: {
         colour: '#ff8800da',
         aoeStats: aoeStats.babyDragonAOE,
-        size: 10
+        size: 10,
+        aoeOnDeath: true,
+        groundProj: true
     },
     bomberBomb: {
         aoeStats: aoeStats.babyDragonAOE,
         speed: 8,
         size: 10,
-        aoeOnDeath: true
+        aoeOnDeath: true,
+        groundProj: true
     },
     eWizardLightning: {
         damage: 230,
@@ -381,7 +388,8 @@ const projectileStats = {
         aoeStats2: aoeStats.healSpiritHealAOE,
         colour: '#ffdd00e2',
         distance: 90,
-        aoeOnDeath: true
+        aoeOnDeath: true,
+        groundProj: true
     },
     iceWizardBullet: {
         aoeStats: aoeStats.iceWizardAOE,
@@ -397,7 +405,8 @@ const projectileStats = {
         speed: 11,
         splitNumber: 5,
         splitSpread: Math.PI / 4,
-        splitStats: {damage: 64, size: 8, distance: 120, colour: '#7e4100ff', pierce: 9999, targetPriority: 'all'}
+        splitStats: {damage: 64, size: 8, distance: 120, colour: '#7e4100ff', pierce: 9999, targetPriority: 'all'},
+        groundProj: true
     },
     eGiantZap: {
         damage: 192,
@@ -2453,6 +2462,8 @@ class Entity {
             } else {
                 if (this.stats.projectileStats.targetPriority == 'all' || this.stats.projectileStats.targetPriority == 'ground') {
                     projectiles.push(new Projectile(this.x, this.y, this.stats.projectileStats, dir, this.team, 'all', this));
+                } else if (this.stats.projectileStats.groundProj) {
+                    projectiles.push(new Projectile(this.x, this.y, this.stats.projectileStats, dir, this.team, {x: this.target.x, y: this.target.y}, this));
                 } else {
                     projectiles.push(new Projectile(this.x, this.y, this.stats.projectileStats, dir, this.team, this.target, this));
                 }
@@ -3369,7 +3380,7 @@ function spawnUnit(x, y, index, team) {
         entities.push(new UnitEntity(x - 10, y, team, stats));
     } else if (stats.count == 15) {
         for (let i = 0; i < 15; i++) {
-            entities.push(new UnitEntity(x + i, y, team, stats));
+            entities.push(new UnitEntity(x + i, y + Math.random(), team, stats));
         }
     } else if (stats.name == 'Royal Recruits') {
         for (let i = 0; i < 6; i++) {
@@ -3377,7 +3388,7 @@ function spawnUnit(x, y, index, team) {
         }
     } else if (stats.count == 6) {
         for (let i = 0; i < 6; i++) {
-            entities.push(new UnitEntity(x + i, y, team, stats));
+            entities.push(new UnitEntity(x + i, y + Math.random(), team, stats));
         }
     } else if (stats.count == 5) {
         entities.push(new UnitEntity(x + 30, y, team, stats));
@@ -3573,7 +3584,7 @@ function drawHandUI() {
         cardBar.appendChild(cardElem);
     }
 
-    /*const nextCard = document.getElementById('nextCard');
+    const nextCard = document.getElementById('nextCard');
 
     let nextCardStats = playerUnits[playerCycles[0]];
 
@@ -3583,7 +3594,7 @@ function drawHandUI() {
             <div style="font-weight: 700;">${nextCardStats.name}</div>
             <div style="font-weight: 700;">Cost: <span style="color: #df00df;">${nextCardStats.cost}</span></div>
         `;
-    }*/
+    }
 }
 
 function cardClick(cardElem, cardStats, index) {
