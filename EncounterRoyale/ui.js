@@ -30,9 +30,9 @@ if (window.innerWidth < 800) {
         cards[i].style.fontSize = '7px';
     }
 
-    nextCard.style.width = '25px';
+    /*nextCard.style.width = '25px';
     nextCard.style.height = '31px';
-    nextCard.style.fontSize = '3.5px';
+    nextCard.style.fontSize = '3.5px';*/
 
     c.style.width = `${window.innerWidth - 10}px`;
     c.style.height = `${window.innerHeight - 120}px`;

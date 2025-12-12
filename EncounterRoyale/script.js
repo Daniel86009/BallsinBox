@@ -1727,6 +1727,17 @@ const playerUnits = {
     unit8: null
 };
 
+const randomPlayerUnits = {
+    unit1: true,
+    unit2: true,
+    unit3: true,
+    unit4: true,
+    unit5: true,
+    unit6: true,
+    unit7: true,
+    unit8: true
+};
+
 /*const enemyUnits = {
     unit1: units.knight,
     unit2: units.archers,
@@ -3365,7 +3376,8 @@ function randomisePlayerUnits() {
 
     for (let i = 0; i < 8; i++) {
         let u = playerUnits['unit' + (i+1)];
-        if (!u) {
+        let isRandom = !u || randomPlayerUnits['unit' + (i+1)];
+        if (isRandom) {
             let index = Math.floor(Math.random() * unitsArr.length);
             let u = units[unitsArr[index]];
 
@@ -3528,6 +3540,7 @@ function cardChoiceClick(cardElem, stats, inDeck, index, handIndex = null) {
         cardElem.classList.remove('occupied');
         cardElem.innerHTML = '';
         playerUnits['unit' + (handIndex + 1)] = null;
+        randomPlayerUnits['unit' + (handIndex + 1)] = true;
     } else {
         if (cardElem.style.opacity == 0.2 && !debug.pickSameCards) return;
         let children = chosenCards.children;
@@ -3547,9 +3560,9 @@ function cardChoiceClick(cardElem, stats, inDeck, index, handIndex = null) {
             child.addEventListener('click', () => cardChoiceClick(child, stats, true, index, i));
 
             playerUnits['unit' + (i + 1)] = stats;
+            randomPlayerUnits['unit' + (i + 1)] = false;
             break;
         }
-        
     }
 }
 
