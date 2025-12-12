@@ -44,9 +44,9 @@ let game = {
     kingY: 80,
     team: 'player',
     enemyElixirMult: 1.5,
-    enemyStartElixir: 5,
+    enemyStartElixir: 7,
     playerElixirMult: 1,
-    playerStartElixir: 5,
+    playerStartElixir: 7,
     randomiseEnemyUnits: true,
     randomisePlayerUnits: false
 };
@@ -417,6 +417,7 @@ const otherUnits = {
         damage: 84,
         deathAOEStats: aoeStats.golemiteDeathAOE,
         attackSpeed: 2500,
+        initHitSpeed: 1000,
         range: 30,
         viewRange: 150,
         size: 25,
@@ -430,6 +431,7 @@ const otherUnits = {
         hp: 217,
         damage: 81,
         attackSpeed: 1300,
+        initHitSpeed: 1000,
         range: 45,
         viewRange: 150,
         size: 15,
@@ -443,6 +445,7 @@ const otherUnits = {
         hp: 81,
         damage: 81,
         attackSpeed: 1100,
+        initHitSpeed: 500,
         range: 20,
         viewRange: 150,
         size: 15,
@@ -470,6 +473,7 @@ const otherUnits = {
         hp: 1080,
         damage: 337,
         attackSpeed: 1100,
+        initHitSpeed: 200,
         range: 30,
         viewRange: 150,
         size: 25,
@@ -507,6 +511,7 @@ const otherUnits = {
         hp: 670,
         damage: 192,
         attackSpeed: 1300,
+        initHitSpeed: 400,
         range: 25,
         viewRange: 150,
         size: 20,
@@ -520,6 +525,7 @@ const otherUnits = {
         hp: 629,
         damage: 53,
         attackSpeed: 1200,
+        initHitSpeed: 250,
         range: 25,
         viewRange: 150,
         size: 20,
@@ -546,6 +552,7 @@ const otherUnits = {
         hp: 202,
         damage: 120,
         attackSpeed: 1100,
+        initHitSpeed: 600,
         range: 20,
         viewRange: 150,
         size: 18,
@@ -563,10 +570,12 @@ const units = {
         hp: 1766,
         damage: 202,
         attackSpeed: 1200,
+        initHitSpeed: 500,
         range: 30,
         viewRange: 150,
         size: 25,
         speed: 1,
+        deployTime: 1000,
         targetPriority: 'ground',
         type: 'unit'
     },
@@ -577,25 +586,29 @@ const units = {
         hp: 304,
         projectileStats: projectileStats.archerArrow,
         attackSpeed: 900,
+        initHitSpeed: 500,
         range: 120,
         viewRange: 150,
         size: 20,
         speed: 1.0,
         count: 2,
+        deployTime: 1000,
         targetPriority: 'all',
         type: 'unit'
     },
     giant: {
-        name: 'Giant', 
+        name: 'Giant',
         symbol: '💪',
-        cost: 5, 
-        hp: 4090, 
-        damage: 253, 
-        attackSpeed: 1500, 
-        range: 35, 
+        cost: 5,
+        hp: 4090,
+        damage: 253,
+        attackSpeed: 1500,
+        initHitSpeed: 500,
+        range: 35,
         viewRange: 175,
         size: 30,
-        speed: 0.7, 
+        speed: 0.7,
+        deployTime: 1000,
         targetPriority: 'buildings', 
         type: 'unit'
     },
@@ -606,11 +619,13 @@ const units = {
         hp: 81,
         damage: 81,
         attackSpeed: 1100,
+        initHitSpeed: 500,
         range: 20,
         viewRange: 150,
         size: 15,
         speed: 1.4,
         count: 3,
+        deployTime: 1000,
         targetPriority: 'ground',
         type: 'unit'
     },
@@ -621,11 +636,13 @@ const units = {
         hp: 81,
         damage: 81,
         attackSpeed: 1100,
+        initHitSpeed: 500,
         range: 20,
         viewRange: 150,
         size: 15,
         speed: 1.4,
         count: 15,
+        deployTime: 1000,
         targetPriority: 'ground',
         type: 'unit'
     },
@@ -698,10 +715,12 @@ const units = {
         cost: 4,
         hp: 1907,
         attackSpeed: 1500,
+        initHitSpeed: 100,
         range: 30,
         viewRange: 150,
         size: 25,
-        speed: 0.9,
+        speed: 1,
+        deployTime: 1000,
         targetPriority: 'ground',
         type: 'unit',
         aoeStats: aoeStats.valkyrieAOE
@@ -713,10 +732,12 @@ const units = {
         hp: 1697,
         damage: 317,
         attackSpeed: 1600,
+        initHitSpeed: 600,
         range: 30,
         viewRange: 150,
         size: 25,
-        speed: 1.3,
+        speed: 1.7,
+        deployTime: 1000,
         targetPriority: 'buildings',
         type: 'unit'
     },
@@ -727,10 +748,12 @@ const units = {
         hp: 1433,
         damage: 755,
         attackSpeed: 1600,
+        initHitSpeed: 500,
         range: 30,
         viewRange: 150,
         size: 25,
         speed: 1,
+        deployTime: 1000,
         targetPriority: 'ground',
         type: 'unit'
     },
@@ -744,10 +767,12 @@ const units = {
         slowDuration: 2000,
         slowAmount: 0.7,
         attackSpeed: 2500,
+        initHitSpeed: 1000,
         range: 30,
         viewRange: 150,
         size: 25,
         speed: 0.8,
+        deployTime: 1000,
         targetPriority: 'buildings',
         type: 'unit'
     },
@@ -776,6 +801,7 @@ const units = {
         viewRange: 150,
         size: 15,
         speed: 1.7,
+        deployTime: 1000,
         targetPriority: 'all',
         type: 'unit',
         dieOnAttack: true
@@ -787,10 +813,12 @@ const units = {
         hp: 3760,
         damage: 816,
         attackSpeed: 1800,
+        initHitSpeed: 500,
         range: 35,
         viewRange: 175,
         size: 30,
         speed: 0.8,
+        deployTime: 1000,
         targetPriority: 'ground',
         type: 'unit'
     },
@@ -801,10 +829,12 @@ const units = {
         hp: 261,
         projectileStats: projectileStats.dartGoblinDart,
         attackSpeed: 800,
+        initHitSpeed: 350,
         range: 156,
         viewRange: 160,
         size: 20,
         speed: 1.7,
+        deployTime: 1000,
         targetPriority: 'all',
         type: 'unit'
     },
@@ -815,10 +845,12 @@ const units = {
         hp: 824,
         projectileStats: projectileStats.cannonBullet,
         attackSpeed: 1000,
+        initHitSpeed: 1000,
         range: 132,
         viewRange: 150,
         size: 25,
         speed: 0,
+        deployTime: 1000,
         targetPriority: 'ground',
         type: 'building',
         hpLostPerSecond: 27.4
@@ -830,11 +862,13 @@ const units = {
         hp: 230,
         projectileStats: projectileStats.minionBullet,
         attackSpeed: 1100,
+        initHitSpeed: 500,
         range: 60,
         viewRange: 150,
         size: 15,
         speed: 1.5,
         count: 3,
+        deployTime: 1000,
         targetPriority: 'all',
         type: 'flying'
     },
@@ -845,11 +879,13 @@ const units = {
         hp: 230,
         projectileStats: projectileStats.minionBullet,
         attackSpeed: 1100,
+        initHitSpeed: 500,
         range: 60,
         viewRange: 150,
         size: 15,
         speed: 1.5,
         count: 6,
+        deployTime: 1000,
         targetPriority: 'all',
         type: 'flying'
     },
@@ -860,10 +896,12 @@ const units = {
         hp: 837,
         projectileStats: projectileStats.megaMinionBullet,
         attackSpeed: 1100,
+        initHitSpeed: 400,
         range: 60,
         viewRange: 150,
         size: 20,
         speed: 1,
+        deployTime: 1000,
         targetPriority: 'all',
         type: 'flying'
     },
@@ -877,10 +915,12 @@ const units = {
         deathSpawnNum: 2,
         deathSpawnStats: otherUnits.golemite,
         attackSpeed: 2500,
+        initHitSpeed: 1000,
         range: 40,
         viewRange: 175,
         size: 35,
         speed: 0.5,
+        deployTime: 3000,
         targetPriority: 'buildings',
         type: 'unit'
     },
@@ -896,6 +936,7 @@ const units = {
         size: 15,
         speed: 2,
         count: 2,
+        deployTime: 1000,
         targetPriority: 'buildings',
         type: 'unit',
         aoeStats: aoeStats.wallBreakerAOE
@@ -909,10 +950,12 @@ const units = {
         deathSpawnNum: 6,
         deathSpawnStats: otherUnits.lavaPup,
         attackSpeed: 1300,
+        initHitSpeed: 1000,
         range: 75,
         viewRange: 175,
         size: 30,
         speed: 0.7,
+        deployTime: 1000,
         targetPriority: 'buildings',
         type: 'flying'
     },
@@ -927,6 +970,7 @@ const units = {
         viewRange: 150,
         size: 15,
         speed: 1.7,
+        deployTime: 1000,
         targetPriority: 'all',
         type: 'unit',
         dieOnAttack: true
@@ -953,10 +997,12 @@ const units = {
         supportSpawnSpeed: 7000,
         supportStats: otherUnits.skeleton,
         attackSpeed: 1100,
+        initHitSpeed: 700,
         range: 132,
         viewRange: 150,
         size: 20,
         speed: 1,
+        deployTime: 1000,
         targetPriority: 'all',
         type: 'unit'
     },
@@ -966,11 +1012,13 @@ const units = {
         cost: 6, 
         hp: 3164,
         projectileStats: projectileStats.royalGiantBullet,
-        attackSpeed: 1700, 
+        attackSpeed: 1700,
+        initHitSpeed: 900,
         range: 120, 
         viewRange: 175,
         size: 30,
-        speed: 0.7, 
+        speed: 0.7,
+        deployTime: 1000,
         targetPriority: 'buildings', 
         type: 'unit'
     },
@@ -984,11 +1032,13 @@ const units = {
         dashRange: {min: 84, max: 144},
         dashSpeed: 10,
         dashPauseTime: 800,
-        attackSpeed: 1000, 
+        attackSpeed: 1000,
+        initHitSpeed: 400,
         range: 30,
         viewRange: 150,
         size: 25,
-        speed: 1.0, 
+        speed: 1.4,
+        deployTime: 1000,
         targetPriority: 'ground',
         type: 'unit'
     },
@@ -1001,11 +1051,13 @@ const units = {
         dashSpeed: 4,
         dashAOEStats: aoeStats.megaKightJumpAOE,
         dashPauseTime: 900,
-        attackSpeed: 1200, 
+        attackSpeed: 1200,
+        initHitSpeed: 500,
         range: 40,
         viewRange: 150,
         size: 30,
-        speed: 1.0, 
+        speed: 1.0,
+        deployTime: 1000,
         targetPriority: 'ground',
         type: 'unit',
         aoeStats: aoeStats.megaKnightAttackAOE,
@@ -1018,11 +1070,13 @@ const units = {
         hp: 81,
         damage: 81,
         attackSpeed: 1300,
+        initHitSpeed: 600,
         range: 25,
         viewRange: 150,
         size: 15,
         speed: 1.7,
         count: 5,
+        deployTime: 1000,
         targetPriority: 'all',
         type: 'flying'
     },
@@ -1035,10 +1089,12 @@ const units = {
         deathSpawnNum: 1,
         deathSpawnStats: otherUnits.balloonBomb,
         attackSpeed: 2000,
+        initHitSpeed: 200,
         range: 30,
         viewRange: 150,
         size: 25,
         speed: 1,
+        deployTime: 1000,
         targetPriority: 'buildings',
         type: 'flying'
     },
@@ -1055,6 +1111,7 @@ const units = {
         viewRange: 150,
         size: 30,
         speed: 0,
+        deployTime: 1000,
         targetPriority: 'all',
         type: 'building',
         hpLostPerSecond: 39
@@ -1067,10 +1124,12 @@ const units = {
         damage: 256,
         deathAOEStats: aoeStats.lumberjackRage,
         attackSpeed: 800,
+        initHitSpeed: 400,
         range: 30,
         viewRange: 150,
         size: 25,
         speed: 1.7,
+        deployTime: 1000,
         targetPriority: 'ground',
         type: 'unit'
     },
@@ -1084,10 +1143,12 @@ const units = {
         chargeSpeed: 1.7,
         chargeTriggerDistance: 60,
         attackSpeed: 1400,
+        initHitSpeed: 500,
         range: 40,
         viewRange: 150,
         size: 25,
         speed: 1.0,
+        deployTime: 1000,
         targetPriority: 'ground',
         type: 'unit'
     },
@@ -1098,10 +1159,12 @@ const units = {
         hp: 529,
         projectileStats: projectileStats.mArcherArrow,
         attackSpeed: 1100,
+        initHitSpeed: 700,
         range: 156,
         viewRange: 160,
         size: 20,
         speed: 1.0,
+        deployTime: 1000,
         targetPriority: 'all',
         type: 'unit'
     },
@@ -1112,10 +1175,12 @@ const units = {
         hp: 2081,
         projectileStats: projectileStats.bowlerBall,
         attackSpeed: 2500,
+        initHitSpeed: 500,
         range: 96,
         viewRange: 150,
         size: 30,
         speed: 0.7,
+        deployTime: 1000,
         targetPriority: 'ground',
         type: 'unit'
     },
@@ -1127,11 +1192,13 @@ const units = {
         sheildHP: 256,
         damage: 117,
         attackSpeed: 1000,
+        initHitSpeed: 500,
         range: 25,
         viewRange: 150,
         size: 15,
         speed: 1.4,
         count: 3,
+        deployTime: 1000,
         targetPriority: 'ground',
         type: 'unit'
     },
@@ -1143,11 +1210,13 @@ const units = {
         sheildHP: 240,
         damage: 133,
         attackSpeed: 1300,
+        initHitSpeed: 500,
         range: 35,
         viewRange: 150,
         size: 22,
         speed: 1.4,
         count: 6,
+        deployTime: 1000,
         targetPriority: 'ground',
         type: 'unit'
     },
@@ -1158,11 +1227,13 @@ const units = {
         hp: 670,
         damage: 192,
         attackSpeed: 1300,
+        initHitSpeed: 400,
         range: 25,
         viewRange: 150,
         size: 20,
         speed: 1,
         count: 5,
+        deployTime: 1000,
         targetPriority: 'ground',
         type: 'unit'
     },
@@ -1190,10 +1261,12 @@ const units = {
         hp: 721,
         projectileStats: projectileStats.musketeerBullet,
         attackSpeed: 1000,
+        initHitSpeed: 700,
         range: 140,
         viewRange: 150,
         size: 22,
         speed: 1.0,
+        deployTime: 1000,
         targetPriority: 'all',
         type: 'unit'
     },
@@ -1204,11 +1277,13 @@ const units = {
         hp: 1341,
         damage: 384,
         attackSpeed: 1400,
+        initHitSpeed: 500,
         range: 25,
         viewRange: 150,
         size: 20,
         speed: 1.4,
         count: 2,
+        deployTime: 1000,
         targetPriority: 'ground',
         type: 'unit'
     },
@@ -1219,11 +1294,13 @@ const units = {
         hp: 560,
         projectileStats: projectileStats.skeletonDragonFireBall,
         attackSpeed: 1900,
+        initHitSpeed: 400,
         range: 84,
         viewRange: 150,
         size: 20,
         speed: 1.7,
         count: 2,
+        deployTime: 1000,
         targetPriority: 'all',
         type: 'flying'
     },
@@ -1234,11 +1311,13 @@ const units = {
         hp: 133,
         projectileStats: projectileStats.spearGoblinSpear,
         attackSpeed: 1700,
+        initHitSpeed: 500,
         range: 120,
         viewRange: 150,
         size: 18,
         speed: 1.7,
         count: 3,
+        deployTime: 1000,
         targetPriority: 'all',
         type: 'unit'
     },
@@ -1249,11 +1328,13 @@ const units = {
         hp: 202,
         damage: 120,
         attackSpeed: 1100,
+        initHitSpeed: 600,
         range: 23,
         viewRange: 150,
         size: 18,
         speed: 1.7,
         count: 4,
+        deployTime: 1000,
         targetPriority: 'ground',
         type: 'unit'
     },
@@ -1268,6 +1349,7 @@ const units = {
         viewRange: 150,
         size: 15,
         speed: 1.7,
+        deployTime: 1000,
         targetPriority: 'all',
         type: 'unit',
         dieOnAttack: true
@@ -1279,10 +1361,12 @@ const units = {
         hp: 949,
         projectileStats: projectileStats.eDragonLightning,
         attackSpeed: 2100,
+        initHitSpeed: 700,
         range: 84,
         viewRange: 150,
         size: 25,
         speed: 1,
+        deployTime: 1000,
         targetPriority: 'all',
         type: 'flying'
     },
@@ -1298,6 +1382,7 @@ const units = {
         viewRange: 150,
         size: 25,
         speed: 1,
+        deployTime: 1000,
         targetPriority: 'all',
         type: 'flying'
     },
@@ -1308,10 +1393,12 @@ const units = {
         hp: 1600,
         projectileStats: projectileStats.xBowBullet,
         attackSpeed: 300,
+        initHitSpeed: 300,
         range: 276,
         viewRange: 276,
         size: 25,
         speed: 0,
+        deployTime: 3500,
         targetPriority: 'all',
         type: 'building',
         hpLostPerSecond: 27.4
@@ -1328,6 +1415,7 @@ const units = {
         viewRange: 150,
         size: 25,
         speed: 0,
+        deployTime: 1000,
         targetPriority: 'all',
         type: 'building'
     },
@@ -1340,10 +1428,12 @@ const units = {
         deathSpawnNum: 1,
         deathSpawnStats: otherUnits.bombTowerBomb,
         attackSpeed: 1800,
+        initHitSpeed: 500,
         range: 144,
         viewRange: 150,
         size: 25,
         speed: 0,
+        deployTime: 1000,
         targetPriority: 'all',
         type: 'building'
     },
@@ -1354,10 +1444,12 @@ const units = {
         hp: 1210,
         aoeStats: aoeStats.royalGhostAOE,
         attackSpeed: 1800,
+        initHitSpeed: 600,
         range: 30,
         viewRange: 150,
         size: 25,
         speed: 1.4,
+        deployTime: 1000,
         targetPriority: 'ground',
         type: 'unit',
         invisTime: 1800,
@@ -1370,10 +1462,12 @@ const units = {
         hp: 261,
         projectileStats: projectileStats.princessArrows,
         attackSpeed: 3000,
+        initHitSpeed: 300,
         range: 216,
         viewRange: 216,
         size: 20,
         speed: 1.0,
+        deployTime: 1000,
         targetPriority: 'all',
         type: 'unit'
     },
@@ -1384,10 +1478,12 @@ const units = {
         hp: 1152,
         projectileStats: projectileStats.babyDragonFire,
         attackSpeed: 1500,
+        initHitSpeed: 300,
         range: 84,
         viewRange: 150,
         size: 20,
         speed: 1.4,
+        deployTime: 1000,
         targetPriority: 'all',
         type: 'flying'
     },
@@ -1402,10 +1498,12 @@ const units = {
         chargeSpeed: 1.7,
         chargeTriggerDistance: 60,
         attackSpeed: 1300,
+        initHitSpeed: 400,
         range: 40,
         viewRange: 150,
         size: 25,
         speed: 1.0,
+        deployTime: 1000,
         targetPriority: 'ground',
         type: 'unit'
     },
@@ -1416,10 +1514,12 @@ const units = {
         hp: 896,
         damage: 102,
         attackSpeed: 600,
+        initHitSpeed: 200,
         range: 25,
         viewRange: 150,
         size: 20,
         speed: 1.4,
+        deployTime: 1000,
         targetPriority: 'ground',
         type: 'unit'
     },
@@ -1430,10 +1530,12 @@ const units = {
         hp: 1210,
         damage: 194,
         attackSpeed: 1300,
+        initHitSpeed: 500,
         range: 40,
         viewRange: 150,
         size: 22,
         speed: 1.4,
+        deployTime: 1000,
         targetPriority: 'ground',
         type: 'spell'
     },
@@ -1453,6 +1555,7 @@ const units = {
         viewRange: 150,
         size: 25,
         speed: 1,
+        deployTime: 1000,
         targetPriority: 'buildings',
         type: 'unit',
         dieOnAttack: true
@@ -1464,10 +1567,12 @@ const units = {
         hp: 304,
         projectileStats: projectileStats.bomberBomb,
         attackSpeed: 1800,
+        initHitSpeed: 200,
         range: 108,
         viewRange: 150,
         size: 20,
         speed: 1,
+        deployTime: 1000,
         targetPriority: 'ground',
         type: 'unit'
     },
@@ -1478,11 +1583,13 @@ const units = {
         hp: 837,
         damage: 74,
         attackSpeed: 1200,
+        initHitSpeed: 400,
         range: 25,
         viewRange: 150,
         size: 20,
         speed: 1.7,
         count: 4,
+        deployTime: 1000,
         targetPriority: 'buildings',
         type: 'unit'
     },
@@ -1493,10 +1600,12 @@ const units = {
         hp: 714,
         projectileStats: projectileStats.eWizardLightning,
         attackSpeed: 1800,
+        initHitSpeed: 600,
         range: 120,
         viewRange: 150,
         size: 20,
         speed: 1.4,
+        deployTime: 1000,
         targetPriority: 'all',
         type: 'unit',
         spawnAOEStats: aoeStats.eWizardSpawnAOE
@@ -1529,10 +1638,12 @@ const units = {
         hp: 529,
         projectileStats: projectileStats.motherWitchBullet,
         attackSpeed: 900,
+        initHitSpeed: 300,
         range: 132,
         viewRange: 150,
         size: 20,
         speed: 1.0,
+        deployTime: 1000,
         targetPriority: 'all',
         type: 'unit'
     },
@@ -1548,6 +1659,7 @@ const units = {
         viewRange: 150,
         size: 25,
         speed: 1,
+        deployTime: 1000,
         targetPriority: 'ground',
         type: 'unit',
         spawnAOEStats: aoeStats.battleHealerSpawnAOE
@@ -1559,10 +1671,12 @@ const units = {
         hp: 755,
         projectileStats: projectileStats.wizardFireball,
         attackSpeed: 1400,
+        initHitSpeed: 400,
         range: 132,
         viewRange: 150,
         size: 20,
         speed: 1,
+        deployTime: 1000,
         targetPriority: 'all',
         type: 'unit'
     },
@@ -1573,10 +1687,12 @@ const units = {
         hp: 1369,
         projectileStats: projectileStats.mortarRock,
         attackSpeed: 5000,
+        initHitSpeed: 1000,
         range: {min: 84, max: 276},
         viewRange: {min: 84, max: 276},
         size: 25,
         speed: 0,
+        deployTime: 3500,
         targetPriority: 'ground',
         type: 'building',
         hpLostPerSecond: 45.6
@@ -1588,10 +1704,12 @@ const units = {
         hp: 1152,
         projectileStats: projectileStats.teslaLightning,
         attackSpeed: 1100,
+        initHitSpeed: 500,
         range: 132,
         viewRange: 132,
         size: 25,
         speed: 0,
+        deployTime: 1000,
         targetPriority: 'all',
         type: 'building',
         hpLostPerSecond: 38.4,
@@ -1611,23 +1729,26 @@ const units = {
         viewRange: 175,
         size: 22,
         speed: 1.4,
+        deployTime: 1000,
         targetPriority: 'buildings',
         type: 'flying',
         dieOnAttack: true
     },
     eGiant: {
-        name: 'Electro Giant', 
+        name: 'Electro Giant',
         symbol: '💪🏿',
-        cost: 7, 
-        hp: 3855, 
+        cost: 7,
+        hp: 3855,
         damage: 163,
         reflectedStats: projectileStats.eGiantZap,
         reflectionRadius: 72,
-        attackSpeed: 2100, 
-        range: 35, 
+        attackSpeed: 2100,
+        initHitSpeed: 1500,
+        range: 35,
         viewRange: 175,
         size: 30,
-        speed: 0.7, 
+        speed: 0.7,
+        deployTime: 1000,
         targetPriority: 'buildings', 
         type: 'unit'
     },
@@ -1642,6 +1763,7 @@ const units = {
         viewRange: 150,
         size: 15,
         speed: 1.7,
+        deployTime: 1000,
         targetPriority: 'all',
         type: 'unit',
         dieOnAttack: true
@@ -1653,10 +1775,12 @@ const units = {
         hp: 688,
         projectileStats: projectileStats.iceWizardBullet,
         attackSpeed: 1700,
+        initHitSpeed: 500,
         range: 132,
         viewRange: 150,
         size: 20,
         speed: 1,
+        deployTime: 1000,
         targetPriority: 'all',
         type: 'unit',
         spawnAOEStats: aoeStats.iceWizardSpawnAOE
@@ -1668,10 +1792,12 @@ const units = {
         hp: 304,
         projectileStats: projectileStats.firecrackerBullet,
         attackSpeed: 3000,
+        initHitSpeed: 650,
         range: 144,
         viewRange: 150,
         size: 20,
         speed: 1.4,
+        deployTime: 1000,
         targetPriority: 'all',
         type: 'unit',
         recoil: 4
@@ -1689,6 +1815,7 @@ const units = {
         viewRange: 150,
         size: 22,
         speed: 1,
+        deployTime: 1000,
         targetPriority: 'buildings',
         type: 'unit',
         invisTime: 1,
@@ -1710,6 +1837,7 @@ const units = {
         viewRange: 150,
         size: 25,
         speed: 0,
+        deployTime: 1000,
         targetPriority: 'ground',
         type: 'building',
         hpLostPerSecond: 17.6
@@ -2042,6 +2170,7 @@ class Entity {
         this.team = team;
         this.stats = stats;
         this.attackCooldown = 0;
+        this.initAttackCooldown = stats.initHitSpeed;
         this.hp = stats.hp;
         this.sheildHP = stats.sheildHP || 0;
         this.dead = false;
@@ -2058,6 +2187,7 @@ class Entity {
         this.invisible = false;
         this.hidden = false;
         this.pigCurseTime = 0;
+        this.deployTimeLeft = this.stats.deployTime || 0;
 
         if (stats.spawnInvis) this.invisible = true;
         if (!stats) this.dead = true;
@@ -2072,6 +2202,7 @@ class Entity {
             ctx.fill();
         }
 
+        //Draw e giant radius
         if (this.stats.reflectionRadius) {
             ctx.beginPath();
             ctx.fillStyle = (this.team == 'player') ? '#00e1ff3c' : '#b900003c';
@@ -2191,6 +2322,19 @@ class Entity {
             ctx.lineTo(this.target.x, this.target.y);
             ctx.stroke();
         }
+
+        /*if (this.deployTimeLeft > 1) {
+            let angle = (this.deployTimeLeft / this.stats.deployTime) * Math.PI * 2;
+            ctx.beginPath();
+            ctx.fillStyle = '#000000';
+            ctx.arc(this.x, this.y + 20, 15, 0, 2 * Math.PI);
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.fillStyle = (this.team == 'player') ? '#3966f9ff' : '#fc3b3bff';
+            ctx.arc(this.x, this.y + 20, 11, angle, 0);
+            ctx.fill();
+        }*/
 
 
         //---Debug---
@@ -2374,6 +2518,13 @@ class UnitEntity extends Entity {
             return;
         }
 
+        if (this.deployTimeLeft > 0) {
+            this.deployTimeLeft -= 1000 / 60;
+            if (this.stats.type != 'building' && this.stats.type != 'bomb') this.collide();
+            this.wallCol();
+            return;
+        }
+
         if (this.target && this.target.invisible) this.target = null;
 
         if (!this.target || this.target.dead) {
@@ -2456,27 +2607,32 @@ class UnitEntity extends Entity {
                 this.dashPauseTime = this.stats.dashPauseTime;
             }
         } else if (distCheck && this.target.stats.size > 0) {
-            if (this.stats.aoeStats) {
-                if (this.charging) this.aoeAttack(this.x, this.y, this.stats.chargeAOEStats);
-                else this.aoeAttack(this.x, this.y, this.stats.aoeStats);
-            } else if (this.stats.projectileStats) {
-                this.shoot(this.target);
-            } else if (this.stats.beamDamage) {
-                this.attack(this.target);
+            if (this.initAttackCooldown > 0 && !this.charging) {
+                this.initAttackCooldown -= 1000 / 60;
             } else {
-                this.attack(this.target);
-            }
-            if (this.stats.dieOnAttack) {
-                this.dead = true;
-                return;
-            }
-            this.isAttacking = true;
-            this.charging = false;
-            this.distance = 0;
-            this.nonAttackTime = 0;
+                if (this.stats.aoeStats) {
+                    if (this.charging) this.aoeAttack(this.x, this.y, this.stats.chargeAOEStats);
+                    else this.aoeAttack(this.x, this.y, this.stats.aoeStats);
+                } else if (this.stats.projectileStats) {
+                    this.shoot(this.target);
+                } else if (this.stats.beamDamage) {
+                    this.attack(this.target);
+                } else {
+                    this.attack(this.target);
+                }
+                if (this.stats.dieOnAttack) {
+                    this.dead = true;
+                    return;
+                }
+                this.isAttacking = true;
+                this.charging = false;
+                this.distance = 0;
+                this.nonAttackTime = 0;
+            }   
         } else {
             this.isAttacking = false;
             this.attackTime = 0;
+            this.initAttackCooldown = this.stats.initHitSpeed;
             if (this.dashTime <= 1 && !this.charging) this.moveTowards(this.target);
         }
 
@@ -3679,9 +3835,15 @@ function runGameTime() {
 }
 
 function getCrowns() {
-    if (game.playerElixirMult > 1 || debug.pickSameCards || game.enemyElixirMult < 1) return;
     const totalCrownDisplay = document.getElementById('totalCrownDisplay');
     const newCrownDisplay = document.getElementById('newCrownDisplay');
+
+    if (game.playerElixirMult > 1 || debug.pickSameCards || game.enemyElixirMult < 1) {
+        newCrownDisplay.innerHTML = 'No crowns given';
+        newCrownDisplay.style.display = 'block';
+        return;
+    }
+
     totalCrownDisplay.innerHTML = `${localStorage.crowns || 0} 👑`;
     let crownAmount = 3;
 
