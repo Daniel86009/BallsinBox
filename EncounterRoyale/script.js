@@ -10,7 +10,6 @@ ToDo:
 -Add next card display
 -Add deploy time
 -Add first attack time
--Add total crown score
 */
 
 //1 range ≈ 24
@@ -1469,7 +1468,7 @@ const units = {
         viewRange: 150,
         size: 20,
         speed: 1,
-        targetPriority: 'all',
+        targetPriority: 'ground',
         type: 'unit'
     },
     royalHogs: {
@@ -1718,14 +1717,14 @@ const units = {
 };
 
 const playerUnits = {
-    unit1: units.knight,
-    unit2: units.archers,
-    unit3: units.giant,
-    unit4: units.skeletons,
-    unit5: units.iceGolem,
-    unit6: units.valkyrie,
-    unit7: units.hogRider,
-    unit8: units.miniPekka
+    unit1: null,
+    unit2: null,
+    unit3: null,
+    unit4: null,
+    unit5: null,
+    unit6: null,
+    unit7: null,
+    unit8: null
 };
 
 /*const enemyUnits = {
@@ -3297,7 +3296,7 @@ function reset() {
     updateElixirUI();
 
     if (game.randomiseEnemyUnits) randomiseEnemyUnits();
-    if (game.randomisePlayerUnits) randomisePlayerUnits();
+    randomisePlayerUnits();
 
     let playerUnitsArr = Object.keys(playerUnits);
     let enemyUnitsArr = Object.keys(enemyUnits);
@@ -3349,14 +3348,31 @@ function randomiseEnemyUnits() {
 
 function randomisePlayerUnits() {
     let unitsArr = Object.keys(units);
+    
+    for (let i = 0; i < 8; i++) {
+        let u = playerUnits['unit' + (i+1)];
+        if (!u) continue;
+
+        let exit = false;
+        for (let j = 0; j < unitsArr; j++) {
+            if (units[unitsArr[j]] == u) {
+                unitsArr.splice(j, 1);
+                continue;
+            }
+        }
+        if (exit) continue;
+    }
 
     for (let i = 0; i < 8; i++) {
-        let index = Math.floor(Math.random() * unitsArr.length);
-        let u = units[unitsArr[index]];
+        let u = playerUnits['unit' + (i+1)];
+        if (!u) {
+            let index = Math.floor(Math.random() * unitsArr.length);
+            let u = units[unitsArr[index]];
 
-        playerUnits['unit' + (i+1)] = u;
+            playerUnits['unit' + (i+1)] = u;
 
-        unitsArr.splice(index, 1);
+            unitsArr.splice(index, 1);
+        }
     }
 }
 
@@ -3366,6 +3382,8 @@ function drawHandUI() {
     for (let i = 0; i < playerHand.length; i++) {
         let cardStats = playerUnits[playerHand[i]];
         let cardElem = document.createElement('div');
+
+        if (!cardStats) continue;
 
         cardElem.classList.add('card');
 
@@ -3503,12 +3521,13 @@ function populateChoices() {
     }
 }
 
-function cardChoiceClick(cardElem, stats, inDeck, index) {
+function cardChoiceClick(cardElem, stats, inDeck, index, handIndex = null) {
     if (inDeck) {
         cardChoices.children[index].style.opacity = 1;
         cardElem.removeEventListener('click', () => cardChoiceClick(child, stats, true, index));
         cardElem.classList.remove('occupied');
         cardElem.innerHTML = '';
+        playerUnits['unit' + (handIndex + 1)] = null;
     } else {
         if (cardElem.style.opacity == 0.2 && !debug.pickSameCards) return;
         let children = chosenCards.children;
@@ -3525,7 +3544,7 @@ function cardChoiceClick(cardElem, stats, inDeck, index) {
 
             cardElem.style.opacity = 0.2;
 
-            child.addEventListener('click', () => cardChoiceClick(child, stats, true, index));
+            child.addEventListener('click', () => cardChoiceClick(child, stats, true, index, i));
 
             playerUnits['unit' + (i + 1)] = stats;
             break;

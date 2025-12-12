@@ -81,8 +81,6 @@ window.addEventListener('touchstart', handleOutsideClick);
 const elixirMultSlider = document.getElementById('enemyElixirMult');
 const elixirMultValue = document.getElementById('enemyElixirValue');
 
-const enemyRandomCards = document.getElementById('enemyRandomCards');
-const playerRandomCards = document.getElementById('playerRandomCards');
 const debugDrawRange = document.getElementById('debugDrawRange');
 const debugDrawViewRange = document.getElementById('debugDrawViewRange');
 
@@ -90,8 +88,6 @@ const infinitePlayerElixir = document.getElementById('infinitePlayerElixir');
 const pickSameCards = document.getElementById('pickSameCards');
 
 elixirMultSlider.value = game.enemyElixirMult;
-enemyRandomCards.checked = game.randomiseEnemyUnits;
-playerRandomCards.checked = game.playerRandomCards;
 debugDrawRange.checked = debug.drawRange;
 debugDrawViewRange.checked = debug.drawViewRange;
 infinitePlayerElixir.checked = game.playerElixirMult > 10;
@@ -100,16 +96,6 @@ pickSameCards.checked = debug.pickSameCards;
 elixirMultSlider.addEventListener('input', () => {
     elixirMultValue.textContent = elixirMultSlider.value;
     game.enemyElixirMult = Number(elixirMultSlider.value);
-});
-
-enemyRandomCards.addEventListener('change', e => {
-    window.randomiseEnemyCards = e.target.checked;
-    game.randomiseEnemyUnits = e.target.checked;
-});
-
-playerRandomCards.addEventListener('change', e => {
-    window.randomisePlayerCards = e.target.checked;
-    game.randomisePlayerUnits = e.target.checked;
 });
 
 debugDrawRange.addEventListener('change', e => {
