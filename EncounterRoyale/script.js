@@ -641,6 +641,7 @@ const units = {
     skarmy: {
         name: 'Skeleton Army',
         symbol: '💀',
+        displaySymbol: '💀💀',
         cost: 3,
         hp: 81,
         damage: 81,
@@ -1258,7 +1259,7 @@ const units = {
         distance: 300,
         knockback: 4,
         targetPriority: 'ground',
-        speed: 1.5,
+        speed: 2,
         colour: '#b16800',
         lifetime: 9999,
         ctDamage: 40
@@ -2333,6 +2334,7 @@ class Entity {
         }
 
         /*if (this.deployTimeLeft > 1) {
+            let top = this.y + 20 - 15;
             let angle = (this.deployTimeLeft / this.stats.deployTime) * Math.PI * 2;
             ctx.beginPath();
             ctx.fillStyle = '#000000';
@@ -2341,7 +2343,13 @@ class Entity {
 
             ctx.beginPath();
             ctx.fillStyle = (this.team == 'player') ? '#3966f9ff' : '#fc3b3bff';
-            ctx.arc(this.x, this.y + 20, 11, angle, 0);
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 4;
+            ctx.moveTo(this.x, top);
+            ctx.lineTo(this.x, this.y + 20);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(this.x, this.y + 20, 11, 0, 2 * Math.PI);
             ctx.fill();
         }*/
 
@@ -3567,7 +3575,7 @@ function drawHandUI() {
         cardElem.classList.add('card');
 
         cardElem.innerHTML = `
-            <h2>${cardStats.symbol}</h2>
+            <h2>${cardStats.displaySymbol || cardStats.symbol}</h2>
             <div style="font-weight: 700;">${cardStats.name}</div>
             <div style="font-weight: 700;">Cost: <span style="color: #df00df;">${cardStats.cost}</span></div>
         `;
@@ -3590,7 +3598,7 @@ function drawHandUI() {
 
     if (nextCardStats) {
         nextCard.innerHTML = `
-            <h2>${nextCardStats.symbol}</h2>
+            <h2>${nextCardStats.displaySymbol || nextCardStats.symbol}</h2>
             <div style="font-weight: 700;">${nextCardStats.name}</div>
             <div style="font-weight: 700;">Cost: <span style="color: #df00df;">${nextCardStats.cost}</span></div>
         `;
@@ -3690,7 +3698,7 @@ function populateChoices() {
         cardElem.classList.add('card');
 
         cardElem.innerHTML = `
-            <h2>${cardStats.symbol}</h2>
+            <h2>${cardStats.displaySymbol || cardStats.symbol}</h2>
             <div style="font-weight: 700;">${cardStats.name}</div>
             <div style="font-weight: 700;">Cost: <span style="color: #df00df;">${cardStats.cost}</span></div>
         `;
@@ -3716,7 +3724,7 @@ function cardChoiceClick(cardElem, stats, inDeck, index, handIndex = null) {
             if (child.classList.contains('occupied')) continue;
 
             child.innerHTML = `
-                <h2>${stats.symbol}</h2>
+                <h2>${stats.displaySymbol || stats.symbol}</h2>
                 <div style="font-weight: 700;">${stats.name}</div>
                 <div style="font-weight: 700;">Cost: <span style="color: #df00df;">${stats.cost}</span></div>
             `;
