@@ -4,9 +4,9 @@ ToDo:
     -Add spell support
     -Make more responsive
 -Add more units, buildings and spells
-    -Tornado
 -Add proper icons
 -Add better visuals and particle effects
+-Make elixir bar go up smoothly
 */
 
 //1 range ≈ 24
@@ -62,8 +62,10 @@ const aoeStats = {
         damage: 179,
         lifetime: 5500,
         shrink: false,
-        rageBoost: 1.3,
-        ctDamage: 54
+        speedMult: 1.3,
+        ctDamage: 54,
+        rageDuration: 2000,
+        colour: '#ff32f85d'
     },
     valkyrieAOE: {
         radius: 60,
@@ -169,12 +171,14 @@ const aoeStats = {
     battleHealerSpawnAOE: {
         radius: 60,
         damage: 0,
-        heal: 202
+        heal: 202,
+        colour: '#30b40071'
     },
     battleHealerAOE: {
         radius: 96,
         damage: 0,
-        heal: 102
+        heal: 102,
+        colour: '#30b40071'
     },
     wizardAOE: {
         radius: 36,
@@ -202,7 +206,8 @@ const aoeStats = {
     healSpiritHealAOE: {
         radius: 60,
         damage: 0,
-        heal: 401
+        heal: 401,
+        colour: '#30b40071'
     },
     iceWizardAOE: {
         radius: 36,
@@ -498,7 +503,7 @@ const otherUnits = {
         damage: 179,
         lifetime: 5500,
         shrink: false,
-        rageBoost: 1.3
+        speedMult: 1.3
     },
     bombTowerBomb: {
         name: 'Bomb Tower Bomb',
@@ -671,9 +676,11 @@ const units = {
         cost: 3,
         type: 'spell',
         radius: 120,
-        damage: 366,
+        damage: 122,
         lifetime: 500,
-        ctDamage: 93
+        ctDamage: 31,
+        pulseTime: 200,
+        pulseCount: 3
     },
     rage: {
         name: 'Rage',
@@ -684,8 +691,10 @@ const units = {
         damage: 179,
         lifetime: 4500,
         shrink: false,
-        rageBoost: 1.3,
-        ctDamage: 54
+        speedMult: 1.3,
+        rageDuration: 2000,
+        ctDamage: 54,
+        colour: '#ff32f85d'
     },
     zap: {
         name: 'Zap',
@@ -718,6 +727,54 @@ const units = {
         slowAmount: 0.7,
         ctDamage: 54,
         knockback: 4
+    },
+    poison: {
+        name: 'Poison',
+        symbol: '🔴',
+        cost: 4,
+        type: 'spell',
+        radius: 84,
+        damage: 92,
+        moveSpeedMult: 0.85,
+        lifetime: 8000,
+        ctDamage: 23,
+        pulseTime: 1000,
+        pulseCount: 8,
+        shrink: false,
+        colour: '#7b000086'
+    },
+    earthquake: {
+        name: 'Earthquake',
+        symbol: '🟤',
+        cost: 3,
+        type: 'spell',
+        radius: 84,
+        damage: 84,
+        moveSpeedMult: 0.5,
+        lifetime: 1000,
+        buidlingDamage: 287,
+        ctDamage: 53,
+        pulseTime: 1000,
+        pulseCount: 3,
+        shrink: false,
+        colour: '#7b000086',
+        target: 'ground'
+    },
+    tornado: {
+        name: 'Tornado',
+        symbol: '🌪️',
+        cost: 3,
+        type: 'spell',
+        radius: 132,
+        damage: 42,
+        lifetime: 1050,
+        ctDamage: 29,
+        pulseTime: 550,
+        pulseCount: 2,
+        pullForce: 0.5,
+        shrink: false,
+        colour: '#b0b0b05d',
+        target: 'ground'
     },
     valkyrie: {
         name: 'Valkyrie',
@@ -885,6 +942,7 @@ const units = {
     minionHorde: {
         name: 'Minion Horde',
         symbol: '😈',
+        displaySymbol: '😈😈',
         cost: 5,
         hp: 230,
         projectileStats: projectileStats.minionBullet,
@@ -995,7 +1053,8 @@ const units = {
         lifetime: 4000,
         freezeDuration: 4000,
         shrink: false,
-        canHitHidden: true
+        canHitHidden: true,
+        colour: '#00c8ffc5'
     },
     witch: {
         name: 'Witch',
@@ -2187,9 +2246,11 @@ class Entity {
         this.freezeTime = 0;
         this.slowTime = 0;
         this.slowAmount = 1;
-        this.rageBoost = 1;
+        this.rageTime = 0;
+        this.speedMult = 1;
+        this.moveSpeedMult = 1;
         this.stunTime = 0;
-        this.supportSpawnCooldown = this.stats.supportSpawnSpeed / 4;
+        this.supportSpawnCooldown = stats.supportSpawnSpeed / 4;
         this.charging = false;
         this.isAttacking = false;
         this.attackTime = 0;
@@ -2281,7 +2342,7 @@ class Entity {
             ctx.fill();
         } 
         //Draw if rage boosted
-        else if (this.rageBoost > 1) {
+        else if (this.rageTime > 1) {
             ctx.beginPath();
             ctx.fillStyle = '#e600ff93';
             ctx.arc(this.x, this.y, this.stats.size, 0, 2*Math.PI);
@@ -2502,19 +2563,44 @@ class Entity {
         }
     }
 
-    checkRageBoost() {
-        let isBoosted = false;
+    checkSpeedChange() {
+        if (this.rageTime > 0) this.speedMult = 1.3;
+        else this.speedMult = 1;
+        this.moveSpeedMult = 1;
+
+        let rageBoosted = false;
+        if (this.rageTime > 0) rageBoosted = true;
         for (let i = 0; i < aoes.length; i++) {
             let p = aoes[i];
 
-            if (!p.stats.rageBoost || p.team != this.team) continue;
+            if (!p.stats.speedMult || p.team != this.team) continue;
+            if (p.stats.target == 'ground' && this.stats.type == 'flying') continue;
 
             if (M.dist(this, p) < this.stats.size + p.stats.radius) {
-                isBoosted = true;
-                this.rageBoost = p.stats.rageBoost;
+                if (p.stats.rageDuration) {
+                    if (!rageBoosted) {
+                        this.speedMult *= p.stats.speedMult;
+                        this.rageTime = p.stats.rageDuration;
+                    } else {
+                        this.rageTime = p.stats.rageDuration;
+                    }
+                } else {
+                    this.speedMult *= p.stats.speedMult;
+                }
+                
             }
         }
-        if (!isBoosted) this.rageBoost = 1;
+
+        for (let i = 0; i < aoes.length; i++) {
+            let p = aoes[i];
+
+            if (!p.stats.moveSpeedMult || p.team == this.team) continue;
+            if (p.stats.target == 'ground' && this.stats.type == 'flying') continue;
+
+            if (M.dist(this, p) < this.stats.size + p.stats.radius) {
+                this.moveSpeedMult *= p.stats.moveSpeedMult;
+            }
+        }
     }
 }
 
@@ -2577,9 +2663,10 @@ class UnitEntity extends Entity {
         if (this.stats.invisTime && this.nonAttackTime > this.stats.invisTime) this.invisible = true;
         else this.invisible = false;
 
-        if (this.attackCooldown > 0) this.attackCooldown -= 1000 / 60 * this.slowAmount * this.rageBoost;
-        if (this.supportSpawnCooldown > 0 && this.stats.supportSpawnSpeed) this.supportSpawnCooldown -= 1000 / 60 * this.slowAmount * this.rageBoost;
+        if (this.attackCooldown > 0) this.attackCooldown -= 1000 / 60 * this.slowAmount * this.speedMult;
+        if (this.supportSpawnCooldown > 0 && this.stats.supportSpawnSpeed) this.supportSpawnCooldown -= 1000 / 60 * this.slowAmount * this.speedMult;
         if (this.pigCurseTime > 0) this.pigCurseTime -= 1000 / 60;
+        if (this.rageTime > 0) this.rageTime -= 1000 / 60;
 
         if (this.stats.hpLostPerSecond) {
             this.takeDamage(this.stats.hpLostPerSecond / (1000 / 60) / 4);
@@ -2600,7 +2687,7 @@ class UnitEntity extends Entity {
 
         this.checkDash();
         this.checkCharge();
-        this.checkRageBoost();
+        this.checkSpeedChange();
         this.spawnSupport();
         this.findTarget();
 
@@ -2752,8 +2839,8 @@ class UnitEntity extends Entity {
         let dx = target.x - this.x;
         let dy = target.y - this.y;
 
-        let xAmount = (dx / dist) * speed * this.slowAmount * this.rageBoost;
-        let yAmount = (dy / dist) * speed * this.slowAmount * this.rageBoost;
+        let xAmount = (dx / dist) * speed * this.slowAmount * this.moveSpeedMult * this.speedMult;
+        let yAmount = (dy / dist) * speed * this.slowAmount * this.moveSpeedMult * this.speedMult;
         
         this.x += xAmount;
         this.y += yAmount;
@@ -2834,7 +2921,7 @@ class UnitEntity extends Entity {
 
     checkDash() {
         if (this.dashPauseTime > 0) {
-            this.dashPauseTime -= 1000 / 60 * this.slowAmount * this.rageBoost;
+            this.dashPauseTime -= 1000 / 60 * this.slowAmount * this.speedMult;
             return;
         }
         
@@ -2903,14 +2990,16 @@ class TowerEntity extends Entity {
         } 
 
         if (this.attackCooldown > 0) {
-            this.attackCooldown -= 1000 / 60 * this.slowAmount * this.rageBoost;
+            this.attackCooldown -= 1000 / 60 * this.slowAmount * this.speedMult;
         }
+
+        if (this.rageTime > 0) this.rageTime -= 1000 / 60;
 
         if (this.target && M.dist(this, this.target) + this.target.stats.size > this.stats.range) {
             this.isAttacking = false;
         }
 
-        this.checkRageBoost();
+        this.checkSpeedChange();
         this.findTarget();
 
         if (this.target) {
@@ -2964,11 +3053,12 @@ class AOE {
         this.stats = stats;
         this.radius = this.stats.radius;
         this.lifetime = stats.lifetime || 250;
-        this.originalRadius = this.stats.radius;
         this.team = team;
         this.dead = false;
         this.target = stats.target || 'all';
         this.owner = owner;
+        this.pulseCooldown = stats.pulseTime || 0;
+        this.pulseCount = stats.pulseCount || 1;
 
         if (!this.stats.lifetime) this.stats.lifetime = 250;
 
@@ -2977,27 +3067,39 @@ class AOE {
 
     draw() {
         ctx.beginPath();
-        if (this.stats.rageBoost > 1) ctx.fillStyle = '#ff32f85d';
-        else if (this.stats.freezeDuration > 1) ctx.fillStyle = '#00c8ffc5';
-        else if (this.stats.heal) ctx.fillStyle = '#30b40071';
+        if (this.stats.colour) ctx.fillStyle = this.stats.colour;
         else ctx.fillStyle = this.team === 'player' ? '#00046f79' : '#ff840059';
         ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI); 
         ctx.fill();
     }
 
     update() {
+        if (this.pulseCooldown > 0) {
+            this.pulseCooldown -= 1000 / 60;
+        } else if (this.pulseCount > 0) {
+            this.aoeDamage();
+            if (this.stats.shrink != false) {
+                this.lifetime = this.stats.lifetime || 250;
+                this.radius = this.stats.radius;
+            }
+        }
+
         if (this.lifetime > 0) {
             this.lifetime -= 1000 / 60;
 
             if (this.stats.shrink == true || this.stats.shrink == null) {
                 this.radius = Math.max(10, this.stats.radius * (this.lifetime / this.stats.lifetime));
             }
-        } else {
+        } else if (this.pulseCount == 0) {
             this.dead = true;
         }
+
+        if (this.stats.pullForce) this.pull();
     }
 
     aoeDamage() {
+        this.pulseCooldown = this.stats.pulseTime || 0;
+        this.pulseCount--;
         for (let i = 0; i < entities.length; i++) {
             let e = entities[i];
             if (e.stats.type == 'bomb') continue;
@@ -3005,7 +3107,7 @@ class AOE {
 
             if (this.stats.target == 'ground' && e.stats.type == 'flying') continue;
 
-            let minDist = this.radius + e.stats.size;
+            let minDist = this.stats.radius + e.stats.size;
 
             if (M.dist(this, e) < minDist) {
                 if (e.team != this.team) {
@@ -3019,6 +3121,7 @@ class AOE {
                     if (this.stats.stunDuration) e.stunTime += this.stats.stunDuration;
 
                     if (this.stats.ctDamage && (e.stats.name == 'king' || e.stats.name == 'princess')) e.takeDamage(this.stats.ctDamage, this.owner);
+                    else if (this.stats.buidlingDamage && e.stats.type == 'building') e.takeDamage(this.stats.buidlingDamage, this.owner); 
                     else e.takeDamage(this.stats.damage, this.owner);
                     if (this.stats.stunDuration) e.stunTime = this.stats.stunDuration;
 
@@ -3029,6 +3132,20 @@ class AOE {
                 } else {
                     if (this.stats.heal) e.heal(this.stats.heal);
                 }
+            }
+        }
+    }
+
+    pull() {
+        for (let i = 0; i < entities.length; i++) {
+            let e = entities[i];
+
+            if (e.type == 'building' || e.team == this.team) continue;
+
+            let minDist = this.stats.radius + e.stats.size;
+            if (M.dist(this, e) < minDist) {
+                let dir = M.normalise(this.x - e.x, this.y - e.y);
+                if (e.applyKnockback) e.applyKnockback(dir, this.stats.pullForce);
             }
         }
     }

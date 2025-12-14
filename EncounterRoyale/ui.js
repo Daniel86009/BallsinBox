@@ -33,6 +33,7 @@ if (window.innerWidth < 800) {
     nextCard.style.width = '25px';
     nextCard.style.height = '31px';
     nextCard.style.fontSize = '3.5px';
+    nextCard.style.display = 'none';
 
     c.style.width = `${window.innerWidth - 10}px`;
     c.style.height = `${window.innerHeight - 120}px`;
