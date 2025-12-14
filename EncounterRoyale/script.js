@@ -4,6 +4,32 @@ ToDo:
     -Add spell support
     -Make more responsive
 -Add more units, buildings and spells
+*/
+    /*-Vines
+    -Sparky
+    -Royal Delivery
+    -Elixir Collector
+    -Goblin Hut
+    -Barb Hut
+    -Rascals
+    -Goblin Drill
+    -Executioner
+    -Hunter
+    -Goblin Curse
+    -Goblin Demolisher
+    -Cannon Cart
+    -Mirror
+    -Clone
+    -Skeleton Giant
+    -Elixir Golem
+    -Goblin Giant
+    -Rune Giant
+    -Ram Rider
+    -Fisherman
+    -Pheonix
+    -Goblin Machine
+    -Graveyard*/
+/*
 -Add proper icons
 -Add better visuals and particle effects
 -Make elixir bar go up smoothly
@@ -420,6 +446,21 @@ const projectileStats = {
         ctDamage: 128,
         chainAmount: 1,
         range: 1
+    },
+    flyingMachineBullet: {
+        damage: 171,
+        speed: 16
+    },
+    zappiesZap: {
+        damage: 117,
+        stunDuration: 500,
+        type: 'lightning',
+        chainAmount: 1,
+        range: 1
+    },
+    furncaceBullet: {
+        damage: 179,
+        colour: '#ff8800da'
     }
 };
 
@@ -573,6 +614,34 @@ const otherUnits = {
         speed: 1.7,
         targetPriority: 'ground',
         type: 'spell'
+    },
+    fireSpirit: {
+        name: 'Fire Spirit',
+        symbol: '🔥',
+        hp: 230,
+        projectileStats: projectileStats.fireSpirit,
+        attackSpeed: 2000,
+        range: 60,
+        viewRange: 150,
+        size: 15,
+        speed: 1.7,
+        targetPriority: 'all',
+        type: 'unit',
+        dieOnAttack: true
+    },
+    bat: {
+        name: 'Bat',
+        symbol: '🦇',
+        hp: 81,
+        damage: 81,
+        attackSpeed: 1300,
+        initHitSpeed: 600,
+        range: 25,
+        viewRange: 150,
+        size: 15,
+        speed: 1.7,
+        targetPriority: 'all',
+        type: 'flying'
     }
 };
 
@@ -1910,6 +1979,94 @@ const units = {
         targetPriority: 'ground',
         type: 'building',
         hpLostPerSecond: 17.6
+    },
+    flyingMachine: {
+        name: 'Flying Machine',
+        symbol: '🚁',
+        cost: 4,
+        hp: 614,
+        projectileStats: projectileStats.flyingMachineBullet,
+        attackSpeed: 1100,
+        initHitSpeed: 500,
+        range: 144,
+        viewRange: 150,
+        size: 25,
+        speed: 1.4,
+        deployTime: 1000,
+        targetPriority: 'flying',
+        type: 'unit'
+    },
+    zappies: {
+        name: 'Zappies',
+        symbol: '🔋',
+        cost: 4,
+        hp: 529,
+        projectileStats: projectileStats.zappiesZap,
+        attackSpeed: 2100,
+        initHitSpeed: 800,
+        range: 108,
+        viewRange: 150,
+        size: 20,
+        speed: 1,
+        count: 3,
+        deployTime: 1000,
+        targetPriority: 'all',
+        type: 'unit',
+    },
+    furnace: {
+        name: 'Furnace',
+        symbol: '🏭',
+        cost: 4,
+        hp: 727,
+        projectileStats: projectileStats.furncaceBullet,
+        supportSpawnNum: 1,
+        supportSpawnSpeed: 7000,
+        supportStats: otherUnits.fireSpirit,
+        attackSpeed: 1100,
+        range: 132,
+        viewRange: 150,
+        size: 25,
+        speed: 1,
+        deployTime: 1000,
+        targetPriority: 'all',
+        type: 'unit'
+    },
+    threeMusketeers: {
+        name: 'Three Musketees',
+        symbol: '🔫',
+        displaySymbol: '🔫🔫',
+        cost: 9,
+        hp: 721,
+        projectileStats: projectileStats.musketeerBullet,
+        attackSpeed: 1000,
+        initHitSpeed: 700,
+        range: 140,
+        viewRange: 150,
+        size: 22,
+        speed: 1.0,
+        deployTime: 1000,
+        count: 3,
+        targetPriority: 'all',
+        type: 'unit'
+    },
+    nightWitch: {
+        name: 'Night Witch',
+        symbol: '🧛🏿',
+        cost: 4,
+        hp: 906,
+        damage: 286,
+        supportSpawnNum: 2,
+        supportSpawnSpeed: 5000,
+        supportStats: otherUnits.bat,
+        attackSpeed: 1300,
+        initHitSpeed: 750,
+        range: 38.4,
+        viewRange: 150,
+        size: 25,
+        speed: 1,
+        deployTime: 1000,
+        targetPriority: 'all',
+        type: 'unit'
     }
 };
 
@@ -2015,6 +2172,7 @@ let elixirMult = 1;
 let crowns = Number(localStorage.crowns) || 0;
 
 function start() {
+    console.log(Object.keys(units).length + 26);
     document.addEventListener('mousemove', (e) => {
         let rect = c.getBoundingClientRect();
         mouse.x = e.clientX - rect.left;
@@ -2548,6 +2706,7 @@ class Entity {
     }
 
     spawnSupport() {
+        let dir = (this.team == 'player') ? -1 : 1;
         if (this.supportSpawnCooldown < 1) {
             if (this.stats.supportSpawnNum == 4) {
                 entities.push(new UnitEntity(this.x + 50, this.y, this.team, this.stats.supportStats));
@@ -2555,8 +2714,10 @@ class Entity {
                 entities.push(new UnitEntity(this.x, this.y + 50, this.team, this.stats.supportStats));
                 entities.push(new UnitEntity(this.x, this.y - 50, this.team, this.stats.supportStats));
             } else if (this.stats.supportSpawnNum == 2) {
-                entities.push(new UnitEntity(this.x, this.y, this.team, this.stats.supportStats));
-                entities.push(new UnitEntity(this.x, this.y, this.team, this.stats.supportStats));
+                entities.push(new UnitEntity(this.x, this.y + dir, this.team, this.stats.supportStats));
+                entities.push(new UnitEntity(this.x, this.y + dir, this.team, this.stats.supportStats));
+            } else {
+                entities.push(new UnitEntity(this.x, this.y + dir * (this.stats.size + this.stats.supportStats.size) , this.team, this.stats.supportStats));
             }
 
             this.supportSpawnCooldown = this.stats.supportSpawnSpeed;
