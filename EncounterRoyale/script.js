@@ -1993,8 +1993,8 @@ const units = {
         size: 25,
         speed: 1.4,
         deployTime: 1000,
-        targetPriority: 'flying',
-        type: 'unit'
+        targetPriority: 'all',
+        type: 'flying'
     },
     zappies: {
         name: 'Zappies',
