@@ -2897,7 +2897,6 @@ class UnitEntity extends Entity {
         if (this.rageTime > 0) this.rageTime -= 1000 / 60;
 
         if (this.stats.hpLostPerSecond) {
-            console.log('Test')
             this.takeDamage(this.stats.hpLostPerSecond / (1000 / 60) / 4);
         }
 
