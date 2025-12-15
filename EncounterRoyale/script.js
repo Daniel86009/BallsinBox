@@ -1569,7 +1569,8 @@ const units = {
         speed: 0,
         deployTime: 1000,
         targetPriority: 'all',
-        type: 'building'
+        type: 'building',
+        hpLostPerSecond: 58.3
     },
     bombTower: {
         name: 'Bomb Tower',
@@ -2896,6 +2897,7 @@ class UnitEntity extends Entity {
         if (this.rageTime > 0) this.rageTime -= 1000 / 60;
 
         if (this.stats.hpLostPerSecond) {
+            console.log('Test')
             this.takeDamage(this.stats.hpLostPerSecond / (1000 / 60) / 4);
         }
 
