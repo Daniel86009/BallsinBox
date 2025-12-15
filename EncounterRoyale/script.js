@@ -5,9 +5,7 @@ ToDo:
     -Make more responsive
 -Add more units, buildings and spells
 */
-    /*-Vines
-    -Sparky
-    -Royal Delivery
+    /*-Sparky
     -Elixir Collector
     -Goblin Hut
     -Barb Hut
@@ -246,6 +244,10 @@ const aoeStats = {
         damage: 84,
         slowDuration: 1000,
         slowAmount: 0.7
+    },
+    royalDeliveryAOE: {
+        radius: 72,
+        damage: 473
     }
 };
 
@@ -844,6 +846,18 @@ const units = {
         shrink: false,
         colour: '#b0b0b05d',
         target: 'ground'
+    },
+    vines: {
+        name: 'Vines',
+        symbol: '🥀',
+        cost: 3,
+        type: 'spell',
+        radius: 60,
+        damage: 153,
+        ctDamage: 38,
+        pulseCount: 2,
+        pulseTime: 1000,
+        vineDuration: 2500
     },
     valkyrie: {
         name: 'Valkyrie',
@@ -2067,6 +2081,24 @@ const units = {
         deployTime: 1000,
         targetPriority: 'all',
         type: 'unit'
+    },
+    royalDelivery: {
+        name: 'Royal Delivery',
+        symbol: '📦',
+        cost: 3,
+        hp: 547,
+        sheildHP: 240,
+        damage: 133,
+        attackSpeed: 1300,
+        initHitSpeed: 500,
+        range: 35,
+        viewRange: 150,
+        size: 22,
+        speed: 1,
+        targetPriority: 'ground',
+        type: 'unit',
+        spawnAOEStats: aoeStats.royalDeliveryAOE,
+        spawnDelay: 3000
     }
 };
 
@@ -2310,13 +2342,13 @@ function update() {
             continue;
         }
 
-        if(e.stats.type != 'flying') e.draw();
+        if(!e.isFlying) e.draw();
         e.update();
     }
 
     for (let i = 0; i < entities.length; i++) {
         let e = entities[i];
-        if (e.stats.type == 'flying') e.draw();
+        if (e.isFlying) e.draw();
     }
 
     for (let i = 0; i < aoes.length; i++) {
@@ -2416,7 +2448,9 @@ class Entity {
         this.invisible = false;
         this.hidden = false;
         this.pigCurseTime = 0;
-        this.deployTimeLeft = this.stats.deployTime || 0;
+        this.deployTimeLeft = stats.deployTime || 0;
+        this.isFlying = stats.type == 'flying';
+        this.vineTime = 0;
 
         if (stats.spawnInvis) this.invisible = true;
         if (!stats) this.dead = true;
@@ -2424,7 +2458,7 @@ class Entity {
 
     draw() {
         //Draw shadow
-        if (this.stats.type == 'flying') {
+        if (this.isFlying) {
             ctx.beginPath();
             ctx.fillStyle = '#00000079';
             ctx.arc(this.x + 10, this.y + 10, this.stats.size, 0, 2*Math.PI);
@@ -2549,6 +2583,29 @@ class Entity {
             ctx.strokeStyle = '#ff0000ff';
             ctx.moveTo(this.x, this.y);
             ctx.lineTo(this.target.x, this.target.y);
+            ctx.stroke();
+        }
+
+        if (this.vineTime > 1) {
+            let p1 = {x: Math.cos(Math.PI / 4) * this.stats.size, y: Math.sin(Math.PI / 4) * this.stats.size};
+            let p2 = {x: Math.cos(Math.PI * 2.4) * this.stats.size, y: Math.sin(Math.PI * 2.4) * this.stats.size};
+            let p3 = {x: Math.cos(Math.PI * 3/4) * this.stats.size, y: Math.sin(Math.PI * 3/4) * this.stats.size};
+            ctx.strokeStyle = '#7d2a00ff';
+            ctx.lineWidth = 4;
+            
+            ctx.beginPath();
+            ctx.moveTo(this.x + p1.x, this.y + p1.y);
+            ctx.lineTo(this.x - p1.x, this.y - p1.y);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(this.x + p2.x, this.y + p2.y);
+            ctx.lineTo(this.x - p2.x, this.y - p2.y);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(this.x + p3.x, this.y + p3.y);
+            ctx.lineTo(this.x - p3.x, this.y - p3.y);
             ctx.stroke();
         }
 
@@ -2735,7 +2792,7 @@ class Entity {
             let p = aoes[i];
 
             if (!p.stats.speedMult || p.team != this.team) continue;
-            if (p.stats.target == 'ground' && this.stats.type == 'flying') continue;
+            if (p.stats.target == 'ground' && this.isFlying) continue;
 
             if (M.dist(this, p) < this.stats.size + p.stats.radius) {
                 if (p.stats.rageDuration) {
@@ -2756,7 +2813,7 @@ class Entity {
             let p = aoes[i];
 
             if (!p.stats.moveSpeedMult || p.team == this.team) continue;
-            if (p.stats.target == 'ground' && this.stats.type == 'flying') continue;
+            if (p.stats.target == 'ground' && this.isFlying) continue;
 
             if (M.dist(this, p) < this.stats.size + p.stats.radius) {
                 this.moveSpeedMult *= p.stats.moveSpeedMult;
@@ -2773,6 +2830,7 @@ class UnitEntity extends Entity {
         this.dashPauseTime = 0;
         this.distance = 0;
         this.knockbackVel = {x: 0, y: 0};
+        this.hasDeployed = false;
 
         if (this.stats.spawnAOEStats) this.aoeAttack(this.x, this.y, this.stats.spawnAOEStats);
         if (this.stats.spawnInvis) this.nonAttackTime = this.stats.invisTime;
@@ -2796,6 +2854,14 @@ class UnitEntity extends Entity {
         if (!this.target || this.target.dead) {
             this.attackTime = 0;
             this.attacking = false;
+        }
+
+        if (this.vineTime > 0) {
+            this.vineTime -= 1000 / 60;
+            this.isFlying = false;
+            return;
+        } else {
+            if (this.stats.type == 'flying') this.isFlying = true;
         }
 
         if (this.stunTime > 0) {
@@ -2933,7 +2999,7 @@ class UnitEntity extends Entity {
                         continue;
                     }
                 } else if (this.stats.targetPriority == 'ground') {
-                    if (e.stats.type != 'flying') {
+                    if (e.stats.type != 'flying' && e.isFlying == false) {
                         minDist = dist;
                         closestEnemy = e;
                     } else {
@@ -3015,8 +3081,8 @@ class UnitEntity extends Entity {
             if (obj == this) continue;
             if (obj.stats.type == 'bomb') continue;
 
-            if (this.stats.type === 'flying' && obj.stats.type !== 'flying') continue;
-            if (this.stats.type !== 'flying' && obj.stats.type === 'flying') continue;
+            if (this.isFlying && !obj.isFlying) continue;
+            if (!this.isFlying && obj.isFlying) continue;
 
             let minDist = this.stats.size + obj.stats.size;
             let dx = this.x - obj.x;
@@ -3137,6 +3203,11 @@ class TowerEntity extends Entity {
         }
 
         if (this.target && this.target.invisible) this.target = null;
+
+        if (this.vineTime > 0) {
+            this.vineTime -= 1000 / 60;
+            return;
+        }
 
         if (this.stunTime > 0) {
             this.stunTime -= 1000 / 60;
@@ -3266,7 +3337,7 @@ class AOE {
             if (e.stats.type == 'bomb') continue;
             if (e.hidden && !this.stats.canHitHidden) continue;
 
-            if (this.stats.target == 'ground' && e.stats.type == 'flying') continue;
+            if (this.stats.target == 'ground' && e.isFlying) continue;
 
             let minDist = this.stats.radius + e.stats.size;
 
@@ -3289,6 +3360,10 @@ class AOE {
                     if (this.stats.knockback && e.knockbackVel) {
                         let dir = M.normalise(e.x - this.x, e.y - this.y);
                         e.applyKnockback(dir, this.stats.knockback);
+                    }
+
+                    if (this.pulseCount == this.stats.pulseCount - 1 && this.stats.vineDuration) {
+                        e.vineTime = this.stats.vineDuration;
                     }
                 } else {
                     if (this.stats.heal) e.heal(this.stats.heal);
@@ -3380,8 +3455,8 @@ class Projectile {
 
                 if (u.team == this.team || u.stats.type == 'bomb') continue;
                 if (u.hidden && !this.stats.canHitHidden) continue;
-                if (this.stats.targetPriority == 'ground' && u.stats.type == 'flying') continue;
-                if (this.stats.target == 'buildings' && (u.stats.type == 'unit' || u.stats.type == 'flying')) continue;
+                if (this.stats.targetPriority == 'ground' && u.isFlying) continue;
+                if (this.stats.target == 'buildings' && (u.stats.type == 'unit' || u.isFlying)) continue;
 
                 let isHit = false;
                 for (let j = 0; j < this.hitTargets.length; j++) {
@@ -3592,6 +3667,10 @@ class M {
             return {x: x.x * (1 / mag), y: x.y * (1 / mag)};
         }
     }
+
+    static pointOnCirc(a) {
+        return {x: Math.cos(a), y: Math.sin(a)};
+    }
 }
 
 function runAI() {
@@ -3657,6 +3736,15 @@ function spawnUnit(x, y, index, team) {
     }
 
     updateElixirUI();
+    
+    if (stats.spawnDelay) {
+        setTimeout(function() {spawnLogic(x, y, team, stats)}, stats.spawnDelay);
+    } else {
+        spawnLogic(x, y, team, stats);
+    }
+}
+
+function spawnLogic(x, y, team, stats) {
     if (stats.count == 2) {
         entities.push(new UnitEntity(x - 10, y, team, stats));
         entities.push(new UnitEntity(x + 10, y, team, stats));
