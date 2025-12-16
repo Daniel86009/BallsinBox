@@ -147,8 +147,14 @@ body {
 }
 
 #elixirBar {
-    transition: width 0.1s linear;
+    position: absolute;
     background-color: #df00df;
+    z-index: 1;
+}
+
+#elixirBarGrey {
+    position: absolute;
+    background-color: #aaaaaa69;
 }
 
 .divider-line {
@@ -158,6 +164,7 @@ body {
     height: 100%;
     background: rgba(176, 176, 176, 0.769);
     pointer-events: none;
+    z-index: 2;
 }
 
 #cardBar {

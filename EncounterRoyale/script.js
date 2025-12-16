@@ -8,22 +8,18 @@ ToDo:
     /*
     -Sparky
     -Elixir Collector
-    -Rascals
     -Goblin Drill
     -Executioner
     -Hunter
     -Goblin Demolisher
     -Cannon Cart
-    -Mirror
-    -Clone
-    -Skeleton Giant
-    -Elixir Golem
+    -Mirror ----
     -Goblin Giant
     -Rune Giant
-    -Ram Rider
-    -Fisherman
+    -Ram Rider ----
+    -Fisherman ----
     -Pheonix
-    -Goblin Machine
+    -Goblin Machine ----
     -Graveyard
     */
 /*
@@ -39,6 +35,7 @@ const c = document.getElementById('c');
 const ctx = c.getContext('2d');
 
 const elixirBar = document.getElementById('elixirBar');
+const elixirBarGrey = document.getElementById('elixirBarGrey');
 const elixirNum = document.getElementById('elixirNum');
 
 const gameoverScreen = document.getElementById('gameoverScreen');
@@ -52,7 +49,7 @@ const cardChoices = document.getElementById('cardChoices');
 
 const game = {
     maxElixir: 10,
-    elixirRate: 2800,
+    elixirRate: 28,
     laneLeftX: c.width * 0.25,
     laneRightX: c.width * 0.75,
     river: c.height / 2,
@@ -67,8 +64,7 @@ const game = {
     enemyStartElixir: 7,
     playerElixirMult: 1,
     playerStartElixir: 7,
-    randomiseEnemyUnits: true,
-    randomisePlayerUnits: false
+    randomiseEnemyUnits: true
 };
 
 const debug = {
@@ -247,6 +243,11 @@ const aoeStats = {
     royalDeliveryAOE: {
         radius: 72,
         damage: 473
+    },
+    giantSkeletonBombAOE: {
+        radius: 72,
+        damage: 535,
+        ctDamage: 1068
     }
 };
 
@@ -462,6 +463,10 @@ const projectileStats = {
     furncaceBullet: {
         damage: 179,
         colour: '#ff8800da'
+    },
+    rascalSling: {
+        damage: 125,
+        speed: 16
     }
 };
 
@@ -521,7 +526,7 @@ const otherUnits = {
         speed: 0,
         targetPriority: 'ground',
         type: 'bomb',
-        hpLostPerSecond: 400
+        hpLostPerSecond: 400 * 4
     },
     diddy: {
         name: 'Diddy',
@@ -559,7 +564,7 @@ const otherUnits = {
         speed: 0,
         targetPriority: 'ground',
         type: 'bomb',
-        hpLostPerSecond: 400
+        hpLostPerSecond: 400 * 4
     },
     barbarian: {
         name: 'Barbarian',
@@ -657,8 +662,87 @@ const otherUnits = {
         speed: 1.7,
         targetPriority: 'all',
         type: 'unit'
+    },
+    rascalBoy: {
+        name: 'Rascal Boy',
+        symbol: '👨🏻',
+        hp: 1940,
+        damage: 204,
+        attackSpeed: 1500,
+        initHitSpeed: 400,
+        range: 30,
+        viewRange: 150,
+        size: 25,
+        speed: 1,
+        deployTime: 1000,
+        targetPriority: 'ground',
+        type: 'unit'
+    },
+    rascalGirl: {
+        name: 'Rascal Girl',
+        symbol: '👩🏻',
+        hp: 261,
+        projectileStats: projectileStats.rascalSling,
+        attackSpeed: 1000,
+        initHitSpeed: 500,
+        range: 120,
+        viewRange: 150,
+        size: 20,
+        speed: 1,
+        deployTime: 1000,
+        targetPriority: 'all',
+        type: 'unit'
+
+    },
+    elixirGolemite: {
+        name: 'Elixir Golemite',
+        symbol: 'O',
+        hp: 762,
+        damage: 128,
+        deathSpawnNum: 2,
+        deathSpawnStats: null,
+        attackSpeed: 1100,
+        initHitSpeed: 800,
+        range: 30,
+        viewRange: 150,
+        size: 25,
+        speed: 1,
+        targetPriority: 'buildings',
+        type: 'unit',
+        deathEnemyElixir: 0.5
+    },
+    elixirBlob: {
+        name: 'Elixir Blob',
+        symbol: 'o',
+        hp: 360,
+        damage: 64,
+        attackSpeed: 1100,
+        initHitSpeed: 800,
+        range: 25,
+        viewRange: 150,
+        size: 20,
+        speed: 1.4,
+        targetPriority: 'buildings',
+        type: 'unit',
+        deathEnemyElixir: 0.5
+    },
+    giantSkeletonBomb: {
+        name: 'Giant Skeleton Bomb',
+        symbol: '💣',
+        hp: 3000,
+        deathAOEStats: aoeStats.giantSkeletonBombAOE,
+        attackSpeed: 2000,
+        range: 20,
+        viewRange: 150,
+        size: 15,
+        speed: 0,
+        targetPriority: 'ground',
+        type: 'bomb',
+        hpLostPerSecond: 400 * 4
     }
 };
+
+otherUnits.elixirGolemite.deathSpawnStats = otherUnits.elixirBlob;
 
 const units = {
     knight: {
@@ -899,6 +983,15 @@ const units = {
         shrink: false,
         canHitHidden: true,
         colour: '#00c8ffc5'
+    },
+    clone: {
+        name: 'Clone',
+        symbol: '🧬',
+        cost: 3,
+        type: 'spell',
+        radius: 72,
+        damage: 0,
+        clone: true
     },
     valkyrie: {
         name: 'Valkyrie',
@@ -2169,6 +2262,48 @@ const units = {
         type: 'building',
         hpLostPerSecond: 40.9,
         spawnInRange: true
+    },
+    rascals: {
+        name: 'Rascals',
+        cost: 5,
+        symbol: '👨🏻👩🏻'
+    },
+    elixirGolem: {
+        name: 'Elixir Golem',
+        symbol: '⏺',
+        cost: 3,
+        hp: 1569,
+        damage: 253,
+        deathSpawnNum: 2,
+        deathSpawnStats: otherUnits.elixirGolemite,
+        attackSpeed: 1100,
+        initHitSpeed: 800,
+        range: 40,
+        viewRange: 175,
+        size: 30,
+        speed: 0.7,
+        deployTime: 1000,
+        targetPriority: 'buildings',
+        type: 'unit',
+        deathEnemyElixir: 1
+    },
+    giantSkeleton: {
+        name: 'Giant Skeleton',
+        symbol: '☠️',
+        cost: 6,
+        hp: 3617,
+        damage: 266,
+        deathSpawnNum: 1,
+        deathSpawnStats: otherUnits.giantSkeletonBomb,
+        attackSpeed: 1400,
+        initHitSpeed: 300,
+        range: 35,
+        viewRange: 150,
+        size: 30,
+        speed: 1,
+        deployTime: 1000,
+        targetPriority: 'all',
+        type: 'unit'
     }
 };
 
@@ -2194,26 +2329,15 @@ const randomPlayerUnits = {
     unit8: true
 };
 
-/*const enemyUnits = {
-    unit1: units.knight,
-    unit2: units.archers,
-    unit3: units.megaKnight,
-    unit4: units.skeletons,
-    unit5: units.skarmy,
-    unit6: units.witch,
-    unit7: units.bandit,
-    unit8: units.minions
-};*/
-
 const enemyUnits = {
-    unit1: units.goblinBarrel,
-    unit2: units.goblinBarrel,
-    unit3: units.goblinBarrel,
-    unit4: units.goblinBarrel,
-    unit5: units.goblinBarrel,
-    unit6: units.goblinBarrel,
-    unit7: units.goblinBarrel,
-    unit8: units.goblinBarrel
+    unit1: null,
+    unit2: null,
+    unit3: null,
+    unit4: null,
+    unit5: null,
+    unit6: null,
+    unit7: null,
+    unit8: null
 };
 
 const towers = {
@@ -2375,30 +2499,36 @@ function update() {
         let e = entities[i];
         
         if (e.dead) {
-            if (e.stats) {
-                if (e.stats.name == 'king') {
-                    if (e.team == 'player') playerTowerDead = {left: true, right: true, king: true};
-                    else enemyTowerDead = {left: true, right: true, king: true};
-                    gameover(e.team);
-                }
+            if (e.stats.name == 'king') {
+                if (e.team == 'player') playerTowerDead = {left: true, right: true, king: true};
+                else enemyTowerDead = {left: true, right: true, king: true};
+                gameover(e.team);
+            }
 
-                if (e.stats.deathAOEStats) {
-                    aoes.push(new AOE(e.x, e.y, e.stats.deathAOEStats, e.team));
+            if (e.stats.deathAOEStats) {
+                aoes.push(new AOE(e.x, e.y, e.stats.deathAOEStats, e.team));
+            }
+            if (e.stats.deathSpawnNum) {
+                for (let j = 0; j < e.stats.deathSpawnNum; j++) {
+                    entities.push(new UnitEntity(e.x + j, e.y, e.team, e.stats.deathSpawnStats));
                 }
-                if (e.stats.deathSpawnNum) {
-                    for (let j = 0; j < e.stats.deathSpawnNum; j++) {
-                        entities.push(new UnitEntity(e.x + j, e.y, e.team, e.stats.deathSpawnStats));
-                    }
-                }
+            }
 
-                if (e.stats.name == 'princess') {
-                    if (e.team == 'player') {
-                        playerKingActivated = true;
-                        (e.x < c.width / 2) ? playerTowerDead.left = true : playerTowerDead.right = true;
-                    } else {
-                        enemyKingActivated = true;
-                        (e.x < c.width / 2) ? enemyTowerDead.left = true : enemyTowerDead.right = true;
-                    }
+            if (e.stats.deathEnemyElixir) {
+                if (e.team == 'player') {
+                    addElixir('enemy', e.stats.deathEnemyElixir);
+                } else {
+                    addElixir('player', e.stats.deathEnemyElixir);
+                }
+            }
+
+            if (e.stats.name == 'princess') {
+                if (e.team == 'player') {
+                    playerKingActivated = true;
+                    (e.x < c.width / 2) ? playerTowerDead.left = true : playerTowerDead.right = true;
+                } else {
+                    enemyKingActivated = true;
+                    (e.x < c.width / 2) ? enemyTowerDead.left = true : enemyTowerDead.right = true;
                 }
             }
 
@@ -2574,38 +2704,45 @@ class Entity {
         ctx.fillText(this.stats.symbol, this.x, this.y);
 
         
+        if (!this.stats.isClone) {
+            //Draw crown tower hp
+            if (this.stats.name == 'king' || this.stats.name == 'princess') {
+                //Heathbar outer
+                ctx.fillStyle = '#000000';
+                ctx.fillRect(this.x - this.stats.size, this.y + this.stats.size + 3, this.stats.size * 2, 15);
 
-        //Draw crown tower hp
-        if (this.stats.name == 'king' || this.stats.name == 'princess') {
-            //Heathbar outer
-            ctx.fillStyle = '#000000';
-            ctx.fillRect(this.x - this.stats.size, this.y + this.stats.size + 3, this.stats.size * 2, 15);
+                //Healthbar inner
+                ctx.fillStyle = '#009607ff';
+                ctx.fillRect(this.x - this.stats.size + 2, this.y + this.stats.size + 5, (this.stats.size * (this.hp / this.stats.hp) * 2)- 4, 11);
 
-            //Healthbar inner
-            ctx.fillStyle = '#009607ff';
-            ctx.fillRect(this.x - this.stats.size + 2, this.y + this.stats.size + 5, (this.stats.size * (this.hp / this.stats.hp) * 2)- 4, 11);
+                //Health Number
+                ctx.fillStyle = (this.team == 'player') ? '#3845ff' : '#fa1d1dff';
+                ctx.font = 'bold 14px Arial';
+                ctx.textAlign = 'left';
+                ctx.textBaseline = 'top';
+                ctx.fillText(Math.round(this.hp).toString(), this.x - this.stats.size + 2, this.y + this.stats.size + 4);
+            } else {
+                //Heathbar outer
+                ctx.fillStyle = '#000000';
+                ctx.fillRect(this.x - this.stats.size, this.y + this.stats.size + 3, this.stats.size * 2, 10);
 
-            //Health Number
-            ctx.fillStyle = (this.team == 'player') ? '#3845ff' : '#fa1d1dff';
-            ctx.font = 'bold 14px Arial';
-            ctx.textAlign = 'left';
-            ctx.textBaseline = 'top';
-            ctx.fillText(Math.round(this.hp).toString(), this.x - this.stats.size + 2, this.y + this.stats.size + 4);
+                //Healthbar inner
+                ctx.fillStyle = '#009607ff';
+                ctx.fillRect(this.x - this.stats.size + 2, this.y + this.stats.size + 5, (this.stats.size * (this.hp / this.stats.hp) * 2)- 4, 6);
+            }
+
+            //Draw shield
+            if (this.sheildHP > 1) {
+                ctx.fillStyle = '#b1a500ff';
+                ctx.fillRect(this.x - this.stats.size + 2, this.y + this.stats.size + 5, (this.stats.size * (this.sheildHP / this.stats.sheildHP) * 2)- 4, 6);
+            }
         } else {
-            //Heathbar outer
-            ctx.fillStyle = '#000000';
-            ctx.fillRect(this.x - this.stats.size, this.y + this.stats.size + 3, this.stats.size * 2, 10);
-
-            //Healthbar inner
-            ctx.fillStyle = '#009607ff';
-            ctx.fillRect(this.x - this.stats.size + 2, this.y + this.stats.size + 5, (this.stats.size * (this.hp / this.stats.hp) * 2)- 4, 6);
+            ctx.beginPath();
+            ctx.fillStyle = '#00fbff5c';
+            ctx.arc(this.x, this.y, this.stats.size, 0, 2 * Math.PI);
+            ctx.fill();
         }
-
-        //Draw shield
-        if (this.sheildHP > 1) {
-            ctx.fillStyle = '#b1a500ff';
-            ctx.fillRect(this.x - this.stats.size + 2, this.y + this.stats.size + 5, (this.stats.size * (this.sheildHP / this.stats.sheildHP) * 2)- 4, 6);
-        }
+        
         
         //Draw if frozen
         if (this.freezeTime > 1) {
@@ -3462,6 +3599,7 @@ class AOE {
                     }
                 } else {
                     if (this.stats.heal) e.heal(this.stats.heal);
+                    if (this.stats.clone) this.clone(e);
                 }
             }
         }
@@ -3479,6 +3617,18 @@ class AOE {
                 if (e.applyKnockback) e.applyKnockback(dir, this.stats.pullForce);
             }
         }
+    }
+
+    clone(e) {
+        if (e.stats.type == 'building') return;
+        if (e.stats.isClone) return;
+        let dir = (this.team == 'player') ? 1 : -1;
+        let stats = {...e.stats};
+        stats.hp = 1;
+        if (stats.sheildHP) stats.sheildHP = 1;
+        stats.isClone = true;
+
+        entities.push(new UnitEntity(e.x, e.y + dir * 10, e.team, stats));
     }
 }
 
@@ -3784,19 +3934,19 @@ function runAI() {
 }
 
 function updateElixir() {
-    if (playerElixir + game.playerElixirMult * elixirMult < game.maxElixir) playerElixir += game.playerElixirMult * elixirMult;
-    else if (game.playerElixirMult < 10) playerElixir = game.maxElixir;
-    if (enemyElixir + game.enemyElixirMult * elixirMult < game.maxElixir) enemyElixir += game.enemyElixirMult * elixirMult;
-    else enemyElixir = game.maxElixir;
+    playerElixir = Math.min(game.maxElixir, playerElixir + (game.playerElixirMult * elixirMult) / 100);
+
+    enemyElixir = Math.min(game.maxElixir, enemyElixir + (game.enemyElixirMult * elixirMult) / 100);
 
     updateElixirUI();
 }
 
 function updateElixirUI() {
-    elixirBar.style.width = `${playerElixir / game.maxElixir * 100}%`;
-    elixirNum.innerHTML = playerElixir;
+    elixirBarGrey.style.width = `${playerElixir / game.maxElixir * 100}%`;
+    elixirBar.style.width = `${Math.floor(playerElixir) / game.maxElixir * 100}%`;
+    elixirNum.innerHTML = Math.floor(playerElixir);
 
-    drawHandUI();
+    updateCardDisabledState();
 }
 
 function spawnUnit(x, y, index, team) {
@@ -3876,13 +4026,18 @@ function spawnLogic(x, y, team, stats) {
         let dir = (team == 'player') ? {x: 0, y: -1} : {x: 0, y: 1};
         projectiles.push(new Projectile(x, y, stats, dir, team));
     } else if (stats.name == 'Goblin Gang') {
-        let dir = (this.team == 'player') ? -10 : 10;
+        let dir = (team == 'player') ? 10 : -10;
         entities.push(new UnitEntity(x + 30, y - dir, team, units.goblins));
         entities.push(new UnitEntity(x, y - dir * 2.5, team, units.goblins));
         entities.push(new UnitEntity(x - 30, y - dir, team, units.goblins));
         entities.push(new UnitEntity(x + 30, y + dir, team, units.spearGoblins));
         entities.push(new UnitEntity(x, y + dir * 2.5, team, units.spearGoblins));
         entities.push(new UnitEntity(x - 30, y + dir, team, units.spearGoblins));
+    } else if (stats.name == 'Rascals') {
+        let dir = (team == 'player') ? 10 : -10;
+        entities.push(new UnitEntity(x, y, team, otherUnits.rascalBoy));
+        entities.push(new UnitEntity(x + 30, y + dir * 5, team, otherUnits.rascalGirl));
+        entities.push(new UnitEntity(x - 30, y + dir * 5, team, otherUnits.rascalGirl));
     } else if (stats.name == 'Goblin Barrel') {
         let startX = c.width / 2;
         let startY = (team == 'player') ? c.height - game.kingY : game.kingY;
@@ -4063,6 +4218,20 @@ function drawHandUI() {
             <div style="font-weight: 700;">${nextCardStats.name}</div>
             <div style="font-weight: 700;">Cost: <span style="color: #df00df;">${nextCardStats.cost}</span></div>
         `;
+    }
+}
+
+function updateCardDisabledState() {
+    const cards = cardBar.children;
+
+    for (let i = 0; i < cards.length; i++) {
+        const cardStats = playerUnits[playerHand[i]];
+        if (!cardStats) continue;
+
+        cards[i].classList.toggle(
+            'disabled',
+            cardStats.cost > playerElixir
+        );
     }
 }
 
@@ -4341,4 +4510,12 @@ function getCrowns() {
     totalCrownDisplay.innerHTML = `${localStorage.crowns || 0} 👑`;
     newCrownDisplay.innerHTML = `+${crownAmount}👑`;
     newCrownDisplay.style.display = 'block';
+}
+
+function addElixir(team, amount) {
+    if (team == 'player') {
+        playerElixir = Math.min(game.maxElixir, playerElixir + amount);
+    } else {
+        enemyElixir = Math.min(game.maxElixir, enemyElixir + amount);
+    }
 }
