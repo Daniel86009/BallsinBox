@@ -1709,7 +1709,8 @@ const units = {
         speed: 0,
         deployTime: 1000,
         targetPriority: 'all',
-        type: 'building'
+        type: 'building',
+        hpLostPerSecond: 45.2
     },
     royalGhost: {
         name: 'Royal Ghost',
