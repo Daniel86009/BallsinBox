@@ -5,15 +5,13 @@ ToDo:
     -Make more responsive
 -Add more units, buildings and spells
 */
-    /*-Sparky
+    /*
+    -Sparky
     -Elixir Collector
-    -Goblin Hut
-    -Barb Hut
     -Rascals
     -Goblin Drill
     -Executioner
     -Hunter
-    -Goblin Curse
     -Goblin Demolisher
     -Cannon Cart
     -Mirror
@@ -26,7 +24,8 @@ ToDo:
     -Fisherman
     -Pheonix
     -Goblin Machine
-    -Graveyard*/
+    -Graveyard
+    */
 /*
 -Add proper icons
 -Add better visuals and particle effects
@@ -644,6 +643,20 @@ const otherUnits = {
         speed: 1.7,
         targetPriority: 'all',
         type: 'flying'
+    },
+    spearGoblin: {
+        name: 'Spear Goblin',
+        symbol: '👺',
+        hp: 133,
+        projectileStats: projectileStats.spearGoblinSpear,
+        attackSpeed: 1700,
+        initHitSpeed: 500,
+        range: 120,
+        viewRange: 150,
+        size: 18,
+        speed: 1.7,
+        targetPriority: 'all',
+        type: 'unit'
     }
 };
 
@@ -857,7 +870,35 @@ const units = {
         ctDamage: 38,
         pulseCount: 2,
         pulseTime: 1000,
-        vineDuration: 2500
+        vineDuration: 2500,
+        colour: '#186d0097'
+    },
+    goblinCurse: {
+        name: 'Goblin Curse',
+        symbol: '🍾',
+        cost: 2,
+        type: 'spell',
+        radius: 72,
+        damage: 30,
+        ctDamage: 6,
+        pulseCount: 6,
+        pulseTime: 1000,
+        goblinCurse: true,
+        shrink: false,
+        colour: '#1efd0066'
+    },
+    freeze: {
+        name: 'Freeze',
+        symbol: '🧊',
+        cost: 4,
+        type: 'spell',
+        radius: 80,
+        damage: 115,
+        lifetime: 4000,
+        freezeDuration: 4000,
+        shrink: false,
+        canHitHidden: true,
+        colour: '#00c8ffc5'
     },
     valkyrie: {
         name: 'Valkyrie',
@@ -1125,19 +1166,6 @@ const units = {
         targetPriority: 'all',
         type: 'unit',
         dieOnAttack: true
-    },
-    freeze: {
-        name: 'Freeze',
-        symbol: '🧊',
-        cost: 4,
-        type: 'spell',
-        radius: 80,
-        damage: 115,
-        lifetime: 4000,
-        freezeDuration: 4000,
-        shrink: false,
-        canHitHidden: true,
-        colour: '#00c8ffc5'
     },
     witch: {
         name: 'Witch',
@@ -1986,7 +2014,7 @@ const units = {
         supportStats: otherUnits.skeleton,
         deathSpawnNum: 4,
         deathSpawnStats: otherUnits.skeleton,
-        range: 132,
+        range: 25,
         viewRange: 150,
         size: 25,
         speed: 0,
@@ -2100,6 +2128,47 @@ const units = {
         type: 'unit',
         spawnAOEStats: aoeStats.royalDeliveryAOE,
         spawnDelay: 3000
+    },
+    barbHut: {
+        name: 'Barbarian Hut',
+        symbol: '🏠',
+        cost: 6,
+        hp: 1164,
+        damage: 0,
+        supportSpawnNum: 3,
+        supportSpawnSpeed: 15000,
+        supportStats: otherUnits.barbarian,
+        deathSpawnNum: 1,
+        deathSpawnStats: otherUnits.barbarian,
+        range: 25,
+        viewRange: 150,
+        size: 25,
+        speed: 0,
+        deployTime: 1000,
+        targetPriority: 'ground',
+        type: 'building',
+        hpLostPerSecond: 38.8
+    },
+    goblinHut: {
+        name: 'Goblin Hut',
+        symbol: '🛖',
+        cost: 4,
+        hp: 1228,
+        damage: 0,
+        supportSpawnNum: 1,
+        supportSpawnSpeed: 1900,
+        supportStats: otherUnits.spearGoblin,
+        deathSpawnNum: 1,
+        deathSpawnStats: otherUnits.spearGoblin,
+        range: 144,
+        viewRange: 150,
+        size: 25,
+        speed: 0,
+        deployTime: 1000,
+        targetPriority: 'all',
+        type: 'building',
+        hpLostPerSecond: 40.9,
+        spawnInRange: true
     }
 };
 
@@ -2205,7 +2274,6 @@ let elixirMult = 1;
 let crowns = Number(localStorage.crowns) || 0;
 
 function start() {
-    console.log(Object.keys(units).length + 26);
     document.addEventListener('mousemove', (e) => {
         let rect = c.getBoundingClientRect();
         mouse.x = e.clientX - rect.left;
@@ -2334,6 +2402,22 @@ function update() {
                 }
             }
 
+            let hasSpawned = false;
+            for (let i = 0; i < aoes.length; i++) {
+                let aoe = aoes[i];
+
+                if (hasSpawned) continue;
+                if (!aoe.stats.goblinCurse) continue;
+                if (aoe.team == e.team) continue;
+
+                let minDist = aoe.stats.radius + e.stats.size;
+
+                if (M.dist(aoe, e) < minDist) {
+                    hasSpawned = true;
+                    entities.push(new UnitEntity(e.x, e.y, aoe.team, otherUnits.goblin));
+                }
+            }
+
             if (e.pigCurseTime > 0) {
                 let team = (e.team == 'player') ? 'enemy' : 'player';
                 entities.push(new UnitEntity(e.x, e.y, team, otherUnits.cursedPig));
@@ -2441,7 +2525,8 @@ class Entity {
         this.speedMult = 1;
         this.moveSpeedMult = 1;
         this.stunTime = 0;
-        this.supportSpawnCooldown = stats.supportSpawnSpeed / 4;
+        if (stats.supportSpawnSpeed > 10000) this.supportSpawnCooldown = 200;
+        else this.supportSpawnCooldown = stats.supportSpawnSpeed / 4;
         this.charging = false;
         this.isAttacking = false;
         this.attackTime = 0;
@@ -2771,6 +2856,13 @@ class Entity {
                 entities.push(new UnitEntity(this.x - 50, this.y, this.team, this.stats.supportStats));
                 entities.push(new UnitEntity(this.x, this.y + 50, this.team, this.stats.supportStats));
                 entities.push(new UnitEntity(this.x, this.y - 50, this.team, this.stats.supportStats));
+            } else if (this.stats.supportSpawnNum == 3) {
+                entities.push(new UnitEntity(this.x, this.y + dir, this.team, this.stats.supportStats));
+                entities.push(new UnitEntity(this.x, this.y + dir, this.team, this.stats.supportStats));
+                entities.push(new UnitEntity(this.x, this.y + dir, this.team, this.stats.supportStats));
+            } else if (this.stats.name == 'Night Witch') {
+                entities.push(new UnitEntity(this.x + 25, this.y + dir * -20, this.team, this.stats.supportStats));
+                entities.push(new UnitEntity(this.x - 25, this.y + dir * -20, this.team, this.stats.supportStats));
             } else if (this.stats.supportSpawnNum == 2) {
                 entities.push(new UnitEntity(this.x, this.y + dir, this.team, this.stats.supportStats));
                 entities.push(new UnitEntity(this.x, this.y + dir, this.team, this.stats.supportStats));
@@ -2916,7 +3008,7 @@ class UnitEntity extends Entity {
         this.checkDash();
         this.checkCharge();
         this.checkSpeedChange();
-        this.spawnSupport();
+        if (!this.stats.spawnInRange) this.spawnSupport();
         this.findTarget();
 
         if (!this.target) return;
@@ -2934,6 +3026,8 @@ class UnitEntity extends Entity {
         let distCheck = false;
         if (minRange > 0) distCheck = (dist - this.target.stats.size < maxRange && dist - this.target.stats.size > minRange);
         else distCheck = dist - this.target.stats.size < maxRange;
+
+        if (this.stats.spawnInRange && distCheck) this.spawnSupport();
 
         if (canDash) {
             if (this.dashTime < 100) {
