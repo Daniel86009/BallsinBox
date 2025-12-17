@@ -4,28 +4,14 @@ ToDo:
     -Add spell support
     -Make more responsive
 -Add more units, buildings and spells
-*/
-    /*
-    -Sparky
-    -Elixir Collector
-    -Goblin Drill
-    -Executioner
-    -Hunter
-    -Goblin Demolisher
-    -Cannon Cart
-    -Mirror ----
+    -Mirror
     -Goblin Giant
     -Rune Giant
-    -Ram Rider ----
-    -Fisherman ----
-    -Pheonix
-    -Goblin Machine ----
-    -Graveyard
-    */
-/*
+    -Ram Rider
+    -Fisherman
+    -Goblin Machine
 -Add proper icons
 -Add better visuals and particle effects
--Make elixir bar go up smoothly
 */
 
 //1 range ≈ 24
@@ -72,6 +58,13 @@ const debug = {
     drawRange: false,
     drawDash: false,
     pickSameCards: false
+};
+
+const particleStats = {
+    dirt: {
+        size: {min: 3, max: 10},
+        colour: '#9d5100ff'
+    }
 };
 
 const aoeStats = {
@@ -248,6 +241,27 @@ const aoeStats = {
         radius: 72,
         damage: 535,
         ctDamage: 1068
+    },
+    sparkyAOE: {
+        radius: 43.2,
+        damage: 1331
+    },
+    goblinDemolisherAOE: {
+        radius: 36,
+        damage: 186
+    },
+    kamikazeGoblinAOE: {
+        radius: 60,
+        damage: 404
+    },
+    phoenixDeathAOE: {
+        radius: 36,
+        damage: 163
+    },
+    goblinDrillSpawnAOE: {
+        radius: 60,
+        damage: 84,
+        ctDamage: 26
     }
 };
 
@@ -376,7 +390,7 @@ const projectileStats = {
         groundProj: true
     },
     bomberBomb: {
-        aoeStats: aoeStats.babyDragonAOE,
+        aoeStats: aoeStats.bomberAOE,
         speed: 8,
         size: 10,
         aoeOnDeath: true,
@@ -467,6 +481,40 @@ const projectileStats = {
     rascalSling: {
         damage: 125,
         speed: 16
+    },
+    sparkyBullet: {
+        aoeStats: aoeStats.sparkyAOE,
+        size: 15,
+        colour: '#00e5ffda',
+        speed: 28
+    },
+    goblinDemolisherBomb: {
+        aoeStats: aoeStats.goblinDemolisherAOE,
+        speed: 8,
+        size: 8,
+        colour: '#b80000d0',
+        aoeOnDeath: true,
+        groundProj: true
+    },
+    cannonCartBullet: {
+        damage: 212,
+        speed: 20
+    },
+    executionerAxe: {
+        damage: 168,
+        colour: '#676767ff',
+        size: 24,
+        distance: 180,
+        returns: true,
+        speed: 11,
+        pierce: 9999,
+        lifetime: 9999,
+        targetPriority: 'all'
+    },
+    hunterBullet: {
+        damage: 84,
+        speed: 10.5,
+        distance: 156
     }
 };
 
@@ -739,10 +787,73 @@ const otherUnits = {
         targetPriority: 'ground',
         type: 'bomb',
         hpLostPerSecond: 400 * 4
+    },
+    kamikazeGoblin: {
+        name: 'Goblin Demolisher',
+        symbol: '💥',
+        hp: 1300,
+        damage: 0,
+        deathAOEStats: aoeStats.kamikazeGoblinAOE,
+        attackSpeed: 2000,
+        range: 30,
+        viewRange: 150,
+        size: 25,
+        speed: 1.7,
+        targetPriority: 'buildings',
+        type: 'unit',
+        hpLostPerSecond: 65,
+        dieOnAttack: true
+    },
+    brokenCannonCart: {
+        name: 'Cannon Cart',
+        symbol: '🛒',
+        hp: 1809,
+        projectileStats: projectileStats.cannonCartBullet,
+        attackSpeed: 900,
+        initHitSpeed: 500,
+        range: 132,
+        viewRange: 150,
+        size: 25,
+        speed: 0,
+        targetPriority: 'ground',
+        type: 'building',
+        hpLostPerSecond: 30.15
+    },
+    phoenixEgg: {
+        name: 'Phoenix Egg',
+        symbol: '🥚',
+        hp: 240,
+        attackSpeed: 2000,
+        range: 20,
+        viewRange: 150,
+        size: 15,
+        speed: 0,
+        targetPriority: 'ground',
+        type: 'building',
+        supportSpawnSpeed: 4300,
+        supportStats: null,
+        supportSpawnNum: 1,
+        dieOnSupportSpawn: true
+    },
+    babyPhoenix: {
+        name: 'Baby Phoenix',
+        symbol: '🐦‍🔥',
+        hp: 1052 * 0.8,
+        damage: 217 * 0.8,
+        attackSpeed: 1000,
+        initHitSpeed: 500,
+        range: 25,
+        viewRange: 150,
+        size: 20,
+        speed: 1,
+        deployTime: 1000,
+        targetPriority: 'all',
+        type: 'flying'
     }
 };
 
 otherUnits.elixirGolemite.deathSpawnStats = otherUnits.elixirBlob;
+otherUnits.phoenixEgg.supportStats = otherUnits.babyPhoenix;
 
 const units = {
     knight: {
@@ -992,6 +1103,43 @@ const units = {
         radius: 72,
         damage: 0,
         clone: true
+    },
+    graveyard: {
+        name: 'Graveyard',
+        symbol: '🪦🪦',
+        cost: 5,
+        type: 'spell',
+        radius: 96,
+        damage: 0,
+        lifetime: 9000,
+        spawnSpeed: 500,
+        initSpawnSpeed: 2200,
+        spawnStats: otherUnits.skeleton,
+        shrink: false,
+        colour: '#70009294'
+    },
+    void: {
+        name: 'Void',
+        symbol: '🕳️',
+        cost: 3,
+        type: 'spell',
+        radius: 60,
+        damage: [340, 160, 76],
+        ctDamage: [48, 25, 17],
+        pulseTime: 1000,
+        pulseCount: 3,
+        lifetime: 4000,
+        shrink: false
+    },
+    lighting: {
+        name: 'Lightning',
+        symbol: '⚡️⚡️',
+        cost: 6,
+        type: 'spell',
+        radius: 60,
+        damage: 1057,
+        ctDamage: 286,
+        hitCount: 3
     },
     valkyrie: {
         name: 'Valkyrie',
@@ -1268,6 +1416,7 @@ const units = {
         projectileStats: projectileStats.witchBullet,
         supportSpawnNum: 4,
         supportSpawnSpeed: 7000,
+        initSupportSpawnSpeed: 1000,
         supportStats: otherUnits.skeleton,
         attackSpeed: 1100,
         initHitSpeed: 700,
@@ -2231,6 +2380,7 @@ const units = {
         damage: 0,
         supportSpawnNum: 3,
         supportSpawnSpeed: 15000,
+        initSupportSpawnSpeed: 200,
         supportStats: otherUnits.barbarian,
         deathSpawnNum: 1,
         deathSpawnStats: otherUnits.barbarian,
@@ -2301,6 +2451,156 @@ const units = {
         range: 35,
         viewRange: 150,
         size: 30,
+        speed: 1,
+        deployTime: 1000,
+        targetPriority: 'ground',
+        type: 'unit'
+    },
+    sparky: {
+        name: 'sparky',
+        symbol: '🪫',
+        cost: 6,
+        hp: 1451,
+        projectileStats: projectileStats.sparkyBullet,
+        attackSpeed: 4000,
+        initHitSpeed: 1000,
+        range: 120,
+        viewRange: 150,
+        size: 25,
+        speed: 0.7,
+        deployTime: 1000,
+        targetPriority: 'ground',
+        type: 'unit',
+        chargeAttack: true,
+        recoil: 4
+    },
+    goblinDemolisher: {
+        name: 'Goblin Demolisher',
+        symbol: '🧨',
+        cost: 4,
+        hp: 1300,
+        projectileStats: projectileStats.goblinDemolisherBomb,
+        attackSpeed: 1200,
+        initHitSpeed: 500,
+        range: 120,
+        viewRange: 150,
+        size: 25,
+        speed: 1,
+        deployTime: 1000,
+        targetPriority: 'ground',
+        type: 'unit',
+        activatedStats: otherUnits.kamikazeGoblin,
+        activationHP: 0.5
+    },
+    cannonCart: {
+        name: 'Cannon Cart',
+        symbol: '🛒',
+        cost: 5,
+        hp: 1809,
+        projectileStats: projectileStats.cannonCartBullet,
+        attackSpeed: 900,
+        initHitSpeed: 500,
+        range: 132,
+        viewRange: 150,
+        size: 25,
+        speed: 1,
+        deployTime: 1000,
+        targetPriority: 'ground',
+        type: 'unit',
+        activatedStats: otherUnits.brokenCannonCart,
+        activationHP: 0.5
+    },
+    phoenix: {
+        name: 'Phoenix',
+        symbol: '🐦‍🔥',
+        cost: 4,
+        hp: 1052,
+        damage: 217,
+        deathSpawnNum: 1,
+        deathSpawnStats: otherUnits.phoenixEgg,
+        deathAOEStats: aoeStats.phoenixDeathAOE,
+        attackSpeed: 1000,
+        initHitSpeed: 500,
+        range: 30,
+        viewRange: 150,
+        size: 25,
+        speed: 1,
+        deployTime: 1000,
+        targetPriority: 'all',
+        type: 'flying'
+    },
+    elixirCollector: {
+        name: 'Elixir Collector',
+        symbol: '🏦',
+        cost: 6,
+        hp: 1070,
+        attackSpeed: 1000,
+        initHitSpeed: 1000,
+        range: 25,
+        viewRange: 150,
+        size: 25,
+        speed: 0,
+        deployTime: 1000,
+        targetPriority: 'ground',
+        type: 'building',
+        hpLostPerSecond: 12.4,
+        elixirSpeed: 12000,
+        elixirAmount: 1,
+        deathElixir: 1
+    },
+    goblinDrill: {
+        name: 'Goblin Drill',
+        symbol: '🛠️',
+        cost: 4,
+        hp: 1313,
+        attackSpeed: 1000,
+        initHitSpeed: 1000,
+        range: 132,
+        viewRange: 150,
+        size: 25,
+        speed: 0,
+        deployTime: 1000,
+        targetPriority: 'ground',
+        type: 'building',
+        deployType: 'spell',
+        hpLostPerSecond: 131.3,
+        spawnAOEStats: aoeStats.goblinDrillSpawnAOE,
+        supportSpawnSpeed: 3000,
+        initSupportSpawnSpeed: 800,
+        supportStats: otherUnits.goblin,
+        supportSpawnNum: 1,
+        deathSpawnNum: 2,
+        deathSpawnStats: otherUnits.goblin
+    },
+    executioner: {
+        name: 'Executioner',
+        symbol: '⛏️',
+        cost: 5,
+        hp: 1280,
+        projectileStats: projectileStats.executionerAxe,
+        attackSpeed: 900,
+        initHitSpeed: 500,
+        range: 108,
+        viewRange: 150,
+        size: 25,
+        speed: 1,
+        deployTime: 1000,
+        targetPriority: 'all',
+        type: 'unit'
+    },
+    hunter: {
+        name: 'Hunter',
+        symbol: '🍗',
+        cost: 4,
+        hp: 885,
+        projectileStats: projectileStats.hunterBullet,
+        projectileCount: 10,
+        projectileSpread: Math.PI / 6,
+        attackSpeed: 2200,
+        initHitSpeed: 700,
+        range: 96,
+        viewRange: 150,
+        size: 25,
         speed: 1,
         deployTime: 1000,
         targetPriority: 'all',
@@ -2523,6 +2823,10 @@ function update() {
                 }
             }
 
+            if (e.stats.deathElixir) {
+                addElixir(e.team, e.stats.deathElixir);
+            }
+
             if (e.stats.name == 'princess') {
                 if (e.team == 'player') {
                     playerKingActivated = true;
@@ -2586,7 +2890,7 @@ function update() {
         let x = mouse.x;
         let y = mouse.y;
 
-        if (stats.type != 'spell') {
+        if (stats.type != 'spell' && stats.deployType != 'spell') {
             let newPos = findMax(x, y);
             if (newPos.x) x = newPos.x;
             if (newPos.y) y = newPos.y;
@@ -2656,8 +2960,7 @@ class Entity {
         this.speedMult = 1;
         this.moveSpeedMult = 1;
         this.stunTime = 0;
-        if (stats.supportSpawnSpeed > 10000) this.supportSpawnCooldown = 200;
-        else this.supportSpawnCooldown = stats.supportSpawnSpeed / 4;
+        this.supportSpawnCooldown = stats.initSupportSpawnSpeed || stats.supportSpawnSpeed;
         this.charging = false;
         this.isAttacking = false;
         this.attackTime = 0;
@@ -2668,9 +2971,11 @@ class Entity {
         this.deployTimeLeft = stats.deployTime || 0;
         this.isFlying = stats.type == 'flying';
         this.vineTime = 0;
+        this.elixirCooldown = stats.elixirSpeed;
 
         if (stats.spawnInvis) this.invisible = true;
         if (!stats) this.dead = true;
+        if (stats.chargeAttack) this.attackCooldown = stats.attackSpeed;
     }
 
     draw() {
@@ -2737,6 +3042,17 @@ class Entity {
                 ctx.fillStyle = '#b1a500ff';
                 ctx.fillRect(this.x - this.stats.size + 2, this.y + this.stats.size + 5, (this.stats.size * (this.sheildHP / this.stats.sheildHP) * 2)- 4, 6);
             }
+
+            //Draw activation
+            if (this.stats.activationHP) {
+                let x = (this.x - this.stats.size) + this.stats.size * 2 * this.stats.activationHP;
+                ctx.strokeStyle = '#d88600ff';
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.moveTo(x, this.y + this.stats.size - 1);
+                ctx.lineTo(x, this.y + this.stats.size + 14);
+                ctx.stroke();
+            }
         } else {
             ctx.beginPath();
             ctx.fillStyle = '#00fbff5c';
@@ -2744,6 +3060,16 @@ class Entity {
             ctx.fill();
         }
         
+        if (this.stats.chargeAttack) {
+            if (this.attackCooldown < 1000) ctx.fillStyle = '#00f7ff9b';
+            else if (this.attackCooldown < 2000) ctx.fillStyle = '#00f7ff6d';
+            else if (this.attackCooldown < 3000) ctx.fillStyle = '#00f7ff3d';
+            else if (this.attackCooldown < 4000) ctx.fillStyle = '#00f7ff1b';
+            else ctx.fillStyle = '#ffffff01';
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.stats.size, 0, 2*Math.PI);
+            ctx.fill();
+        }
         
         //Draw if frozen
         if (this.freezeTime > 1) {
@@ -2919,7 +3245,8 @@ class Entity {
     }
 
     attack(target) {
-        if (target && this.attackCooldown < 1) {
+        let hasDamage = this.stats.damage || this.stats.beamDamage || this.stats.chargeDamage;
+        if (target && this.attackCooldown < 1 && hasDamage) {
             if (this.stats.beamDamage) {
                 if (this.attackTime < this.stats.damageStageTime) {
                     target.takeDamage(this.stats.beamDamage[0], this);
@@ -2965,15 +3292,26 @@ class Entity {
         let dir = M.normalise(target.x - this.x, target.y - this.y);
 
         if (this.attackCooldown < 1) {
-            if (this.stats.projectileStats.type == 'lightning') {
-                projectiles.push(new ChainLighning(this.target.x, this.target.y, this.x, this.y, this.stats.projectileStats, this.team, 'all', this));
+            if (this.stats.projectileCount) {
+                for (let i = 0; i < this.stats.projectileCount; i++) {
+                    let currentAngle = Math.atan2(dir.y, dir.x);
+                    let newAngle = Math.random() * (this.stats.projectileSpread + this.stats.projectileSpread) - this.stats.projectileSpread;
+                    let angle = currentAngle + newAngle;
+                    let newDir = {x: Math.cos(angle), y: Math.sin(angle)};
+
+                    projectiles.push(new Projectile(this.x, this.y, this.stats.projectileStats, newDir, this.team, 'all', this));
+                }
             } else {
-                if (this.stats.projectileStats.targetPriority == 'all' || this.stats.projectileStats.targetPriority == 'ground') {
-                    projectiles.push(new Projectile(this.x, this.y, this.stats.projectileStats, dir, this.team, 'all', this));
-                } else if (this.stats.projectileStats.groundProj) {
-                    projectiles.push(new Projectile(this.x, this.y, this.stats.projectileStats, dir, this.team, {x: this.target.x, y: this.target.y}, this));
+                if (this.stats.projectileStats.type == 'lightning') {
+                projectiles.push(new ChainLighning(this.target.x, this.target.y, this.x, this.y, this.stats.projectileStats, this.team, 'all', this));
                 } else {
-                    projectiles.push(new Projectile(this.x, this.y, this.stats.projectileStats, dir, this.team, this.target, this));
+                    if (this.stats.projectileStats.targetPriority == 'all' || this.stats.projectileStats.targetPriority == 'ground') {
+                        projectiles.push(new Projectile(this.x, this.y, this.stats.projectileStats, dir, this.team, 'all', this));
+                    } else if (this.stats.projectileStats.groundProj) {
+                        projectiles.push(new Projectile(this.x, this.y, this.stats.projectileStats, dir, this.team, {x: this.target.x, y: this.target.y}, this));
+                    } else {
+                        projectiles.push(new Projectile(this.x, this.y, this.stats.projectileStats, dir, this.team, this.target, this));
+                    }
                 }
             }
 
@@ -3004,10 +3342,13 @@ class Entity {
             } else if (this.stats.supportSpawnNum == 2) {
                 entities.push(new UnitEntity(this.x, this.y + dir, this.team, this.stats.supportStats));
                 entities.push(new UnitEntity(this.x, this.y + dir, this.team, this.stats.supportStats));
+            } else if (this.stats.name == 'Phoenix Egg') {
+                entities.push(new UnitEntity(this.x, this.y, this.team, this.stats.supportStats));
             } else {
-                entities.push(new UnitEntity(this.x, this.y + dir * (this.stats.size + this.stats.supportStats.size) , this.team, this.stats.supportStats));
+                entities.push(new UnitEntity(this.x, this.y, this.team, this.stats.supportStats));
             }
 
+            if (this.stats.dieOnSupportSpawn) this.dead = true;
             this.supportSpawnCooldown = this.stats.supportSpawnSpeed;
         }
     }
@@ -3117,6 +3458,12 @@ class UnitEntity extends Entity {
             return;
         }
 
+        if (this.elixirCooldown > 0) this.elixirCooldown -= 1000 / 60;
+        else if (this.stats.elixirSpeed) {
+            this.elixirCooldown = this.stats.elixirSpeed;
+            addElixir(this.team, this.stats.elixirAmount);
+        }
+
         if (!this.isAttacking) this.nonAttackTime += 1000 / 60;
         if (this.stats.invisTime && this.nonAttackTime > this.stats.invisTime) this.invisible = true;
         else this.invisible = false;
@@ -3141,6 +3488,15 @@ class UnitEntity extends Entity {
 
             this.charging = false;
             this.distance = 0;
+        }
+
+        if (this.stats.activationHP) {
+            if (this.hp <= this.stats.hp * this.stats.activationHP) {
+                this.dead = true;
+                let e = new UnitEntity(this.x, this.y, this.team, this.stats.activatedStats);
+                e.hp = this.hp;
+                entities.push(e);
+            }
         }
 
         this.checkDash();
@@ -3312,6 +3668,7 @@ class UnitEntity extends Entity {
             let obj = entities[i];
 
             if (obj == this) continue;
+            if (obj.dead) continue;
             if (obj.stats.type == 'bomb') continue;
 
             if (this.isFlying && !obj.isFlying) continue;
@@ -3524,6 +3881,7 @@ class AOE {
         this.owner = owner;
         this.pulseCooldown = stats.pulseTime || 0;
         this.pulseCount = stats.pulseCount || 1;
+        this.spawnCooldown = stats.initSpawnSpeed || 0;
 
         if (!this.stats.lifetime) this.stats.lifetime = 250;
 
@@ -3549,6 +3907,13 @@ class AOE {
             }
         }
 
+        if (this.spawnCooldown > 0) {
+            this.spawnCooldown -= 1000 / 60;
+        } else if (this.stats.spawnStats) {
+            this.spawnUnit();
+            this.spawnCooldown = this.stats.spawnSpeed;
+        }
+
         if (this.lifetime > 0) {
             this.lifetime -= 1000 / 60;
 
@@ -3565,6 +3930,7 @@ class AOE {
     aoeDamage() {
         this.pulseCooldown = this.stats.pulseTime || 0;
         this.pulseCount--;
+        let unitsInRange = [];
         for (let i = 0; i < entities.length; i++) {
             let e = entities[i];
             if (e.stats.type == 'bomb') continue;
@@ -3576,33 +3942,75 @@ class AOE {
 
             if (M.dist(this, e) < minDist) {
                 if (e.team != this.team) {
-                    if (this.stats.freezeDuration) e.freezeTime += this.stats.freezeDuration;
-
-                    if (this.stats.slowDuration) {
-                        e.slowTime += this.stats.slowDuration;
-                        e.slowAmount = this.stats.slowAmount;
-                    }
-
-                    if (this.stats.stunDuration) e.stunTime += this.stats.stunDuration;
-
-                    if (this.stats.ctDamage && (e.stats.name == 'king' || e.stats.name == 'princess')) e.takeDamage(this.stats.ctDamage, this.owner);
-                    else if (this.stats.buidlingDamage && e.stats.type == 'building') e.takeDamage(this.stats.buidlingDamage, this.owner); 
-                    else e.takeDamage(this.stats.damage, this.owner);
-                    if (this.stats.stunDuration) e.stunTime = this.stats.stunDuration;
-
-                    if (this.stats.knockback && e.knockbackVel) {
-                        let dir = M.normalise(e.x - this.x, e.y - this.y);
-                        e.applyKnockback(dir, this.stats.knockback);
-                    }
-
-                    if (this.pulseCount == this.stats.pulseCount - 1 && this.stats.vineDuration) {
-                        e.vineTime = this.stats.vineDuration;
-                    }
+                    if (!this.stats.damage[0] && !this.stats.hitCount) this.attack(e);
+                    else unitsInRange.push(e);
                 } else {
                     if (this.stats.heal) e.heal(this.stats.heal);
                     if (this.stats.clone) this.clone(e);
                 }
             }
+        }
+
+        if (this.stats.damage[0]) this.voidAttack(unitsInRange);
+        else if (this.stats.hitCount) this.lightningAttack(unitsInRange);
+    }
+
+    attack(e) {
+        if (this.stats.freezeDuration) e.freezeTime += this.stats.freezeDuration;
+
+        if (this.stats.slowDuration) {
+            e.slowTime += this.stats.slowDuration;
+            e.slowAmount = this.stats.slowAmount;
+        }
+
+        if (this.stats.stunDuration) e.stunTime += this.stats.stunDuration;
+
+        if (this.stats.ctDamage && (e.stats.name == 'king' || e.stats.name == 'princess')) e.takeDamage(this.stats.ctDamage, this.owner);
+        else if (this.stats.buidlingDamage && e.stats.type == 'building') e.takeDamage(this.stats.buidlingDamage, this.owner); 
+        else e.takeDamage(this.stats.damage, this.owner);
+        if (this.stats.stunDuration) e.stunTime = this.stats.stunDuration;
+
+        if (this.stats.knockback && e.knockbackVel) {
+            let dir = M.normalise(e.x - this.x, e.y - this.y);
+            e.applyKnockback(dir, this.stats.knockback);
+        }
+
+        if (this.pulseCount == this.stats.pulseCount - 1 && this.stats.vineDuration) {
+            e.vineTime = this.stats.vineDuration;
+        }
+    }
+
+    voidAttack(unitsInRange) {
+        for (let i = 0; i < unitsInRange.length; i++) {
+            let e = unitsInRange[i];
+            if (unitsInRange.length < 2) {
+                if (this.stats.ctDamage && (e.stats.name == 'king' || e.stats.name == 'princess')) e.takeDamage(this.stats.ctDamage[0], this.owner);
+                else e.takeDamage(this.stats.damage[0], this.owner);
+                continue;
+            }
+
+            if (unitsInRange.length < 5) {
+                if (this.stats.ctDamage && (e.stats.name == 'king' || e.stats.name == 'princess')) e.takeDamage(this.stats.ctDamage[1], this.owner);
+                else e.takeDamage(this.stats.damage[1], this.owner);
+                continue;
+            }
+
+            if (this.stats.ctDamage && (e.stats.name == 'king' || e.stats.name == 'princess')) e.takeDamage(this.stats.ctDamage[2], this.owner);
+            else e.takeDamage(this.stats.damage[2], this.owner);
+        }
+    }
+
+    lightningAttack(unitsInRange) {
+        let maxUnits = [null, null, null];
+        for (let i = 0; i < unitsInRange.length; i++) {
+            M.updateLargest(maxUnits, unitsInRange[i]);
+        }
+
+        for (let i = 0; i < maxUnits.length; i++) {
+            let e = maxUnits[i];
+            if (e == null) continue;
+            if (this.stats.ctDamage && (e.stats.name == 'king' || e.stats.name == 'princess')) e.takeDamage(this.stats.ctDamage, this.owner);
+            else e.takeDamage(this.stats.damage, this.owner);
         }
     }
 
@@ -3631,12 +4039,21 @@ class AOE {
 
         entities.push(new UnitEntity(e.x, e.y + dir * 10, e.team, stats));
     }
+
+    spawnUnit() {
+        let angle = Math.random() * Math.PI * 2;
+        let pos = {x: Math.cos(angle) * this.stats.radius + this.x, y: Math.sin(angle) * this.stats.radius + this.y};
+
+        entities.push(new UnitEntity(pos.x, pos.y, this.team, this.stats.spawnStats));
+    }
 }
 
 class Projectile {
     constructor(x, y, stats, direction, team, target = 'all', owner = null) {
         this.x = x;
         this.y = y;
+        this.ox = x;
+        this.oy = y;
         this.stats = stats;
         this.direction = direction;
         this.team = team;
@@ -3647,6 +4064,7 @@ class Projectile {
         this.pierce = this.stats.pierce || 0;
         this.hitTargets = [];
         this.owner = owner;
+        this.returning = false;
 
         if (!this.stats.size) this.stats.size = 5;
         if (!this.stats.speed) this.stats.speed = 10;
@@ -3678,10 +4096,19 @@ class Projectile {
             if (this.stats.aoeOnDeath) aoes.push(new AOE(this.x, this.y, this.stats.aoeStats, this.team, this.owner));
             return;
         }
+
         if (this.distance > this.stats.distance) {
-            this.dead = true;
-            if (this.stats.aoeOnDeath) aoes.push(new AOE(this.x, this.y, this.stats.aoeStats, this.team, this.owner));
-            return;
+            if (this.stats.returns && !this.returning) {
+                this.distance = 0;
+                this.direction.x *= -1;
+                this.direction.y *= -1;
+                this.hitTargets = [];
+                this.returning = true;
+            } else {
+                this.dead = true;
+                if (this.stats.aoeOnDeath) aoes.push(new AOE(this.x, this.y, this.stats.aoeStats, this.team, this.owner));
+                return;
+            }
         }
 
         let xAmount = this.direction.x * this.stats.speed;
@@ -3880,6 +4307,20 @@ class ChainLighning {
     }
 }
 
+class Particle {
+    constructor(x, y, stats) {
+
+    }
+
+    draw() {
+
+    }
+
+    update() {
+
+    }
+}
+
 class M {
     static dist(x1, y1, x2, y2) {
         if (x2 && y2) {
@@ -3916,6 +4357,26 @@ class M {
 
     static pointOnCirc(a) {
         return {x: Math.cos(a), y: Math.sin(a)};
+    }
+
+    static updateLargest(threeLargest, num) {
+        if (threeLargest[2] === null || num > threeLargest[2]) {
+            M.shiftAndUpdate(threeLargest, num, 2);
+        } else if (threeLargest[1] === null || num > threeLargest[1]) {
+            M.shiftAndUpdate(threeLargest, num, 1);
+        } else if (threeLargest[0] === null || num > threeLargest[0]) {
+            M.shiftAndUpdate(threeLargest, num, 0);
+        }
+    }
+
+    static shiftAndUpdate(array, num, idx) {
+        for (let i = 0; i <= idx; i++) {
+            if (i === idx) {
+            array[i] = num;
+            } else {
+            array[i] = array[i + 1];
+            }
+        }
     }
 }
 
@@ -3965,7 +4426,7 @@ function spawnUnit(x, y, index, team) {
         playerHand[index] = playerCycles[0];
         playerCycles.splice(0, 1);
 
-        if (stats.type != 'spell' || stats.width) {
+        if (stats.type != 'spell' && stats.deployType != 'spell' || stats.width) {
             let newPos = findMax(x, y);
             if (newPos.x) x = newPos.x;
             if (newPos.y) y = newPos.y;
@@ -4274,7 +4735,10 @@ function drawMap() {
     ctx.strokeRect(game.laneRightX - (game.bridgeWidth / 2), game.river - (game.riverWidth / 2), game.bridgeWidth, game.riverWidth);
 
     //Draw no deploy area
-    if (mouse.selection != -1 && playerUnits[playerHand[mouse.selection]].type != 'spell') {
+    let isSpell = null;
+    if (mouse.selection != -1) isSpell = playerUnits[playerHand[mouse.selection]].type == 'spell' || playerUnits[playerHand[mouse.selection]].deployType == 'spell';
+
+    if (mouse.selection != -1 && !isSpell) {
         ctx.fillStyle = '#d700005c';
         ctx.strokeStyle = '#7f0000ff';
         ctx.lineWidth = 4;
