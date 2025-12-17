@@ -3439,6 +3439,7 @@ class UnitEntity extends Entity {
         if (this.stunTime > 0) {
             this.stunTime -= 1000 / 60;
             if (this.dashTime) this.dashTime = 0;
+            if (this.stats.chargeAttack) this.attackCooldown = this.stats.attackSpeed;
             this.charging = false;
             this.distance = 0;
             this.attackTime = 0;
