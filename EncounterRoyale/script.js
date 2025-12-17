@@ -244,7 +244,8 @@ const aoeStats = {
     },
     sparkyAOE: {
         radius: 43.2,
-        damage: 1331
+        damage: 1331,
+        target: 'ground'
     },
     goblinDemolisherAOE: {
         radius: 36,
@@ -652,6 +653,7 @@ const otherUnits = {
         viewRange: 150,
         size: 15,
         speed: 1.4,
+        deployTime: 1000,
         targetPriority: 'ground',
         type: 'unit'
     },
@@ -849,11 +851,52 @@ const otherUnits = {
         deployTime: 1000,
         targetPriority: 'all',
         type: 'flying'
+    },
+    miner: {
+        name: 'Miner',
+        symbol: '🪏',
+        hp: 1210,
+        damage: 194,
+        attackSpeed: 1300,
+        initHitSpeed: 500,
+        range: 40,
+        viewRange: 150,
+        size: 22,
+        speed: 1.4,
+        deployTime: 1000,
+        targetPriority: 'ground',
+        type: 'spell'
+    },
+    goblinDrill: {
+        name: 'Goblin Drill',
+        symbol: '🛠️',
+        cost: 4,
+        hp: 1313,
+        attackSpeed: 1000,
+        initHitSpeed: 1000,
+        range: 132,
+        viewRange: 150,
+        size: 25,
+        speed: 0,
+        deployTime: 1000,
+        targetPriority: 'ground',
+        type: 'building',
+        deployType: 'spell',
+        hpLostPerSecond: 131.3,
+        spawnAOEStats: aoeStats.goblinDrillSpawnAOE,
+        supportSpawnSpeed: 3000,
+        initSupportSpawnSpeed: 800,
+        supportStats: null,
+        supportSpawnNum: 1,
+        deathSpawnNum: 2,
+        deathSpawnStats: null
     }
 };
 
 otherUnits.elixirGolemite.deathSpawnStats = otherUnits.elixirBlob;
 otherUnits.phoenixEgg.supportStats = otherUnits.babyPhoenix;
+otherUnits.goblinDrill.supportStats = otherUnits.goblin;
+otherUnits.goblinDrill.deathSpawnStats = otherUnits.goblin;
 
 const units = {
     knight: {
@@ -1220,7 +1263,7 @@ const units = {
         colour: '#b16800ff',
         lifetime: 9999,
         deathSpawnStats: otherUnits.goblin,
-        deathSpawnNum: 3 
+        deathSpawnNum: 3
     },
     fireSpirit: {
         name: 'Fire Spirit',
@@ -1951,17 +1994,19 @@ const units = {
         name: 'Miner',
         symbol: '🪏',
         cost: 3,
-        hp: 1210,
-        damage: 194,
-        attackSpeed: 1300,
-        initHitSpeed: 500,
-        range: 40,
-        viewRange: 150,
-        size: 22,
-        speed: 1.4,
-        deployTime: 1000,
-        targetPriority: 'ground',
-        type: 'spell'
+        type: 'spell',
+        damage: 0,
+        distance: 9999,
+        size: 2,
+        speed: 4,
+        colour: '#b16800ff',
+        lifetime: 9999,
+        deathSpawnStats: otherUnits.miner,
+        deathSpawnNum: 1,
+        particle: particleStats.dirt,
+        particleSpread: 15,
+        particleCount: 1,
+        particleSpeed: 250
     },
     battleRam: {
         name: 'Battle Ram',
@@ -2351,7 +2396,7 @@ const units = {
         size: 25,
         speed: 1,
         deployTime: 1000,
-        targetPriority: 'all',
+        targetPriority: 'ground',
         type: 'unit'
     },
     royalDelivery: {
@@ -2552,25 +2597,19 @@ const units = {
         name: 'Goblin Drill',
         symbol: '🛠️',
         cost: 4,
-        hp: 1313,
-        attackSpeed: 1000,
-        initHitSpeed: 1000,
-        range: 132,
-        viewRange: 150,
-        size: 25,
-        speed: 0,
-        deployTime: 1000,
-        targetPriority: 'ground',
-        type: 'building',
-        deployType: 'spell',
-        hpLostPerSecond: 131.3,
-        spawnAOEStats: aoeStats.goblinDrillSpawnAOE,
-        supportSpawnSpeed: 3000,
-        initSupportSpawnSpeed: 800,
-        supportStats: otherUnits.goblin,
-        supportSpawnNum: 1,
-        deathSpawnNum: 2,
-        deathSpawnStats: otherUnits.goblin
+        type: 'spell',
+        damage: 0,
+        distance: 9999,
+        size: 2,
+        speed: 4,
+        colour: '#b16800ff',
+        lifetime: 9999,
+        deathSpawnStats: otherUnits.goblinDrill,
+        deathSpawnNum: 1,
+        particle: particleStats.dirt,
+        particleSpread: 15,
+        particleCount: 1,
+        particleSpeed: 250
     },
     executioner: {
         name: 'Executioner',
@@ -2669,6 +2708,7 @@ let mouse = {x: 0, y: 0, down: false, selection: -1};
 let entities = [];
 let aoes = [];
 let projectiles = [];
+let particles = [];
 
 let playerElixir = 5;
 let enemyElixir = 5;
@@ -2794,6 +2834,18 @@ function update() {
             projectiles.splice(i, 1);
         }
         else p.update();
+    }
+
+    for (let i = 0; i < particles.length; i++) {
+        let p = particles[i];
+        p.draw();
+
+        if (p.dead) {
+            particles.splice(i, 1);
+        } else {
+            console.log('Drawn')
+            p.update();
+        }
     }
 
     for (let i = 0; i < entities.length; i++) {
@@ -4058,14 +4110,16 @@ class Projectile {
         this.stats = stats;
         this.direction = direction;
         this.team = team;
-        this.lifetime = this.stats.lifetime || 500;
+        this.lifetime = stats.lifetime || 500;
         this.dead = false;
         this.distance = 0;
         this.target = target;
-        this.pierce = this.stats.pierce || 0;
+        this.pierce = stats.pierce || 0;
         this.hitTargets = [];
         this.owner = owner;
         this.returning = false;
+        
+        this.particleCooldown = stats.particleSpeed;
 
         if (!this.stats.size) this.stats.size = 5;
         if (!this.stats.speed) this.stats.speed = 10;
@@ -4096,6 +4150,16 @@ class Projectile {
             this.dead = true;
             if (this.stats.aoeOnDeath) aoes.push(new AOE(this.x, this.y, this.stats.aoeStats, this.team, this.owner));
             return;
+        }
+
+        if (this.particleCooldown > 0) this.particleCooldown -= 1000 / 60;
+        else {
+            for (let i = 0; i < this.stats.particleCount; i++) {
+                let x = Math.random() * (this.stats.particleSpread + this.stats.particleSpread) - this.stats.particleSpread;
+                let y = Math.random() * (this.stats.particleSpread + this.stats.particleSpread) - this.stats.particleSpread;
+
+                particles.push(new Particle(x + this.x, y + this.y, this.stats.particle));
+            }
         }
 
         if (this.distance > this.stats.distance) {
@@ -4310,15 +4374,27 @@ class ChainLighning {
 
 class Particle {
     constructor(x, y, stats) {
+        this.x = x;
+        this.y = y;
+        this.stats = stats;
 
+        this.lifetime = stats.lifetime || 500;
+        this.dead = false;
     }
 
     draw() {
-
+        ctx.beginPath();
+        ctx.fillStyle = this.stats.colour;
+        let r = this.stats.size.min ? Math.random() * (this.stats.size.max - this.stats.size.min) + this.stats.size.min : this.stats.size;
+        ctx.arc(this.x, this.y, r, 0, 2 * Math.PI);
+        ctx.fill();
     }
 
     update() {
-
+        if (this.lifetime > 0) this.lifetime -= 1000 / 60;
+        else {
+            this.dead = true;
+        }
     }
 }
 
@@ -4501,7 +4577,7 @@ function spawnLogic(x, y, team, stats) {
         entities.push(new UnitEntity(x, y, team, otherUnits.rascalBoy));
         entities.push(new UnitEntity(x + 30, y + dir * 5, team, otherUnits.rascalGirl));
         entities.push(new UnitEntity(x - 30, y + dir * 5, team, otherUnits.rascalGirl));
-    } else if (stats.name == 'Goblin Barrel') {
+    } else if (stats.name == 'Goblin Barrel' || stats.name == 'Miner' || stats.name == 'Goblin Drill') {
         let startX = c.width / 2;
         let startY = (team == 'player') ? c.height - game.kingY : game.kingY;
         let dir = {x: x - startX, y: y - startY};
