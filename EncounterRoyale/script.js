@@ -2844,7 +2844,6 @@ function update() {
         if (p.dead) {
             particles.splice(i, 1);
         } else {
-            console.log('Drawn')
             p.update();
         }
     }
@@ -4379,6 +4378,7 @@ class Particle {
     constructor(x, y, stats) {
         this.x = x;
         this.y = y;
+        this.size = (Math.random() * (stats.size.max - stats.size.min) + stats.size.min) || stats.size;
         this.stats = stats;
 
         this.lifetime = stats.lifetime || 500;
@@ -4388,8 +4388,8 @@ class Particle {
     draw() {
         ctx.beginPath();
         ctx.fillStyle = this.stats.colour;
-        let r = this.stats.size.min ? Math.random() * (this.stats.size.max - this.stats.size.min) + this.stats.size.min : this.stats.size;
-        ctx.arc(this.x, this.y, r, 0, 2 * Math.PI);
+        //let r = this.stats.size.min ? Math.random() * (this.stats.size.max - this.stats.size.min) + this.stats.size.min : this.stats.size;
+        ctx.arc(this.x, this.y, this.size, 0, 2 * Math.PI);
         ctx.fill();
     }
 
