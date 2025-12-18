@@ -1179,10 +1179,11 @@ const units = {
         symbol: '⚡️⚡️',
         cost: 6,
         type: 'spell',
-        radius: 60,
+        radius: 84,
         damage: 1057,
         ctDamage: 286,
-        hitCount: 3
+        hitCount: 3,
+        stunDuration: 500
     },
     valkyrie: {
         name: 'Valkyrie',
@@ -4064,6 +4065,8 @@ class AOE {
             if (e == null) continue;
             if (this.stats.ctDamage && (e.stats.name == 'king' || e.stats.name == 'princess')) e.takeDamage(this.stats.ctDamage, this.owner);
             else e.takeDamage(this.stats.damage, this.owner);
+
+            if (this.stats.stunDuration) e.stunTime = this.stats.stunDuration;
         }
     }
 
