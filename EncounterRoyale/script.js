@@ -422,7 +422,8 @@ const projectileStats = {
         speed: 6,
         lifetime: 9999,
         distance: 300,
-        aoeOnDeath: true
+        aoeOnDeath: true,
+        groundProj: true
     },
     teslaLightning: {
         damage: 220,
@@ -515,7 +516,8 @@ const projectileStats = {
     hunterBullet: {
         damage: 84,
         speed: 10.5,
-        distance: 156
+        distance: 156,
+        targetPriority: 'all'
     }
 };
 
