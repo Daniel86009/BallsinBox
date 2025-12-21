@@ -37,7 +37,6 @@ function setupEvents() {
     conn.on('data', (data) => {
         if (isHost && data.type == 'SPAWN_REQUEST') {
             let e = data.entity;
-            console.log(e.x, e.y, e.team, e.stats, e.target);
             if (e.type == 'unit') {
                 entities.push(new UnitEntity(e.x, e.y, e.team, e.stats));
             } else if (e.type == 'projectile') {
@@ -86,7 +85,6 @@ function setupEvents() {
                 }
 
                 if (!unitStats) {
-                    console.log(stats.name);
                     continue;
                 }
 
