@@ -12,6 +12,7 @@ ToDo:
     -Goblin Machine
 -Add proper icons
 -Add better visuals and particle effects
+-Add multiplayer?
 */
 
 //1 range ≈ 24
@@ -45,11 +46,12 @@ const game = {
     deployMaxY2: -175,
     princessY: 170,
     kingY: 80,
-    team: 'player',
-    enemyElixirMult: 1.5,
-    enemyStartElixir: 7,
-    playerElixirMult: 1,
-    playerStartElixir: 7,
+    team1: 'host',
+    team2: 'peer',
+    p2ElixirMult: 1.5,
+    p2StartElixir: 7,
+    p1ElixirMult: 1,
+    p1StartElixir: 7,
     randomiseEnemyUnits: true
 };
 
@@ -62,6 +64,7 @@ const debug = {
 
 const particleStats = {
     dirt: {
+        name: 'dirt',
         size: {min: 3, max: 10},
         colour: '#9d5100ff'
     }
@@ -69,7 +72,7 @@ const particleStats = {
 
 const aoeStats = {
     lumberjackRage: {
-        name: 'Rage',
+        name: 'lumberjackRage',
         radius: 100,
         damage: 179,
         lifetime: 5500,
@@ -80,186 +83,225 @@ const aoeStats = {
         colour: '#ff32f85d'
     },
     valkyrieAOE: {
+        name: 'valkyrieAOE',
         radius: 60,
         damage: 266,
         target: 'ground'
     },
     iceSpiritAOE: {
+        name: 'iceSpiritAOE',
         radius: 60,
         damage: 110,
         freezeDuration: 1200
     },
     fireSpiritAOE: {
+        name: 'fireSpiritAOE',
         radius: 70,
         damage: 207
     },
     iceGolemDeathAOE: {
+        name: 'iceGolemDeathAOE',
         radius: 60,
         damage: 84,
         slowDuration: 2000,
         slowAmount: 0.7
     },
     witchAOE: {
+        name: 'witchAOE',
         radius: 45,
         damage: 335
     },
     golemDeathAOE: {
+        name: 'golemDeathAOE',
         radius: 60,
         damage: 225
     },
     wallBreakerAOE: {
+        name: 'wallBreakerAOE',
         radius: 45,
         damage: 391
     },
     megaKnightAttackAOE: {
+        name: 'megaKnightAttackAOE',
         radius: 40,
         damage: 268,
         target: 'ground',
         id: 'attack'
     },
     megaKightJumpAOE: {
+        name: 'megaKightJumpAOE',
         radius: 60,
         damage: 537,
         target: 'ground'
     },
     megaKnightSpawnAOE: {
+        name: 'megaKnightSpawnAOE',
         radius: 66,
         damage: 430,
         lifetime: 500,
         target: 'ground'
     },
     balloonBombAOE: {
+        name: 'balloonBombAOE',
         radius: 60,
         damage: 240
     },
     golemiteDeathAOE: {
+        name: 'golemiteDeathAOE',
         radius: 60,
         damage: 99
     },
     skeletonDragonAOE: {
+        name: 'skeletonDragonAOE',
         radius: 45,
         damage: 161
     },
     bombTowerBombAOE: {
+        name: 'bombTowerBombAOE',
         radius: 72,
         damage: 222
     },
     bombTowerAOE: {
+        name: 'bombTowerAOE',
         radius: 36,
         damage: 222
     },
     royalGhostAOE: {
+        name: 'royalGhostAOE',
         radius: 26,
         damage: 261,
         target: 'ground'
     },
     princessAOE: {
+        name: 'princessAOE',
         radius: 50,
         damage: 168
     },
     babyDragonAOE: {
+        name: 'babyDragonAOE',
         radius: 36,
         damage: 161
     },
     darkPrinceAOE: {
+        name: 'darkPrinceAOE',
         radius: 26,
         damage: 266,
         target: 'ground'
     },
     darkPrinceChargeAOE: {
+        name: 'darkPrinceChargeAOE',
         radius: 26,
         damage: 532,
         target: 'ground'
     },
     bomberAOE: {
+        name: 'bomberAOE',
         radius: 36,
         damage: 225
     },
     eWizardSpawnAOE: {
+        name: 'eWizardSpawnAOE',
         radius: 72,
         damage: 192,
         stunDuration: 500
     },
     battleHealerSpawnAOE: {
+        name: 'battleHealerSpawnAOE',
         radius: 60,
         damage: 0,
         heal: 202,
         colour: '#30b40071'
     },
     battleHealerAOE: {
+        name: 'battleHealerAOE',
         radius: 96,
         damage: 0,
         heal: 102,
         colour: '#30b40071'
     },
     wizardAOE: {
+        name: 'wizardAOE',
         radius: 36,
         damage: 281
     },
     mortarAOE: {
+        name: 'mortarAOE',
         radius: 48,
         damage: 266,
         target: 'ground'
     },
     skeletonBarrelDeathAOE: {
+        name: 'skeletonBarrelDeathAOE',
         radius: 48,
         damage: 145
     },
     eGiantAOE: {
+        name: 'eGiantAOE',
         radius: 72,
         damage: 192,
         stunDuration: 500,
         ctDamage: 128
     },
     healSpiritAOE: {
+        name: 'healSpiritAOE',
         radius: 36,
         damage: 110
     },
     healSpiritHealAOE: {
+        name: 'healSpiritHealAOE',
         radius: 60,
         damage: 0,
         heal: 401,
         colour: '#30b40071'
     },
     iceWizardAOE: {
+        name: 'iceWizardAOE',
         radius: 36,
         damage: 89,
         slowDuration: 2500,
         slowAmount: 0.7
     },
     iceWizardSpawnAOE: {
+        name: 'iceWizardSpawnAOE',
         radius: 72,
         damage: 84,
         slowDuration: 1000,
         slowAmount: 0.7
     },
     royalDeliveryAOE: {
+        name: 'royalDeliveryAOE',
         radius: 72,
         damage: 473
     },
     giantSkeletonBombAOE: {
+        name: 'giantSkeletonBombAOE',
         radius: 72,
         damage: 535,
         ctDamage: 1068
     },
     sparkyAOE: {
+        name: 'sparkyAOE',
         radius: 43.2,
         damage: 1331,
         target: 'ground'
     },
     goblinDemolisherAOE: {
+        name: 'goblinDemolisherAOE',
         radius: 36,
         damage: 186
     },
     kamikazeGoblinAOE: {
+        name: 'kamikazeGoblinAOE',
         radius: 60,
         damage: 404
     },
     phoenixDeathAOE: {
+        name: 'phoenixDeathAOE',
         radius: 36,
         damage: 163
     },
     goblinDrillSpawnAOE: {
+        name: 'goblinDrillSpawnAOE',
         radius: 60,
         damage: 84,
         ctDamage: 26
@@ -268,15 +310,19 @@ const aoeStats = {
 
 const projectileStats = {
     princessTowerArrow: {
+        name: 'princessTowerArrow',
         damage: 109
     },
     kingTowerBullet: {
+        name: 'kingTowerBullet',
         damage: 109
     },
     archerArrow: {
+        name: 'archerArrow',
         damage: 112
     },
     fireSpirit: {
+        name: 'fireSpirit',
         size: 15,
         aoeStats: aoeStats.fireSpiritAOE,
         colour: '#ff9100ff',
@@ -285,6 +331,7 @@ const projectileStats = {
         groundProj: true
     },
     iceSpirit: {
+        name: 'iceSpirit',
         size: 15,
         aoeStats: aoeStats.iceSpiritAOE,
         colour: '#00fafeff',
@@ -293,31 +340,38 @@ const projectileStats = {
         groundProj: true
     },
     dartGoblinDart: {
+        name: 'dartGoblinDart',
         damage: 156,
         speed: 13
     },
     cannonBullet: {
+        name: 'cannonBullet',
         damage: 212
     },
     minionBullet: {
+        name: 'minionBullet',
         damage: 107,
         speed: 16,
         size: 3
     },
     megaMinionBullet: {
+        name: 'megaMinionBullet',
         damage: 312,
         speed: 16
     },
     witchBullet: {
+        name: 'witchBullet',
         aoeStats: aoeStats.witchAOE,
         colour: '#7700aaff',
         size: 8
     },
     royalGiantBullet: {
+        name: 'royalGiantBullet',
         damage: 307,
         size: 10
     },
     mArcherArrow: {
+        name: 'mArcherArrow',
         damage: 133,
         pierce: 9999,
         distance: 250,
@@ -326,6 +380,7 @@ const projectileStats = {
         size: 7
     },
     bowlerBall: {
+        name: 'bowlerBall',
         damage: 289,
         size: 25,
         pierce: 9999,
@@ -337,10 +392,12 @@ const projectileStats = {
         knockback: 3
     },
     musketeerBullet: {
+        name: 'musketeerBullet',
         damage: 217,
         speed: 16
     },
     skeletonDragonFireBall: {
+        name: 'skeletonDragonFireBall',
         aoeStats: aoeStats.skeletonDragonAOE,
         colour: '#ff8400ff',
         size: 8,
@@ -349,9 +406,11 @@ const projectileStats = {
         groundProj: true
     },
     spearGoblinSpear: {
+        name: 'spearGoblinSpear',
         damage: 81
     },
     eSpiritLightning: {
+        name: 'eSpiritLightning',
         damage: 99,
         type: 'lightning',
         stunDuration: 500,
@@ -359,6 +418,7 @@ const projectileStats = {
         range: 100
     },
     eDragonLightning: {
+        name: 'eDragonLightning',
         damage: 192,
         type: 'lightning',
         stunDuration: 500,
@@ -366,24 +426,28 @@ const projectileStats = {
         range: 70
     },
     xBowBullet: {
+        name: 'xBowBullet',
         damage: 43,
         speed: 16,
         size: 4,
         distance: 300
     },
     bombTowerBullet: {
+        name: 'bombTowerBullet',
         aoeStats: aoeStats.bombTowerAOE,
         size: 10,
         aoeOnDeath: true,
         groundProj: true
     },
     princessArrows: {
+        name: 'princessArrows',
         aoeStats: aoeStats.princessAOE,
         distance: 250,
         aoeOnDeath: true,
         groundProj: true
     },
     babyDragonFire: {
+        name: 'babyDragonFire',
         colour: '#ff8800da',
         aoeStats: aoeStats.babyDragonAOE,
         size: 10,
@@ -391,6 +455,7 @@ const projectileStats = {
         groundProj: true
     },
     bomberBomb: {
+        name: 'bomberBomb',
         aoeStats: aoeStats.bomberAOE,
         speed: 8,
         size: 10,
@@ -398,6 +463,7 @@ const projectileStats = {
         groundProj: true
     },
     eWizardLightning: {
+        name: 'eWizardLightning',
         damage: 230,
         type: 'lightning',
         stunDuration: 500,
@@ -405,17 +471,20 @@ const projectileStats = {
         range: 1
     },
     motherWitchBullet: {
+        name: 'motherWitchBullet',
         damage: 133,
         speed: 12,
         pigCurseDuration: 5000,
         colour: '#bf00ffff'
     },
     wizardFireball: {
+        name: 'wizardFireball',
         aoeStats: aoeStats.wizardAOE,
         colour: '#ff8800da',
         size: 10
     },
     mortarRock: {
+        name: 'mortarRock',
         aoeStats: aoeStats.mortarAOE,
         colour: '#a0a0a0',
         size: 13,
@@ -426,12 +495,14 @@ const projectileStats = {
         groundProj: true
     },
     teslaLightning: {
+        name: 'teslaLightning',
         damage: 220,
         type: 'lightning',
         chainAmount: 1,
         range: 1
     },
     healSpirit: {
+        name: 'healSpirit',
         size: 15,
         aoeStats: aoeStats.healSpiritAOE,
         aoeStats2: aoeStats.healSpiritHealAOE,
@@ -441,12 +512,14 @@ const projectileStats = {
         groundProj: true
     },
     iceWizardBullet: {
+        name: 'iceWizardBullet',
         aoeStats: aoeStats.iceWizardAOE,
         colour: '#00fbffa6',
         size: 8,
         speed: 14
     },
     firecrackerBullet: {
+        name: 'firecrackerBullet',
         damage: 64,
         size: 10,
         distance: 144,
@@ -454,10 +527,20 @@ const projectileStats = {
         speed: 11,
         splitNumber: 5,
         splitSpread: Math.PI / 4,
-        splitStats: {damage: 64, size: 8, distance: 120, colour: '#7e4100ff', pierce: 9999, targetPriority: 'all'},
+        splitStats: null,
         groundProj: true
     },
+    firecrackerSplit: {
+        name: 'firecrackerSplit',
+        damage: 64,
+        size: 8,
+        distance: 120,
+        colour: '#7e4100ff',
+        pierce: 9999,
+        targetPriority: 'all'
+    },
     eGiantZap: {
+        name: 'eGiantZap',
         damage: 192,
         stunDuration: 500,
         type: 'lightning',
@@ -466,10 +549,12 @@ const projectileStats = {
         range: 1
     },
     flyingMachineBullet: {
+        name: 'flyingMachineBullet',
         damage: 171,
         speed: 16
     },
     zappiesZap: {
+        name: 'zappiesZap',
         damage: 117,
         stunDuration: 500,
         type: 'lightning',
@@ -477,20 +562,24 @@ const projectileStats = {
         range: 1
     },
     furncaceBullet: {
+        name: 'furncaceBullet',
         damage: 179,
         colour: '#ff8800da'
     },
     rascalSling: {
+        name: 'rascalSling',
         damage: 125,
         speed: 16
     },
     sparkyBullet: {
+        name: 'sparkyBullet',
         aoeStats: aoeStats.sparkyAOE,
         size: 15,
         colour: '#00e5ffda',
         speed: 28
     },
     goblinDemolisherBomb: {
+        name: 'goblinDemolisherBomb',
         aoeStats: aoeStats.goblinDemolisherAOE,
         speed: 8,
         size: 8,
@@ -499,10 +588,12 @@ const projectileStats = {
         groundProj: true
     },
     cannonCartBullet: {
+        name: 'cannonCartBullet',
         damage: 212,
         speed: 20
     },
     executionerAxe: {
+        name: 'executionerAxe',
         damage: 168,
         colour: '#676767ff',
         size: 24,
@@ -514,12 +605,15 @@ const projectileStats = {
         targetPriority: 'all'
     },
     hunterBullet: {
+        name: 'hunterBullet',
         damage: 84,
         speed: 10.5,
         distance: 156,
         targetPriority: 'all'
     }
 };
+
+projectileStats.firecrackerBullet.splitStats = projectileStats.firecrackerSplit;
 
 const otherUnits = {
     golemite: {
@@ -744,7 +838,6 @@ const otherUnits = {
         deployTime: 1000,
         targetPriority: 'all',
         type: 'unit'
-
     },
     elixirGolemite: {
         name: 'Elixir Golemite',
@@ -2650,7 +2743,7 @@ const units = {
     }
 };
 
-const playerUnits = {
+const p1Units = {
     unit1: null,
     unit2: null,
     unit3: null,
@@ -2661,7 +2754,7 @@ const playerUnits = {
     unit8: null
 };
 
-const randomPlayerUnits = {
+const randomP1Units = {
     unit1: true,
     unit2: true,
     unit3: true,
@@ -2672,7 +2765,7 @@ const randomPlayerUnits = {
     unit8: true
 };
 
-const enemyUnits = {
+const p2Units = {
     unit1: null,
     unit2: null,
     unit3: null,
@@ -2713,24 +2806,24 @@ let aoes = [];
 let projectiles = [];
 let particles = [];
 
-let playerElixir = 5;
-let enemyElixir = 5;
+let p1Elixir = 5;
+let p2Elixir = 5;
 
-let playerHand = []; //What the player can use
-let playerCycles = []; //What the player can use next
+let p1Hand = [];
+let p1Cycles = [];
 
-let enemyHand = [];
-let enemyCycles = [];
+let p2Hand = [];
+let p2Cycles = [];
 
 let elixirIntervalID = null;
 let runAIIntervalID = null;
 let timerIntervalID = null;
 
-let playerKingActivated = false;
-let playerTowerDead = {left: false, right: false, king: false};
+let p1KingActivated = false;
+let p1TowerDead = {left: false, right: false, king: false};
 
-let enemyKingActivated = false;
-let enemyTowerDead = {left: false, right: false, king: false};
+let p2KingActivated = false;
+let p2TowerDead = {left: false, right: false, king: false};
 
 let gameFinished = false;
 
@@ -2738,6 +2831,9 @@ let timePassed = 0;
 let timeLeft = 120;
 let overtimeLeft = 180;
 let elixirMult = 1;
+
+let isReady = false;
+let peerIsReady = false;
 
 let crowns = Number(localStorage.crowns) || 0;
 
@@ -2749,14 +2845,14 @@ function start() {
 
         if (c.style.width == `${window.innerWidth - 10}px`) {
             mouse.x += window.innerHeight - 10;
-            mouse.y += window.innerWidth - 120;
+            mouse.y += window.innerWidth - 240;
         }
     });
 
     c.addEventListener('mousedown', (e) => {
         mouse.down = true;
         
-        spawnUnit(mouse.x, mouse.y, mouse.selection, game.team, playerElixir);
+        spawnUnit(mouse.x, mouse.y, mouse.selection, game.team1, p1Elixir);
 
         mouse.selection = -1;
 
@@ -2778,11 +2874,11 @@ function start() {
         let cHeight = c.style.height.replace('px', '');
 
         if (Number(cWidth) < 800) {
-            mouse.x *= 500 / cWidth;
-            mouse.y *= 800 / cHeight;
+            mouse.x *= 500 / Number(cWidth);
+            mouse.y *= 800 / Number(cHeight);
         }
 
-        spawnUnit(mouse.x, mouse.y, mouse.selection, game.team, playerElixir);
+        spawnUnit(mouse.x, mouse.y, mouse.selection, game.team1, p1Elixir);
 
         mouse.selection = -1;
         
@@ -2796,16 +2892,16 @@ function start() {
     document.addEventListener('keydown', (e) => {
         switch (e.key) {
             case '1':
-                cardClick(cardBar.children[0], playerUnits[playerHand[0]], 0);
+                cardClick(cardBar.children[0], p1Units[p1Hand[0]], 0);
                 break;
             case '2':
-                cardClick(cardBar.children[1], playerUnits[playerHand[1]], 1);
+                cardClick(cardBar.children[1], p1Units[p1Hand[1]], 1);
                 break;
             case '3':
-                cardClick(cardBar.children[2], playerUnits[playerHand[2]], 2);
+                cardClick(cardBar.children[2], p1Units[p1Hand[2]], 2);
                 break;
             case '4':
-                cardClick(cardBar.children[3], playerUnits[playerHand[3]], 3);
+                cardClick(cardBar.children[3], p1Units[p1Hand[3]], 3);
                 break;
         }
     });
@@ -2820,104 +2916,17 @@ function update() {
 
     for (let i = 0; i < projectiles.length; i++) {
         let p = projectiles[i];
-
         p.draw();
-        if (p.dead) {
-            let y = p.stats.height ? p.y + p.stats.height : p.y;
-            if (p.stats.deathSpawnStats) {
-                if (p.stats.deathSpawnNum == 3) {
-                    entities.push(new UnitEntity(p.x + 10, y, p.team, p.stats.deathSpawnStats));
-                    entities.push(new UnitEntity(p.x, y + 10, p.team, p.stats.deathSpawnStats));
-                    entities.push(new UnitEntity(p.x - 10, y, p.team, p.stats.deathSpawnStats));
-                } else {
-                    entities.push(new UnitEntity(p.x, y, p.team, p.stats.deathSpawnStats));
-                }
-            }
-            if (p.stats.splitStats) p.split();
-            projectiles.splice(i, 1);
-        }
-        else p.update();
     }
 
     for (let i = 0; i < particles.length; i++) {
         let p = particles[i];
         p.draw();
-
-        if (p.dead) {
-            particles.splice(i, 1);
-        } else {
-            p.update();
-        }
     }
 
     for (let i = 0; i < entities.length; i++) {
         let e = entities[i];
-        
-        if (e.dead) {
-            if (e.stats.name == 'king') {
-                if (e.team == 'player') playerTowerDead = {left: true, right: true, king: true};
-                else enemyTowerDead = {left: true, right: true, king: true};
-                gameover(e.team);
-            }
-
-            if (e.stats.deathAOEStats) {
-                aoes.push(new AOE(e.x, e.y, e.stats.deathAOEStats, e.team));
-            }
-            if (e.stats.deathSpawnNum) {
-                for (let j = 0; j < e.stats.deathSpawnNum; j++) {
-                    entities.push(new UnitEntity(e.x + j, e.y, e.team, e.stats.deathSpawnStats));
-                }
-            }
-
-            if (e.stats.deathEnemyElixir) {
-                if (e.team == 'player') {
-                    addElixir('enemy', e.stats.deathEnemyElixir);
-                } else {
-                    addElixir('player', e.stats.deathEnemyElixir);
-                }
-            }
-
-            if (e.stats.deathElixir) {
-                addElixir(e.team, e.stats.deathElixir);
-            }
-
-            if (e.stats.name == 'princess') {
-                if (e.team == 'player') {
-                    playerKingActivated = true;
-                    (e.x < c.width / 2) ? playerTowerDead.left = true : playerTowerDead.right = true;
-                } else {
-                    enemyKingActivated = true;
-                    (e.x < c.width / 2) ? enemyTowerDead.left = true : enemyTowerDead.right = true;
-                }
-            }
-
-            let hasSpawned = false;
-            for (let i = 0; i < aoes.length; i++) {
-                let aoe = aoes[i];
-
-                if (hasSpawned) continue;
-                if (!aoe.stats.goblinCurse) continue;
-                if (aoe.team == e.team) continue;
-
-                let minDist = aoe.stats.radius + e.stats.size;
-
-                if (M.dist(aoe, e) < minDist) {
-                    hasSpawned = true;
-                    entities.push(new UnitEntity(e.x, e.y, aoe.team, otherUnits.goblin));
-                }
-            }
-
-            if (e.pigCurseTime > 0) {
-                let team = (e.team == 'player') ? 'enemy' : 'player';
-                entities.push(new UnitEntity(e.x, e.y, team, otherUnits.cursedPig));
-            }
-
-            entities.splice(i, 1);
-            continue;
-        }
-
         if(!e.isFlying) e.draw();
-        e.update();
     }
 
     for (let i = 0; i < entities.length; i++) {
@@ -2927,19 +2936,11 @@ function update() {
 
     for (let i = 0; i < aoes.length; i++) {
         let p = aoes[i];
-
-        p.update();
-
-        if (p.dead) {
-            aoes.splice(i, 1);
-            continue;
-        }
-
         p.draw();
     }
 
     if (mouse.selection != -1) {
-        let stats = playerUnits[playerHand[mouse.selection]];
+        let stats = p1Units[p1Hand[mouse.selection]];
 
         let x = mouse.x;
         let y = mouse.y;
@@ -2991,9 +2992,235 @@ function update() {
         ctx.fill();
     }
 
+    if (isHost) {
+        hostUpdate();
+    } else if (!isConnected) {
+        for (let i = 0; i < projectiles.length; i++) {
+            let p = projectiles[i];
+            if (p.dead) {
+                let y = p.stats.height ? p.y + p.stats.height : p.y;
+                if (p.stats.deathSpawnStats) {
+                    if (p.stats.deathSpawnNum == 3) {
+                        entities.push(new UnitEntity(p.x + 10, y, p.team, p.stats.deathSpawnStats));
+                        entities.push(new UnitEntity(p.x, y + 10, p.team, p.stats.deathSpawnStats));
+                        entities.push(new UnitEntity(p.x - 10, y, p.team, p.stats.deathSpawnStats));
+                    } else {
+                        entities.push(new UnitEntity(p.x, y, p.team, p.stats.deathSpawnStats));
+                    }
+                }
+                if (p.stats.splitStats) p.split();
+                projectiles.splice(i, 1);
+            }
+            else p.update();
+        }
+
+        for (let i = 0; i < particles.length; i++) {
+            let p = particles[i];
+            if (p.dead) {
+                particles.splice(i, 1);
+            } else {
+                p.update();
+            }
+        }
+
+        for (let i = 0; i < entities.length; i++) {
+            let e = entities[i];
+            if (e.dead) {
+                if (e.stats.name == 'king') {
+                    if (e.team == game.team1) p1TowerDead = {left: true, right: true, king: true};
+                    else p2TowerDead = {left: true, right: true, king: true};
+                    gameover(e.team);
+                }
+
+                if (e.stats.deathAOEStats) {
+                    aoes.push(new AOE(e.x, e.y, e.stats.deathAOEStats, e.team));
+                }
+                if (e.stats.deathSpawnNum) {
+                    for (let j = 0; j < e.stats.deathSpawnNum; j++) {
+                        entities.push(new UnitEntity(e.x + j, e.y, e.team, e.stats.deathSpawnStats));
+                    }
+                }
+
+                if (e.stats.deathEnemyElixir) {
+                    if (e.team == game.team1) {
+                        addElixir(game.team2, e.stats.deathEnemyElixir);
+                    } else {
+                        addElixir(game.team1, e.stats.deathEnemyElixir);
+                    }
+                }
+
+                if (e.stats.deathElixir) {
+                    addElixir(e.team, e.stats.deathElixir);
+                }
+
+                if (e.stats.name == 'princess') {
+                    if (e.team == game.team1) {
+                        p1KingActivated = true;
+                        (e.x < c.width / 2) ? p1TowerDead.left = true : p1TowerDead.right = true;
+                    } else {
+                        p2KingActivated = true;
+                        (e.x < c.width / 2) ? p2TowerDead.left = true : p2TowerDead.right = true;
+                    }
+                }
+
+                let hasSpawned = false;
+                for (let i = 0; i < aoes.length; i++) {
+                    let aoe = aoes[i];
+
+                    if (hasSpawned) continue;
+                    if (!aoe.stats.goblinCurse) continue;
+                    if (aoe.team == e.team) continue;
+
+                    let minDist = aoe.stats.radius + e.stats.size;
+
+                    if (M.dist(aoe, e) < minDist) {
+                        hasSpawned = true;
+                        entities.push(new UnitEntity(e.x, e.y, aoe.team, otherUnits.goblin));
+                    }
+                }
+
+                if (e.pigCurseTime > 0) {
+                    let team = (e.team == game.team1) ? game.team2 : game.team1;
+                    entities.push(new UnitEntity(e.x, e.y, team, otherUnits.cursedPig));
+                }
+
+                entities.splice(i, 1);
+                continue;
+            } else {
+                e.update();
+            }
+        }
+
+        for (let i = 0; i < aoes.length; i++) {
+            let p = aoes[i];
+
+            p.update();
+
+            if (p.dead) {
+                aoes.splice(i, 1);
+                continue;
+            }
+        }
+    }
+
     runGameTime();
 
     window.requestAnimationFrame(update);
+}
+
+function hostUpdate() {
+    for (let i = 0; i < projectiles.length; i++) {
+        let p = projectiles[i];
+        if (p.dead) {
+            let y = p.stats.height ? p.y + p.stats.height : p.y;
+            if (p.stats.deathSpawnStats) {
+                if (p.stats.deathSpawnNum == 3) {
+                    entities.push(new UnitEntity(p.x + 10, y, p.team, p.stats.deathSpawnStats));
+                    entities.push(new UnitEntity(p.x, y + 10, p.team, p.stats.deathSpawnStats));
+                    entities.push(new UnitEntity(p.x - 10, y, p.team, p.stats.deathSpawnStats));
+                } else {
+                    entities.push(new UnitEntity(p.x, y, p.team, p.stats.deathSpawnStats));
+                }
+            }
+            if (p.stats.splitStats) p.split();
+            projectiles.splice(i, 1);
+        }
+        else p.update();
+    }
+
+    for (let i = 0; i < particles.length; i++) {
+        let p = particles[i];
+        if (p.dead) {
+            particles.splice(i, 1);
+        } else {
+            p.update();
+        }
+    }
+
+    for (let i = 0; i < entities.length; i++) {
+        let e = entities[i];
+        if (e.dead) {
+            if (e.stats.name == 'king') {
+                if (e.team == game.team1) p1TowerDead = {left: true, right: true, king: true};
+                else p2TowerDead = {left: true, right: true, king: true};
+                gameover(e.team);
+            }
+
+            if (e.stats.deathAOEStats) {
+                aoes.push(new AOE(e.x, e.y, e.stats.deathAOEStats, e.team));
+            }
+            if (e.stats.deathSpawnNum) {
+                for (let j = 0; j < e.stats.deathSpawnNum; j++) {
+                    entities.push(new UnitEntity(e.x + j, e.y, e.team, e.stats.deathSpawnStats));
+                }
+            }
+
+            if (e.stats.deathEnemyElixir) {
+                if (e.team == game.team1) {
+                    addElixir(game.team2, e.stats.deathEnemyElixir);
+                } else {
+                    addElixir(game.team1, e.stats.deathEnemyElixir);
+                }
+            }
+
+            if (e.stats.deathElixir) {
+                addElixir(e.team, e.stats.deathElixir);
+            }
+
+            if (e.stats.name == 'princess') {
+                if (e.team == game.team1) {
+                    p1KingActivated = true;
+                    (e.x < c.width / 2) ? p1TowerDead.left = true : p1TowerDead.right = true;
+                    if (isConnected && conn.open) conn.send({type: 'TOWER_INFO', team: game.team1, towerDead: p1TowerDead});
+                } else {
+                    p2KingActivated = true;
+                    (e.x < c.width / 2) ? p2TowerDead.left = true : p2TowerDead.right = true;
+                    if (isConnected && conn.open) conn.send({type: 'TOWER_INFO', team: game.team2, towerDead: p2TowerDead});
+                }
+            }
+
+            let hasSpawned = false;
+            for (let i = 0; i < aoes.length; i++) {
+                let aoe = aoes[i];
+
+                if (hasSpawned) continue;
+                if (!aoe.stats.goblinCurse) continue;
+                if (aoe.team == e.team) continue;
+
+                let minDist = aoe.stats.radius + e.stats.size;
+
+                if (M.dist(aoe, e) < minDist) {
+                    hasSpawned = true;
+                    entities.push(new UnitEntity(e.x, e.y, aoe.team, otherUnits.goblin));
+                }
+            }
+
+            if (e.pigCurseTime > 0) {
+                let team = (e.team == game.team1) ? game.team2 : game.team1;
+                entities.push(new UnitEntity(e.x, e.y, team, otherUnits.cursedPig));
+            }
+
+            entities.splice(i, 1);
+            continue;
+        } else {
+            e.update();
+        }
+    }
+
+    for (let i = 0; i < aoes.length; i++) {
+        let p = aoes[i];
+
+        p.update();
+
+        if (p.dead) {
+            aoes.splice(i, 1);
+            continue;
+        }
+    }
+
+    if (isConnected && conn.open) {
+        conn.send({type: 'SYNC', entities: entities.map(d => d.serialise()), aoes: aoes.map(d => d.serialise()), projectiles: projectiles.map(d => d.serialise()), particles: particles.map(d => d.serialise()), time: {t: timeLeft, ot: overtimeLeft}});
+    }
 }
 
 class Entity {
@@ -3004,28 +3231,29 @@ class Entity {
         this.stats = stats;
         this.attackCooldown = 0;
         this.initAttackCooldown = stats.initHitSpeed;
-        this.hp = stats.hp;
-        this.sheildHP = stats.sheildHP || 0;
+        this.hp = stats.hp; //
+        this.sheildHP = stats.sheildHP || 0; //
         this.dead = false;
-        this.freezeTime = 0;
-        this.slowTime = 0;
+        this.freezeTime = 0; //
+        this.slowTime = 0; //
         this.slowAmount = 1;
-        this.rageTime = 0;
+        this.rageTime = 0; //
         this.speedMult = 1;
         this.moveSpeedMult = 1;
         this.stunTime = 0;
         this.supportSpawnCooldown = stats.initSupportSpawnSpeed || stats.supportSpawnSpeed;
-        this.charging = false;
-        this.isAttacking = false;
+        this.charging = false; //
+        this.isAttacking = false; //
         this.attackTime = 0;
         this.nonAttackTime = 0;
         this.invisible = false;
-        this.hidden = false;
-        this.pigCurseTime = 0;
+        this.hidden = false; //
+        this.pigCurseTime = 0; //
         this.deployTimeLeft = stats.deployTime || 0;
-        this.isFlying = stats.type == 'flying';
-        this.vineTime = 0;
+        this.isFlying = stats.type == 'flying'; //
+        this.vineTime = 0; //
         this.elixirCooldown = stats.elixirSpeed;
+        this.target = null;
 
         if (stats.spawnInvis) this.invisible = true;
         if (!stats) this.dead = true;
@@ -3033,27 +3261,29 @@ class Entity {
     }
 
     draw() {
+        let y = isHost ? this.y : c.height - this.y;
+
         //Draw shadow
         if (this.isFlying) {
             ctx.beginPath();
             ctx.fillStyle = '#00000079';
-            ctx.arc(this.x + 10, this.y + 10, this.stats.size, 0, 2*Math.PI);
+            ctx.arc(this.x + 10, y + 10, this.stats.size, 0, 2*Math.PI);
             ctx.fill();
         }
 
         //Draw e giant radius
         if (this.stats.reflectionRadius) {
             ctx.beginPath();
-            ctx.fillStyle = (this.team == 'player') ? '#00e1ff3c' : '#b900003c';
-            ctx.arc(this.x, this.y, this.stats.reflectionRadius, 0, 2 * Math.PI);
+            ctx.fillStyle = (this.team == game.team1) ? '#00e1ff3c' : '#b900003c';
+            ctx.arc(this.x, y, this.stats.reflectionRadius, 0, 2 * Math.PI);
             ctx.fill();
         }
 
         //Circle
         let opacity = this.invisible ? '30' : 'a1';
-        ctx.fillStyle = (this.team == 'player') ? ('#3845ff' + opacity) : ('#ff4343' + opacity);
+        ctx.fillStyle = (this.team == game.team1) ? ('#3845ff' + opacity) : ('#ff4343' + opacity);
         ctx.beginPath();
-        ctx.arc(this.x, this.y, this.stats.size, 0, 2 * Math.PI);
+        ctx.arc(this.x, y, this.stats.size, 0, 2 * Math.PI);
         ctx.fill();
 
         //Symbol
@@ -3061,7 +3291,7 @@ class Entity {
         ctx.font = `${this.stats.size + 5}px Arial`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText(this.stats.symbol, this.x, this.y);
+        ctx.fillText(this.stats.symbol, this.x, y);
 
         
         if (!this.stats.isClone) {
@@ -3069,32 +3299,32 @@ class Entity {
             if (this.stats.name == 'king' || this.stats.name == 'princess') {
                 //Heathbar outer
                 ctx.fillStyle = '#000000';
-                ctx.fillRect(this.x - this.stats.size, this.y + this.stats.size + 3, this.stats.size * 2, 15);
+                ctx.fillRect(this.x - this.stats.size, y + this.stats.size + 3, this.stats.size * 2, 15);
 
                 //Healthbar inner
                 ctx.fillStyle = '#009607ff';
-                ctx.fillRect(this.x - this.stats.size + 2, this.y + this.stats.size + 5, (this.stats.size * (this.hp / this.stats.hp) * 2)- 4, 11);
+                ctx.fillRect(this.x - this.stats.size + 2, y + this.stats.size + 5, (this.stats.size * (this.hp / this.stats.hp) * 2)- 4, 11);
 
                 //Health Number
-                ctx.fillStyle = (this.team == 'player') ? '#3845ff' : '#fa1d1dff';
+                ctx.fillStyle = (this.team == game.team1) ? '#3845ff' : '#fa1d1dff';
                 ctx.font = 'bold 14px Arial';
                 ctx.textAlign = 'left';
                 ctx.textBaseline = 'top';
-                ctx.fillText(Math.round(this.hp).toString(), this.x - this.stats.size + 2, this.y + this.stats.size + 4);
+                ctx.fillText(Math.round(this.hp).toString(), this.x - this.stats.size + 2, y + this.stats.size + 4);
             } else {
                 //Heathbar outer
                 ctx.fillStyle = '#000000';
-                ctx.fillRect(this.x - this.stats.size, this.y + this.stats.size + 3, this.stats.size * 2, 10);
+                ctx.fillRect(this.x - this.stats.size, y + this.stats.size + 3, this.stats.size * 2, 10);
 
                 //Healthbar inner
                 ctx.fillStyle = '#009607ff';
-                ctx.fillRect(this.x - this.stats.size + 2, this.y + this.stats.size + 5, (this.stats.size * (this.hp / this.stats.hp) * 2)- 4, 6);
+                ctx.fillRect(this.x - this.stats.size + 2, y + this.stats.size + 5, (this.stats.size * (this.hp / this.stats.hp) * 2)- 4, 6);
             }
 
             //Draw shield
             if (this.sheildHP > 1) {
                 ctx.fillStyle = '#b1a500ff';
-                ctx.fillRect(this.x - this.stats.size + 2, this.y + this.stats.size + 5, (this.stats.size * (this.sheildHP / this.stats.sheildHP) * 2)- 4, 6);
+                ctx.fillRect(this.x - this.stats.size + 2, y + this.stats.size + 5, (this.stats.size * (this.sheildHP / this.stats.sheildHP) * 2)- 4, 6);
             }
 
             //Draw activation
@@ -3103,14 +3333,14 @@ class Entity {
                 ctx.strokeStyle = '#d88600ff';
                 ctx.lineWidth = 4;
                 ctx.beginPath();
-                ctx.moveTo(x, this.y + this.stats.size - 1);
-                ctx.lineTo(x, this.y + this.stats.size + 14);
+                ctx.moveTo(x, y + this.stats.size - 1);
+                ctx.lineTo(x, y + this.stats.size + 14);
                 ctx.stroke();
             }
         } else {
             ctx.beginPath();
             ctx.fillStyle = '#00fbff5c';
-            ctx.arc(this.x, this.y, this.stats.size, 0, 2 * Math.PI);
+            ctx.arc(this.x, y, this.stats.size, 0, 2 * Math.PI);
             ctx.fill();
         }
         
@@ -3121,7 +3351,7 @@ class Entity {
             else if (this.attackCooldown < 4000) ctx.fillStyle = '#00f7ff1b';
             else ctx.fillStyle = '#ffffff01';
             ctx.beginPath();
-            ctx.arc(this.x, this.y, this.stats.size, 0, 2*Math.PI);
+            ctx.arc(this.x, y, this.stats.size, 0, 2*Math.PI);
             ctx.fill();
         }
         
@@ -3129,19 +3359,19 @@ class Entity {
         if (this.freezeTime > 1) {
             ctx.beginPath();
             ctx.fillStyle = '#3fdfff93';
-            ctx.arc(this.x, this.y, this.stats.size, 0, 2*Math.PI);
+            ctx.arc(this.x, y, this.stats.size, 0, 2*Math.PI);
             ctx.fill();
         } else if (this.slowTime > 1) {
             ctx.beginPath();
             ctx.fillStyle = '#3fdfff35';
-            ctx.arc(this.x, this.y, this.stats.size, 0, 2*Math.PI);
+            ctx.arc(this.x, y, this.stats.size, 0, 2*Math.PI);
             ctx.fill();
         } 
         //Draw if rage boosted
         else if (this.rageTime > 1) {
             ctx.beginPath();
             ctx.fillStyle = '#e600ff93';
-            ctx.arc(this.x, this.y, this.stats.size, 0, 2*Math.PI);
+            ctx.arc(this.x, y, this.stats.size, 0, 2*Math.PI);
             ctx.fill();
         }
 
@@ -3149,7 +3379,7 @@ class Entity {
         if (this.charging) {
             ctx.beginPath();
             ctx.fillStyle = '#fbff0055';
-            ctx.arc(this.x, this.y, this.stats.size, 0, 2 * Math.PI);
+            ctx.arc(this.x, y, this.stats.size, 0, 2 * Math.PI);
             ctx.fill();
         }
 
@@ -3157,19 +3387,19 @@ class Entity {
         if (this.pigCurseTime > 1) {
             ctx.beginPath();
             ctx.fillStyle = '#fb00ff55';
-            ctx.arc(this.x, this.y, this.stats.size, 0, 2 * Math.PI);
+            ctx.arc(this.x, y, this.stats.size, 0, 2 * Math.PI);
             ctx.fill();
         }
 
         if (this.hidden) {
             ctx.beginPath();
             ctx.fillStyle = '#b16800';
-            ctx.arc(this.x, this.y, this.stats.size, 0, 2 * Math.PI);
+            ctx.arc(this.x, y, this.stats.size, 0, 2 * Math.PI);
             ctx.fill();
             ctx.beginPath();
             ctx.strokeStyle = '#623900ff';
-            ctx.moveTo(this.x, this.y - this.stats.size);
-            ctx.lineTo(this.x, this.y + this.stats.size);
+            ctx.moveTo(this.x, y - this.stats.size);
+            ctx.lineTo(this.x, y + this.stats.size);
             ctx.stroke();
         }
 
@@ -3178,15 +3408,17 @@ class Entity {
             ctx.beginPath();
             ctx.lineWidth = 5;
             ctx.strokeStyle = '#ffa200ff';
-            ctx.moveTo(this.x, this.y);
-            ctx.lineTo(this.target.x, this.target.y);
+            ctx.moveTo(this.x, y);
+            if (isHost) ctx.lineTo(this.target.x, this.target.y);
+            else ctx.lineTo(this.target.x, c.height - this.target.y);
             ctx.stroke();
 
             ctx.beginPath();
             ctx.lineWidth = 2;
             ctx.strokeStyle = '#ff0000ff';
-            ctx.moveTo(this.x, this.y);
-            ctx.lineTo(this.target.x, this.target.y);
+            ctx.moveTo(this.x, y);
+            if (isHost) ctx.lineTo(this.target.x, this.target.y);
+            else ctx.lineTo(this.target.x, c.height - this.target.y);
             ctx.stroke();
         }
 
@@ -3198,38 +3430,38 @@ class Entity {
             ctx.lineWidth = 4;
             
             ctx.beginPath();
-            ctx.moveTo(this.x + p1.x, this.y + p1.y);
-            ctx.lineTo(this.x - p1.x, this.y - p1.y);
+            ctx.moveTo(this.x + p1.x, y + p1.y);
+            ctx.lineTo(this.x - p1.x, y - p1.y);
             ctx.stroke();
 
             ctx.beginPath();
-            ctx.moveTo(this.x + p2.x, this.y + p2.y);
-            ctx.lineTo(this.x - p2.x, this.y - p2.y);
+            ctx.moveTo(this.x + p2.x, y + p2.y);
+            ctx.lineTo(this.x - p2.x, y - p2.y);
             ctx.stroke();
 
             ctx.beginPath();
-            ctx.moveTo(this.x + p3.x, this.y + p3.y);
-            ctx.lineTo(this.x - p3.x, this.y - p3.y);
+            ctx.moveTo(this.x + p3.x, y + p3.y);
+            ctx.lineTo(this.x - p3.x, y - p3.y);
             ctx.stroke();
         }
 
         /*if (this.deployTimeLeft > 1) {
-            let top = this.y + 20 - 15;
+            let top = y + 20 - 15;
             let angle = (this.deployTimeLeft / this.stats.deployTime) * Math.PI * 2;
             ctx.beginPath();
             ctx.fillStyle = '#000000';
-            ctx.arc(this.x, this.y + 20, 15, 0, 2 * Math.PI);
+            ctx.arc(this.x, y + 20, 15, 0, 2 * Math.PI);
             ctx.fill();
 
             ctx.beginPath();
-            ctx.fillStyle = (this.team == 'player') ? '#3966f9ff' : '#fc3b3bff';
+            ctx.fillStyle = (this.team == game.team1) ? '#3966f9ff' : '#fc3b3bff';
             ctx.strokeStyle = '#000000';
             ctx.lineWidth = 4;
             ctx.moveTo(this.x, top);
-            ctx.lineTo(this.x, this.y + 20);
+            ctx.lineTo(this.x, y + 20);
             ctx.stroke();
             ctx.beginPath();
-            ctx.arc(this.x, this.y + 20, 11, 0, 2 * Math.PI);
+            ctx.arc(this.x, y + 20, 11, 0, 2 * Math.PI);
             ctx.fill();
         }*/
 
@@ -3241,7 +3473,7 @@ class Entity {
             ctx.beginPath();
             ctx.lineWidth = 2;
             ctx.strokeStyle = 'black';
-            ctx.arc(this.x, this.y, this.stats.viewRange, 0, 2 * Math.PI);
+            ctx.arc(this.x, y, this.stats.viewRange, 0, 2 * Math.PI);
             ctx.stroke();
         }
 
@@ -3250,7 +3482,7 @@ class Entity {
             ctx.beginPath();
             ctx.lineWidth = 2;
             ctx.strokeStyle = 'red';
-            ctx.arc(this.x, this.y, this.stats.range, 0, 2 * Math.PI);
+            ctx.arc(this.x, y, this.stats.range, 0, 2 * Math.PI);
             ctx.stroke();
         }
 
@@ -3259,10 +3491,10 @@ class Entity {
             ctx.beginPath();
             ctx.lineWidth = 2;
             ctx.strokeStyle = 'blue';
-            ctx.arc(this.x, this.y, this.stats.dashRange.min, 0, 2 * Math.PI);
+            ctx.arc(this.x, y, this.stats.dashRange.min, 0, 2 * Math.PI);
             ctx.stroke();
             ctx.beginPath();
-            ctx.arc(this.x, this.y, this.stats.dashRange.max, 0, 2 * Math.PI);
+            ctx.arc(this.x, y, this.stats.dashRange.max, 0, 2 * Math.PI);
             ctx.stroke();
         }
     }
@@ -3379,7 +3611,7 @@ class Entity {
     }
 
     spawnSupport() {
-        let dir = (this.team == 'player') ? -1 : 1;
+        let dir = (this.team == game.team1) ? -1 : 1;
         if (this.supportSpawnCooldown < 1) {
             if (this.stats.supportSpawnNum == 4) {
                 entities.push(new UnitEntity(this.x + 50, this.y, this.team, this.stats.supportStats));
@@ -3446,12 +3678,34 @@ class Entity {
             }
         }
     }
+
+    serialise() {
+        let s = {
+            x: this.x,
+            y: this.y,
+            team: this.team,
+            name: this.stats.name,
+            hp: this.hp,
+            sheildHP: this.sheildHP,
+            freezeTime: this.freezeTime,
+            slowTime: this.slowTime,
+            rageTime: this.rageTime,
+            charging: this.charging,
+            isAttacking: this.isAttacking,
+            hidden: this.hidden,
+            isFlying: this.isFlying,
+            vineTime: this.vineTime,
+            invisible: this.invisible,
+            target: null
+        };
+        if (this.target) s.target = {x: this.target.x, y: this.target.y};
+        return s;
+    }
 }
 
 class UnitEntity extends Entity {
     constructor(x, y, team, stats) {
         super(x, y, team, stats);
-        this.target = null;
         this.dashTime = 0;
         this.dashPauseTime = 0;
         this.distance = 0;
@@ -3681,9 +3935,9 @@ class UnitEntity extends Entity {
             let princess = onLeft ? princessLeft : princessRight;
 
             let bridgeX = onLeft ? game.laneLeftX : game.laneRightX;
-            let bridgeY = (this.team == 'player') ? game.river - game.riverWidth / 2 : game.river + game.riverWidth / 2;
+            let bridgeY = (this.team == game.team1) ? game.river - game.riverWidth / 2 : game.river + game.riverWidth / 2;
 
-            let onOwnSide = (this.team == 'player') ? this.y > game.river : this.y < game.river;
+            let onOwnSide = (this.team == game.team1) ? this.y > game.river : this.y < game.river;
 
             if (onOwnSide && this.stats.type != 'flying') {
                 if (!(M.dist(this.x, this.y, bridgeX, game.river) < this.stats.speed + 1)) {
@@ -3881,10 +4135,10 @@ class TowerEntity extends Entity {
 
         if (this.target) {
             this.isAttacking = true;
-            if (this.team == 'player') {
-                if (playerKingActivated || this.stats.name != 'king') this.shoot(this.target);
+            if (this.team == game.team1) {
+                if (p1KingActivated || this.stats.name != 'king') this.shoot(this.target);
             } else {
-                if (enemyKingActivated || this.stats.name != 'king') this.shoot(this.target);
+                if (p2KingActivated || this.stats.name != 'king') this.shoot(this.target);
             }
         }
     }
@@ -3910,10 +4164,10 @@ class TowerEntity extends Entity {
     }
 
     takeDamage(amount, e = null) {
-        if (this.team == 'player') {
-            if (!playerKingActivated && this.stats.name == 'king') playerKingActivated = true;
+        if (this.team == game.team1) {
+            if (!p1KingActivated && this.stats.name == 'king') p1KingActivated = true;
         } else {
-            if (!enemyKingActivated && this.stats.name == 'king') enemyKingActivated = true;
+            if (!p2KingActivated && this.stats.name == 'king') p2KingActivated = true;
         }
         if (this.hp <= amount) {
             this.dead = true;
@@ -3944,10 +4198,11 @@ class AOE {
     }
 
     draw() {
+        let y = isHost ? this.y : c.height - this.y;
         ctx.beginPath();
         if (this.stats.colour) ctx.fillStyle = this.stats.colour;
-        else ctx.fillStyle = this.team === 'player' ? '#00046f79' : '#ff840059';
-        ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI); 
+        else ctx.fillStyle = this.team == game.team1 ? '#00046f79' : '#ff840059';
+        ctx.arc(this.x, y, this.radius, 0, 2 * Math.PI); 
         ctx.fill();
     }
 
@@ -4088,7 +4343,7 @@ class AOE {
     clone(e) {
         if (e.stats.type == 'building') return;
         if (e.stats.isClone) return;
-        let dir = (this.team == 'player') ? 1 : -1;
+        let dir = (this.team == game.team1) ? 1 : -1;
         let stats = {...e.stats};
         stats.hp = 1;
         if (stats.sheildHP) stats.sheildHP = 1;
@@ -4102,6 +4357,10 @@ class AOE {
         let pos = {x: Math.cos(angle) * this.stats.radius + this.x, y: Math.sin(angle) * this.stats.radius + this.y};
 
         entities.push(new UnitEntity(pos.x, pos.y, this.team, this.stats.spawnStats));
+    }
+
+    serialise() {
+        return {x: this.x, y: this.y, name: this.stats.name, team: this.team, radius: this.radius};
     }
 }
 
@@ -4131,18 +4390,19 @@ class Projectile {
     }
 
     draw() {
+        let y = isHost ? this.y : c.height - this.y;
         if (this.stats.width) {
             ctx.beginPath();
             if (this.stats.colour) ctx.fillStyle = this.stats.colour;
             else ctx.fillStyle = '#000';
-            let x = -this.stats.width / 2 + this.x;
-            let y = this.stats.height / 2 + this.y;
-            ctx.fillRect(x, y, this.stats.width, this.stats.height);
+            let nx = -this.stats.width / 2 + this.x;
+            let ny = this.stats.height / 2 + y;
+            ctx.fillRect(nx, ny, this.stats.width, this.stats.height);
         } else {
             ctx.beginPath();
             if (this.stats.colour) ctx.fillStyle = this.stats.colour;
             else ctx.fillStyle = '#000';
-            ctx.arc(this.x, this.y, this.stats.size, 0, 2*Math.PI);
+            ctx.arc(this.x, y, this.stats.size, 0, 2*Math.PI);
             ctx.fill();
         }
     }
@@ -4284,8 +4544,12 @@ class Projectile {
             projectiles.push(new Projectile(this.x, this.y, this.stats.splitStats, dir, this.team, 'all', this.owner));
         }
     }
-}
 
+    serialise() {
+        return {x: this.x, y: this.y, name: this.stats.name, team: this.team};
+    }
+}
+ 
 class ChainLighning {
     constructor(x, y, ox, oy, stats, team, target = 'all', owner) {
         this.x = x;
@@ -4303,18 +4567,20 @@ class ChainLighning {
     }
 
     draw() {
+        let y = isHost ? this.y : c.height - this.y;
+        let oy = isHost ? this.oy : c.height - this.oy;
         ctx.beginPath();
         ctx.lineWidth = 5;
         ctx.strokeStyle = '#00e1ff';
-        ctx.moveTo(this.x, this.y);
-        ctx.lineTo(this.ox, this.oy);
+        ctx.moveTo(this.x, y);
+        ctx.lineTo(this.ox, oy);
         ctx.stroke();
 
         ctx.beginPath();
         ctx.lineWidth = 2;
         ctx.strokeStyle = '#ffffff';
-        ctx.moveTo(this.x, this.y);
-        ctx.lineTo(this.ox, this.oy);
+        ctx.moveTo(this.x, y);
+        ctx.lineTo(this.ox, oy);
         ctx.stroke();
     }
 
@@ -4374,6 +4640,10 @@ class ChainLighning {
             this.dead = true;
         }
     }
+
+    serialise() {
+        return {x: this.x, y: this.y, ox: this.ox, oy: this.oy, name: this.stats.name, team: this.team, type: 'lightning'};
+    }
 }
 
 class Particle {
@@ -4388,10 +4658,11 @@ class Particle {
     }
 
     draw() {
+        let y = isHost ? this.y : c.height - this.y;
         ctx.beginPath();
         ctx.fillStyle = this.stats.colour;
         //let r = this.stats.size.min ? Math.random() * (this.stats.size.max - this.stats.size.min) + this.stats.size.min : this.stats.size;
-        ctx.arc(this.x, this.y, this.size, 0, 2 * Math.PI);
+        ctx.arc(this.x, y, this.size, 0, 2 * Math.PI);
         ctx.fill();
     }
 
@@ -4400,6 +4671,10 @@ class Particle {
         else {
             this.dead = true;
         }
+    }
+
+    serialise() {
+        return {x: this.x, y: this.y, stats: this.stats, size: this.size};
     }
 }
 
@@ -4465,8 +4740,8 @@ class M {
 function runAI() {
     if (Math.random() < 0.5) return;
     let spawnPoints = [{x: c.width / 2, y: 300}, {x: game.laneLeftX, y: game.princessY + 50}, {x: game.laneRightX, y: game.princessY + 50}];
-    let i = Math.floor(Math.random() * enemyHand.length);
-    let stats = enemyUnits[enemyHand[i]];
+    let i = Math.floor(Math.random() * p2Hand.length);
+    let stats = p2Units[p2Hand[i]];
 
     if (stats.name == 'Goblin Barrel') {
         spawnPoints = [{x: game.laneLeftX, y: c.height - game.princessY}, {x: game.laneRightX, y: c.height - game.princessY}];
@@ -4474,21 +4749,21 @@ function runAI() {
 
     let spawnPoint = spawnPoints[Math.floor(Math.random() * spawnPoints.length)];
 
-    spawnUnit(spawnPoint.x, spawnPoint.y, i, 'enemy', enemyHand, enemyCycles);
+    spawnUnit(spawnPoint.x, spawnPoint.y, i, game.team2);
 }
 
 function updateElixir() {
-    playerElixir = Math.min(game.maxElixir, playerElixir + (game.playerElixirMult * elixirMult) / 100);
+    p1Elixir = Math.min(game.maxElixir, p1Elixir + (game.p1ElixirMult * elixirMult) / 100);
 
-    enemyElixir = Math.min(game.maxElixir, enemyElixir + (game.enemyElixirMult * elixirMult) / 100);
+    p2Elixir = Math.min(game.maxElixir, p2Elixir + (game.p2ElixirMult * elixirMult) / 100);
 
     updateElixirUI();
 }
 
 function updateElixirUI() {
-    elixirBarGrey.style.width = `${playerElixir / game.maxElixir * 100}%`;
-    elixirBar.style.width = `${Math.floor(playerElixir) / game.maxElixir * 100}%`;
-    elixirNum.innerHTML = Math.floor(playerElixir);
+    elixirBarGrey.style.width = `${p1Elixir / game.maxElixir * 100}%`;
+    elixirBar.style.width = `${Math.floor(p1Elixir) / game.maxElixir * 100}%`;
+    elixirNum.innerHTML = Math.floor(p1Elixir);
 
     updateCardDisabledState();
 }
@@ -4498,15 +4773,15 @@ function spawnUnit(x, y, index, team) {
 
     let stats = null;
 
-    if (team === 'player') {
-        stats = playerUnits[playerHand[index]];
+    if (team == game.team1) {
+        stats = p1Units[p1Hand[index]];
 
-        if (playerElixir < stats.cost) return;
-        playerElixir -= stats.cost;
+        if (p1Elixir < stats.cost) return;
+        p1Elixir -= stats.cost;
 
-        playerCycles.push(playerHand[index]);
-        playerHand[index] = playerCycles[0];
-        playerCycles.splice(0, 1);
+        p1Cycles.push(p1Hand[index]);
+        p1Hand[index] = p1Cycles[0];
+        p1Cycles.splice(0, 1);
 
         if (stats.type != 'spell' && stats.deployType != 'spell' || stats.width) {
             let newPos = findMax(x, y);
@@ -4514,14 +4789,14 @@ function spawnUnit(x, y, index, team) {
             if (newPos.y) y = newPos.y;
         }
     } else {
-        stats = enemyUnits[enemyHand[index]];
+        stats = p2Units[p2Hand[index]];
 
-        if (enemyElixir < stats.cost) return;
-        enemyElixir -= stats.cost;
+        if (p2Elixir < stats.cost) return;
+        p2Elixir -= stats.cost;
 
-        enemyCycles.push(enemyHand[index]);
-        enemyHand[index] = enemyCycles[0];
-        enemyCycles.splice(0, 1);
+        p2Cycles.push(p2Hand[index]);
+        p2Hand[index] = p2Cycles[0];
+        p2Cycles.splice(0, 1);
     }
 
     updateElixirUI();
@@ -4535,82 +4810,100 @@ function spawnUnit(x, y, index, team) {
 
 function spawnLogic(x, y, team, stats) {
     if (stats.count == 2) {
-        entities.push(new UnitEntity(x - 10, y, team, stats));
-        entities.push(new UnitEntity(x + 10, y, team, stats));
+        spawnRequest(x - 10, y, stats, team);
+        spawnRequest(x + 10, y, stats, team);
     } else if (stats.count == 3) {
-        entities.push(new UnitEntity(x + 10, y, team, stats));
-        entities.push(new UnitEntity(x, y + 10, team, stats));
-        entities.push(new UnitEntity(x - 10, y, team, stats));
+        spawnRequest(x + 10, y, stats, team);
+        spawnRequest(x, y + 10, stats, team);
+        spawnRequest(x - 10, y, stats, team);
     } else if (stats.count == 15) {
         for (let i = 0; i < 15; i++) {
-            entities.push(new UnitEntity(x + i, y + Math.random(), team, stats));
+            spawnRequest(x + i, y + Math.random(), stats, team);
         }
     } else if (stats.name == 'Royal Recruits') {
         for (let i = 0; i < 6; i++) {
-            entities.push(new UnitEntity(x - c.width / 2 + (c.width / 6 * i) + c.width / 12, y, team, stats));
+            spawnRequest(x - c.width / 2 + (c.width / 6 * i) + c.width / 12, y, stats, team);
         }
     } else if (stats.count == 6) {
         for (let i = 0; i < 6; i++) {
-            entities.push(new UnitEntity(x + i, y + Math.random(), team, stats));
+            spawnRequest(x + i, y + Math.random(), stats, team);
         }
     } else if (stats.count == 5) {
-        entities.push(new UnitEntity(x + 30, y, team, stats));
-        entities.push(new UnitEntity(x - 30, y, team, stats));
-        entities.push(new UnitEntity(x, y + 30, team, stats));
-        entities.push(new UnitEntity(x - 20, y - 20, team, stats));
-        entities.push(new UnitEntity(x + 20, y - 20, team, stats));
+        spawnRequest(x + 30, y, stats, team);
+        spawnRequest(x - 30, y, stats, team);
+        spawnRequest(x, y + 30, stats, team);
+        spawnRequest(x - 20, y - 20, stats, team);
+        spawnRequest(x + 20, y - 20, stats, team);
     } else if (stats.count == 4) {
-        entities.push(new UnitEntity(x + 10, y + 10, team, stats));
-        entities.push(new UnitEntity(x - 10, y + 10, team, stats));
-        entities.push(new UnitEntity(x + 10, y - 10, team, stats));
-        entities.push(new UnitEntity(x - 10, y - 10, team, stats));
+        spawnRequest(x + 10, y + 10, stats, team);
+        spawnRequest(x - 10, y + 10, stats, team);
+        spawnRequest(x + 10, y - 10, stats, team);
+        spawnRequest(x - 10, y - 10, stats, team);
     } else if (stats.type == 'spell' && !stats.hp && !stats.distance) {
-        aoes.push(new AOE(x, y, stats, team));
+        spawnRequest(x, y, stats, team, 'aoe');
     } else if (stats.name == 'Log' || stats.name == 'Barbarian Barrel') {
-        let dir = (team == 'player') ? {x: 0, y: -1} : {x: 0, y: 1};
-        projectiles.push(new Projectile(x, y, stats, dir, team));
+        let dir = (team == game.team1) ? {x: 0, y: -1} : {x: 0, y: 1};
+        spawnRequest(x, y, stats, team, 'log', dir);
     } else if (stats.name == 'Goblin Gang') {
-        let dir = (team == 'player') ? 10 : -10;
-        entities.push(new UnitEntity(x + 30, y - dir, team, units.goblins));
-        entities.push(new UnitEntity(x, y - dir * 2.5, team, units.goblins));
-        entities.push(new UnitEntity(x - 30, y - dir, team, units.goblins));
-        entities.push(new UnitEntity(x + 30, y + dir, team, units.spearGoblins));
-        entities.push(new UnitEntity(x, y + dir * 2.5, team, units.spearGoblins));
-        entities.push(new UnitEntity(x - 30, y + dir, team, units.spearGoblins));
+        let dir = (team == game.team1) ? 10 : -10;
+        spawnRequest(x + 30, y - dir, units.goblins, team);
+        spawnRequest(x, y - dir * 2.5, units.goblins, team);
+        spawnRequest(x - 30, y - dir, units.goblins, team);
+        spawnRequest(x + 30, y + dir, units.spearGoblins, team);
+        spawnRequest(x, y + dir * 2.5, units.spearGoblins, team);
+        spawnRequest(x - 30, y + dir, units.spearGoblins, team);
     } else if (stats.name == 'Rascals') {
-        let dir = (team == 'player') ? 10 : -10;
-        entities.push(new UnitEntity(x, y, team, otherUnits.rascalBoy));
-        entities.push(new UnitEntity(x + 30, y + dir * 5, team, otherUnits.rascalGirl));
-        entities.push(new UnitEntity(x - 30, y + dir * 5, team, otherUnits.rascalGirl));
+        let dir = (team == game.team1) ? 10 : -10;
+        spawnRequest(x, y, otherUnits.rascalBoy, team);
+        spawnRequest(x + 30, y + dir * 5, otherUnits.rascalGirl, team);
+        spawnRequest(x - 30, y + dir * 5, otherUnits.rascalGirl, team);
     } else if (stats.name == 'Goblin Barrel' || stats.name == 'Miner' || stats.name == 'Goblin Drill') {
         let startX = c.width / 2;
-        let startY = (team == 'player') ? c.height - game.kingY : game.kingY;
+        let startY = (team == game.team1) ? c.height - game.kingY : game.kingY;
         let dir = {x: x - startX, y: y - startY};
 
         dir = M.normalise(dir);
-        projectiles.push(new Projectile(startX, startY, stats, dir, team, {x: x, y: y}));
+        spawnRequest(startX, startY, stats, team, 'projectile', dir, {x: x, y: y});
     } else {
-        entities.push(new UnitEntity(x, y, team, stats));
+        spawnRequest(x, y, stats, team);
     }
 }
 
 function gameover(loser) {
+    const offline = !isConnected || !conn;
+
     gameFinished = true;
 
-    if (loser != 'player') {
-        gameoverMessage.innerHTML = 'Player Wins!';
-    } else {
-        gameoverMessage.innerHTML = 'AI Wins!';
+    if (!offline && isHost) {
+        conn.send({type: 'TOWER_INFO', team: game.team1, towerDead: p1TowerDead});
+        conn.send({type: 'TOWER_INFO', team: game.team2, towerDead: p2TowerDead});
+        conn.send({type: 'GAMEOVER', loser: loser});
     }
 
-    restartButton.innerHTML = 'Play Again'
+    let winner;
+    if (offline) {
+        winner = loser != game.team1 ? 'Player' : 'BallsinBox';
+    } else {
+        const hostWon = (loser == game.team1) == isHost;
+        winner = hostWon ? 'Host' : 'Peer';
+    }
+
+    gameoverMessage.innerHTML = `${winner} Wins!`;
+
+    restartButton.style.background = '#10b981';
+    if (offline) restartButton.innerHTML = 'Play Again';
 
     gameoverScreen.style.visibility = 'visible';
     gameoverScreen.style.opacity = '1';
 
-    entities = [];
-    projectiles = [];
-    aoes = [];
+    multiplayerMenu.style.display = 'block';
+
+    if (isHost) {
+        entities = [];
+        projectiles = [];
+        aoes = [];
+        particles = [];
+    }
 
     mouse.selection = -1;
     timePassed = 0;
@@ -4630,53 +4923,70 @@ function reset() {
     gameoverScreen.style.visibility = 'hidden';
     gameoverScreen.style.opacity = '0';
 
-    playerElixir = game.playerStartElixir;
-    enemyElixir = game.enemyStartElixir;
-    playerKingActivated = false;
-    playerTowerDead = {left: false, right: false, king: false};
-    enemyKingActivated = false;
-    enemyTowerDead = {left: false, right: false, king: false};
+    multiplayerMenu.style.display = 'none';
+
+    p1Elixir = game.p1StartElixir;
+    p2Elixir = game.p2StartElixir;
+    p1KingActivated = false;
+    p1TowerDead = {left: false, right: false, king: false};
+    p2KingActivated = false;
+    p2TowerDead = {left: false, right: false, king: false};
 
     elixirMult = 1;
 
     updateElixirUI();
 
     if (game.randomiseEnemyUnits) randomiseEnemyUnits();
-    randomisePlayerUnits();
+    randomiseP1Units();
 
-    let playerUnitsArr = Object.keys(playerUnits);
-    let enemyUnitsArr = Object.keys(enemyUnits);
+    let p1UnitsArr = Object.keys(p1Units);
+    let p2UnitsArr = Object.keys(p2Units);
 
-    let playerDeck = [...playerUnitsArr];
-    M.shuffle(playerDeck);
-    playerHand = playerDeck.slice(0, 4);
-    playerCycles = playerDeck.slice(4);
+    let p1Deck = [...p1UnitsArr];
+    M.shuffle(p1Deck);
+    p1Hand = p1Deck.slice(0, 4);
+    p1Cycles = p1Deck.slice(4);
 
-    let enemyDeck = [...enemyUnitsArr];
-    M.shuffle(enemyDeck);
-    enemyHand = enemyDeck.slice(0, 4);
-    enemyCycles = enemyDeck.slice(4);
-
-    /*console.log('Enemy Units:');
-    for (let i = 0; i < enemyUnitsArr.length; i++) {
-        console.log(enemyUnits[enemyUnitsArr[i]].name);
-    }*/
+    let p2Deck = [...p2UnitsArr];
+    M.shuffle(p2Deck);
+    p2Hand = p2Deck.slice(0, 4);
+    p2Cycles = p2Deck.slice(4);
 
     drawHandUI();
 
-    //Enemy towers
-    entities.push(new TowerEntity(c.width / 2, game.kingY, 'enemy', towers.king));
-    entities.push(new TowerEntity(game.laneLeftX, game.princessY, 'enemy', towers.princess));
-    entities.push(new TowerEntity(game.laneRightX, game.princessY, 'enemy', towers.princess));
-    
-    //Player towers
-    entities.push(new TowerEntity(c.width / 2, c.height - game.kingY, 'player', towers.king));
-    entities.push(new TowerEntity(game.laneLeftX, c.height - game.princessY, 'player', towers.princess));
-    entities.push(new TowerEntity(game.laneRightX, c.height - game.princessY, 'player', towers.princess));
+    if (isHost) {
+        //Peer Towers
+        entities.push(new TowerEntity(c.width / 2, game.kingY, game.team2, towers.king));
+        entities.push(new TowerEntity(game.laneLeftX, game.princessY, game.team2, towers.princess));
+        entities.push(new TowerEntity(game.laneRightX, game.princessY, game.team2, towers.princess));
+        
+        //Host Towers
+        entities.push(new TowerEntity(c.width / 2, c.height - game.kingY, game.team1, towers.king));
+        entities.push(new TowerEntity(game.laneLeftX, c.height - game.princessY, game.team1, towers.princess));
+        entities.push(new TowerEntity(game.laneRightX, c.height - game.princessY, game.team1, towers.princess));
+    }
 
     elixirIntervalID = setInterval(updateElixir, game.elixirRate);
-    runAIIntervalID = setInterval(runAI, 1000);
-    timerIntervalID = setInterval(stepTimer, 100);
+    if (!isConnected) runAIIntervalID = setInterval(runAI, 1000);
+    if (isHost) timerIntervalID = setInterval(stepTimer, 100);
+}
+
+function requestStart() {
+    if (!isConnected || !conn) {
+        reset();
+        return;
+    }
+
+    restartButton.style.background = '#333';
+
+    if (peerIsReady && isHost) {
+        reset();
+        conn.send({type: 'READY'});
+    } else if (!isHost) {
+        conn.send({type: 'READY'});
+    } else if (isHost) {
+        isReady = true;
+    }
 }
 
 function randomiseEnemyUnits() {
@@ -4686,17 +4996,17 @@ function randomiseEnemyUnits() {
         let index = Math.floor(Math.random() * unitsArr.length);
         let u = units[unitsArr[index]];
 
-        enemyUnits['unit' + (i+1)] = u;
+        p2Units['unit' + (i+1)] = u;
 
         unitsArr.splice(index, 1);
     }
 }
 
-function randomisePlayerUnits() {
+function randomiseP1Units() {
     let unitsArr = Object.keys(units);
     
     for (let i = 0; i < 8; i++) {
-        let u = playerUnits['unit' + (i+1)];
+        let u = p1Units['unit' + (i+1)];
         if (!u) continue;
 
         let exit = false;
@@ -4710,13 +5020,13 @@ function randomisePlayerUnits() {
     }
 
     for (let i = 0; i < 8; i++) {
-        let u = playerUnits['unit' + (i+1)];
-        let isRandom = !u || randomPlayerUnits['unit' + (i+1)];
+        let u = p1Units['unit' + (i+1)];
+        let isRandom = !u || randomP1Units['unit' + (i+1)];
         if (isRandom) {
             let index = Math.floor(Math.random() * unitsArr.length);
             let u = units[unitsArr[index]];
 
-            playerUnits['unit' + (i+1)] = u;
+            p1Units['unit' + (i+1)] = u;
 
             unitsArr.splice(index, 1);
         }
@@ -4726,8 +5036,8 @@ function randomisePlayerUnits() {
 function drawHandUI() {
     cardBar.innerHTML = '';
 
-    for (let i = 0; i < playerHand.length; i++) {
-        let cardStats = playerUnits[playerHand[i]];
+    for (let i = 0; i < p1Hand.length; i++) {
+        let cardStats = p1Units[p1Hand[i]];
         let cardElem = document.createElement('div');
 
         if (!cardStats) continue;
@@ -4740,11 +5050,15 @@ function drawHandUI() {
             <div style="font-weight: 700;">Cost: <span style="color: #df00df;">${cardStats.cost}</span></div>
         `;
 
+        if (window.innerWidth < 800) {
+            cardElem.style.width = `${(window.innerWidth - 25) / 4}px`
+        }
+
         if (i === mouse.selection) {
             cardElem.classList.add('selected');
         }
 
-        if (cardStats.cost > playerElixir) {
+        if (cardStats.cost > p1Elixir) {
             cardElem.classList.add('disabled');
         }
 
@@ -4754,7 +5068,7 @@ function drawHandUI() {
 
     const nextCard = document.getElementById('nextCard');
 
-    let nextCardStats = playerUnits[playerCycles[0]];
+    let nextCardStats = p1Units[p1Cycles[0]];
 
     if (nextCardStats) {
         nextCard.innerHTML = `
@@ -4769,18 +5083,18 @@ function updateCardDisabledState() {
     const cards = cardBar.children;
 
     for (let i = 0; i < cards.length; i++) {
-        const cardStats = playerUnits[playerHand[i]];
+        const cardStats = p1Units[p1Hand[i]];
         if (!cardStats) continue;
 
         cards[i].classList.toggle(
             'disabled',
-            cardStats.cost > playerElixir
+            cardStats.cost > p1Elixir
         );
     }
 }
 
 function cardClick(cardElem, cardStats, index) {
-    if (playerElixir < cardStats.cost) return;
+    if (p1Elixir < cardStats.cost) return;
 
     if (mouse.selection === index) {
         mouse.selection = -1;
@@ -4818,19 +5132,21 @@ function drawMap() {
 
     //Draw no deploy area
     let isSpell = null;
-    if (mouse.selection != -1) isSpell = playerUnits[playerHand[mouse.selection]].type == 'spell' || playerUnits[playerHand[mouse.selection]].deployType == 'spell';
+    if (mouse.selection != -1) isSpell = p1Units[p1Hand[mouse.selection]].type == 'spell' || p1Units[p1Hand[mouse.selection]].deployType == 'spell';
 
     if (mouse.selection != -1 && !isSpell) {
         ctx.fillStyle = '#d700005c';
         ctx.strokeStyle = '#7f0000ff';
         ctx.lineWidth = 4;
 
-        if (enemyTowerDead.left && enemyTowerDead.right) {
+        let towerDead = isHost ? p2TowerDead : p1TowerDead;
+
+        if (towerDead.left && towerDead.right) {
             ctx.fillRect(0, 0, c.width, game.river + (game.riverWidth / 2) + game.deployMaxY2);
             ctx.strokeRect(0, 0, c.width, game.river + (game.riverWidth / 2) + game.deployMaxY2);
         }
         
-        if (enemyTowerDead.left && !enemyTowerDead.right) {
+        if (towerDead.left && !towerDead.right) {
             ctx.fillRect(0, 0, c.width, game.river + (game.riverWidth / 2) + game.deployMaxY2);
             ctx.fillRect(c.width / 2, game.river + (game.riverWidth / 2) + game.deployMaxY2, c.width / 2, (game.river + (game.riverWidth / 2) + game.deployMaxY) - (game.river + (game.riverWidth / 2) + game.deployMaxY2));
             ctx.beginPath();
@@ -4844,7 +5160,7 @@ function drawMap() {
             ctx.stroke();
         }
 
-        if (!enemyTowerDead.left && enemyTowerDead.right) {
+        if (!towerDead.left && towerDead.right) {
             ctx.fillRect(0, 0, c.width, game.river + (game.riverWidth / 2) + game.deployMaxY2);
             ctx.fillRect(0, game.river + (game.riverWidth / 2) + game.deployMaxY2, c.width / 2, (game.river + (game.riverWidth / 2) + game.deployMaxY) - (game.river + (game.riverWidth / 2) + game.deployMaxY2));
             ctx.beginPath();
@@ -4858,7 +5174,7 @@ function drawMap() {
             ctx.stroke();
         }
 
-        if (!enemyTowerDead.left && !enemyTowerDead.right) {
+        if (!towerDead.left && !towerDead.right) {
             ctx.fillRect(0, 0, c.width, game.river + (game.riverWidth / 2) + game.deployMaxY);
             ctx.strokeRect(0, 0, c.width, game.river + (game.riverWidth / 2) + game.deployMaxY);
         }
@@ -4891,8 +5207,8 @@ function cardChoiceClick(cardElem, stats, inDeck, index, handIndex = null) {
         cardElem.removeEventListener('click', () => cardChoiceClick(child, stats, true, index));
         cardElem.classList.remove('occupied');
         cardElem.innerHTML = '';
-        playerUnits['unit' + (handIndex + 1)] = null;
-        randomPlayerUnits['unit' + (handIndex + 1)] = true;
+        p1Units['unit' + (handIndex + 1)] = null;
+        randomP1Units['unit' + (handIndex + 1)] = true;
     } else {
         if (cardElem.style.opacity == 0.2 && !debug.pickSameCards) return;
         let children = chosenCards.children;
@@ -4911,8 +5227,8 @@ function cardChoiceClick(cardElem, stats, inDeck, index, handIndex = null) {
 
             child.addEventListener('click', () => cardChoiceClick(child, stats, true, index, i));
 
-            playerUnits['unit' + (i + 1)] = stats;
-            randomPlayerUnits['unit' + (i + 1)] = false;
+            p1Units['unit' + (i + 1)] = stats;
+            randomP1Units['unit' + (i + 1)] = false;
             break;
         }
     }
@@ -4929,18 +5245,20 @@ function findMax(x, y) {
     let nx = null;
     let ny = null;
 
+    let towerDead = isHost ? p2TowerDead : p1TowerDead;
+
     //Both Dead
-    if (enemyTowerDead.left && enemyTowerDead.right) {
+    if (towerDead.left && towerDead.right) {
         if (y < game.river + (game.riverWidth / 2) + game.deployMaxY2) ny = game.river + (game.riverWidth / 2) + game.deployMaxY2;
     }
 
     //Both Alive
-    if (!enemyTowerDead.left && !enemyTowerDead.right) {
+    if (!towerDead.left && !towerDead.right) {
         if (y < game.river + (game.riverWidth / 2) + game.deployMaxY) ny = game.river + (game.riverWidth / 2) + game.deployMaxY;
     }
 
     //Left Dead
-    if (enemyTowerDead.left && !enemyTowerDead.right) {
+    if (towerDead.left && !towerDead.right) {
         
         if (x <= c.width / 2) {
             //On dead side
@@ -4966,7 +5284,7 @@ function findMax(x, y) {
     }
 
     //Right Dead
-    if (!enemyTowerDead.left && enemyTowerDead.right) {
+    if (!towerDead.left && towerDead.right) {
         if (x >= c.width / 2) {
             //On dead side
             if (y < game.river + (game.riverWidth / 2) + game.deployMaxY2) ny = game.river + (game.riverWidth / 2) + game.deployMaxY2;
@@ -4994,14 +5312,14 @@ function findMax(x, y) {
 }
 
 function runGameTime() {
-    let playerTowersDestroyed = 0;
-    let enemyTowersDestroyed = 0;
+    let p1TowersDestroyed = 0;
+    let p2TowersDestroyed = 0;
 
-    if (enemyTowerDead.left) playerTowersDestroyed++;
-    if (enemyTowerDead.right) playerTowersDestroyed++;
+    if (p2TowerDead.left) p1TowersDestroyed++;
+    if (p2TowerDead.right) p1TowersDestroyed++;
 
-    if (playerTowerDead.left) enemyTowersDestroyed++;
-    if (playerTowerDead.right) enemyTowersDestroyed++;
+    if (p1TowerDead.left) p2TowersDestroyed++;
+    if (p1TowerDead.right) p2TowersDestroyed++;
 
     let displayTime = timeLeft;
     if (timeLeft <= 60) {
@@ -5009,8 +5327,8 @@ function runGameTime() {
     }
     if (timeLeft <= 0) {
         displayTime = overtimeLeft;
-        if (playerTowersDestroyed > enemyTowersDestroyed) gameover('enemy');
-        if (enemyTowersDestroyed > playerTowersDestroyed) gameover('player');
+        if (p1TowersDestroyed > p2TowersDestroyed) gameover(game.team2);
+        if (p2TowersDestroyed > p1TowersDestroyed) gameover(game.team1);
     }
     if (overtimeLeft <= 60) {
         elixirMult = 3;
@@ -5034,7 +5352,7 @@ function getCrowns() {
     const totalCrownDisplay = document.getElementById('totalCrownDisplay');
     const newCrownDisplay = document.getElementById('newCrownDisplay');
 
-    if (game.playerElixirMult > 1 || debug.pickSameCards || game.enemyElixirMult < 1) {
+    if (game.p1ElixirMult > 1 || debug.pickSameCards || game.p2ElixirMult < 1) {
         newCrownDisplay.innerHTML = 'No crowns given';
         newCrownDisplay.style.display = 'block';
         return;
@@ -5043,13 +5361,13 @@ function getCrowns() {
     totalCrownDisplay.innerHTML = `${localStorage.crowns || 0} 👑`;
     let crownAmount = 3;
 
-    if (playerTowerDead.left) crownAmount--;
-    if (playerTowerDead.right) crownAmount--;
-    if (playerTowerDead.king) crownAmount--;
+    if (p1TowerDead.left) crownAmount--;
+    if (p1TowerDead.right) crownAmount--;
+    if (p1TowerDead.king) crownAmount--;
     
-    if (enemyTowerDead.left) crownAmount++;
-    if (enemyTowerDead.right) crownAmount++;
-    if (enemyTowerDead.king) crownAmount++;
+    if (p2TowerDead.left) crownAmount++;
+    if (p2TowerDead.right) crownAmount++;
+    if (p2TowerDead.king) crownAmount++;
 
     crowns += crownAmount;
     localStorage.crowns = crowns;
@@ -5060,9 +5378,9 @@ function getCrowns() {
 }
 
 function addElixir(team, amount) {
-    if (team == 'player') {
-        playerElixir = Math.min(game.maxElixir, playerElixir + amount);
+    if (team == game.team1) {
+        p1Elixir = Math.min(game.maxElixir, p1Elixir + amount);
     } else {
-        enemyElixir = Math.min(game.maxElixir, enemyElixir + amount);
+        p2Elixir = Math.min(game.maxElixir, p2Elixir + amount);
     }
 }

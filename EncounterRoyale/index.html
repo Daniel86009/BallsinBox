@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="#">
     <title>Encounter Royale</title>
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -46,6 +47,13 @@
         </div>
         <p id="totalCrownDisplay">0 👑</p>
 
+        <div id="multiplayerMenu">
+            <input type="text" id="peerCode" placeholder="Room Code"> <br>
+            <button class="btn-host" onclick="startHosting()">Host Room</button>
+            <button class="btn-join" onclick="joinRoom()">Join Room</button>
+            <div id="status">Status: Offline</div>
+        </div>
+
         <canvas id="c" width="500" height="800"></canvas>
 
         <button id="theme-toggle">Switch to Light Mode</button>
@@ -84,7 +92,7 @@
     <div id="gameoverScreen">
         <h2 id="gameoverMessage">Choose Cards</h2>
         <h1 id="newCrownDisplay">+0👑</h1>
-        <button id="restartButton" onclick="reset()">Play</button>
+        <button id="restartButton" onclick="requestStart()">Play</button>
         <div id="chosenCards">
             <div class="card"></div>
             <div class="card"></div>
@@ -101,6 +109,7 @@
         </div>
     </div>
 
+    <script src="multiplayer.js"></script>
     <script src="script.js"></script>
     <script src="ui.js"></script>
 </body>

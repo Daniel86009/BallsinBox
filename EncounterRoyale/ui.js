@@ -16,6 +16,7 @@ toggleButton.addEventListener('click', () => {
 
 //Crown display
 const totalCrownDisplay = document.getElementById('totalCrownDisplay');
+const multiplayerMenu = document.getElementById('multiplayerMenu');
 totalCrownDisplay.innerHTML = `${localStorage.crowns || 0} 👑`;
 
 //Change card size on mobile
@@ -37,6 +38,10 @@ if (window.innerWidth < 800) {
 
     c.style.width = `${window.innerWidth - 10}px`;
     c.style.height = `${window.innerHeight - 120}px`;
+    c.style.paddingLeft = '5px';
+
+    multiplayerMenu.style.transform = 'scale(0.7)';
+    multiplayerMenu.style.transformOrigin = 'top left';
 
     document.getElementById('elixirBarOuter').style.width = `${window.innerWidth - 10}px`;
     document.getElementById('playerUI').style.width = `${window.innerWidth - 10}px`;
@@ -85,7 +90,6 @@ const elixirMultValue = document.getElementById('enemyElixirValue');
 const debugDrawRange = document.getElementById('debugDrawRange');
 const debugDrawViewRange = document.getElementById('debugDrawViewRange');
 
-const infinitePlayerElixir = document.getElementById('infinitePlayerElixir');
 const pickSameCards = document.getElementById('pickSameCards');
 
 elixirMultSlider.value = game.enemyElixirMult;

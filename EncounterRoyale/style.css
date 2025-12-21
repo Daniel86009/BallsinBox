@@ -173,11 +173,6 @@ body {
     justify-content: space-between;
 }
 
-button {
-    min-width: 95px;
-    min-height: 50px;
-}
-
 /*Options menu button*/
 #optionsMenu {
     color: var(--text-color);
@@ -189,7 +184,7 @@ button {
     top: 10px;
     left: 10px;
     cursor: pointer;
-    z-index: 51;
+    z-index: 52;
     user-select: none;
     display: none;
 }
@@ -238,4 +233,41 @@ button {
     width: 50px;
     height: 61px;
     font-size: 7px;
+}
+
+#multiplayerMenu {
+    position: fixed;
+    top: 60px;
+    left: 10px;
+    z-index: 10;
+    background: var(--card-bg);
+    padding: 15px;
+    border-radius: 12px;
+    text-align: left;
+    border: 1px solid var(--card-border);
+    z-index: 51;
+}
+
+#status {
+    font-size: 0.8em;
+    margin-top: 10px;
+    color: #94a3b8;
+}
+
+button {
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.2s;
+}
+
+.btn-host {
+    background: #10b981;
+    color: white;
+}
+.btn-join {
+    background: #3b82f6;
+    color: white;
 }
