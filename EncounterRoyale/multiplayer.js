@@ -1,6 +1,20 @@
 const statusDiv = document.getElementById('status');
 const codeInput = document.getElementById('peerCode');
 
+const iceConfig = {
+    iceServers: [
+        //STUN
+        {urls: 'stun:stun.l.google.com:19302'},
+        {urls: 'stun:stun1.l.google.com:5349'},
+        //TURN
+        {
+            urls: 'turn:freestun.net:3478',
+            username: 'free',
+            credential: 'free'
+        }
+    ]
+};
+
 let peer = null;
 let conn = null;
 let isHost = true;
@@ -8,17 +22,19 @@ let isConnected = false;
 
 function startHosting() {
     isHost = true;
-    peer = new Peer(codeInput.value);
+    peer = new Peer(codeInput.value, {config: iceConfig});
     peer.on('open', (id) => statusDiv.textContent = "Hosting: " + id);
     peer.on('connection', (c) => {
         conn = c;
         setupEvents();
     });
+
+    
 }
 
 function joinRoom() {
     isHost = false;
-    peer = new Peer(); 
+    peer = new Peer(undefined, {config: iceConfig}); 
     peer.on('open', () => {
         conn = peer.connect(codeInput.value);
         setupEvents();
