@@ -4875,8 +4875,8 @@ function gameover(loser) {
     gameFinished = true;
 
     if (!offline && isHost) {
-        conn.send({type: 'TOWER_INFO', team: game.team1, towerDead: p1TowerDead});
-        conn.send({type: 'TOWER_INFO', team: game.team2, towerDead: p2TowerDead});
+        conn.send({type: 'TOWER_INFO', team: game.team1, towerDead: p2TowerDead});
+        conn.send({type: 'TOWER_INFO', team: game.team2, towerDead: p1TowerDead});
         conn.send({type: 'GAMEOVER', loser: loser});
     }
 
@@ -4884,8 +4884,8 @@ function gameover(loser) {
     if (offline) {
         winner = loser != game.team1 ? 'Player' : 'BallsinBox';
     } else {
-        const hostWon = (loser == game.team1) == isHost;
-        winner = hostWon ? 'Host' : 'Peer';
+        if ((isHost && loser == game.team1) || (!isHost && loser == game.team1)) winner = 'Peer';
+        else winner = 'Host';
     }
 
     gameoverMessage.innerHTML = `${winner} Wins!`;
