@@ -7,13 +7,10 @@ const iceConfig = {
         {urls: 'stun:stun.l.google.com:19302'},
         {urls: 'stun:stun1.l.google.com:5349'},
         //TURN
-        {
-            urls: 'turn:freestun.net:3478',
-            username: 'free',
-            credential: 'free'
-        }
     ]
 };
+
+setICE();
 
 let peer = null;
 let conn = null;
@@ -218,4 +215,16 @@ function spawnRequest(x, y, stats, team, type = 'unit', dir, target = 'all') {
     } else if (conn && conn.open) {
         conn.send({type: 'SPAWN_REQUEST', entity: {x: x, y: c.height - y, team: game.team2, stats: stats, type: type, dir: dir, target: target}});
     }
+}
+
+async function setICE() {
+    const response = await fetch("https://ballsinbox.metered.live/api/v1/turn/credentials?apiKey=5a1fe3be6f2b5f8142db127fe398e66de399");
+    const turnServers = await response.json();
+    iceConfig.iceServers = [
+        //STUN
+        {urls: 'stun:stun.l.google.com:19302'},
+        {urls: 'stun:stun1.l.google.com:5349'},
+        //TURN
+        ...turnServers
+    ]
 }
