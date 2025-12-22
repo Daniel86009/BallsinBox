@@ -2713,7 +2713,7 @@ const units = {
         cost: 5,
         hp: 1280,
         projectileStats: projectileStats.executionerAxe,
-        attackSpeed: 900,
+        attackSpeed: 2400,
         initHitSpeed: 500,
         range: 108,
         viewRange: 150,
@@ -4748,9 +4748,13 @@ function runAI() {
     let i = Math.floor(Math.random() * p2Hand.length);
     let stats = p2Units[p2Hand[i]];
 
-    if (stats.name == 'Goblin Barrel') {
+    if (stats.name == 'Goblin Barrel' || stats.name == 'Miner') {
         spawnPoints = [{x: game.laneLeftX, y: c.height - game.princessY}, {x: game.laneRightX, y: c.height - game.princessY}];
-    } 
+    } else if (stats.name == 'Elixir Collector') {
+        spawnPoints = [{x: 50, y: 50}, {x: 120, y: 50}, {x: c.width - 50, y: 50}, {x: c.width - 120, y: 50}];
+    } else if (stats.name == '') {
+
+    }
 
     let spawnPoint = spawnPoints[Math.floor(Math.random() * spawnPoints.length)];
 
