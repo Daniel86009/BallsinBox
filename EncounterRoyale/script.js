@@ -4050,6 +4050,11 @@ class UnitEntity extends Entity {
             this.dashPauseTime -= 1000 / 60 * this.slowAmount * this.speedMult;
             return;
         }
+
+        if (this.target && this.target.type == 'waypoint') {
+            this.dashTime = 0;
+            return;
+        }
         
         if (this.dashTime > 0) {
             if (!this.target || this.target.dead) {

@@ -24,9 +24,7 @@ function startHosting() {
     peer.on('connection', (c) => {
         conn = c;
         setupEvents();
-    });
-
-    
+    });    
 }
 
 function joinRoom() {
@@ -209,7 +207,7 @@ function spawnRequest(x, y, stats, team, type = 'unit', dir, target = 'all') {
         } else if (type == 'log') {
             projectiles.push(new Projectile(x, y, stats, dir, team));
         } else if (type == 'aoe') {
-            projectiles.push(new AOE(x, y, stats, team));
+            aoes.push(new AOE(x, y, stats, team));
         }
         
     } else if (conn && conn.open) {

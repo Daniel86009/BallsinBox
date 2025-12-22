@@ -92,15 +92,15 @@ const debugDrawViewRange = document.getElementById('debugDrawViewRange');
 
 const pickSameCards = document.getElementById('pickSameCards');
 
-elixirMultSlider.value = game.enemyElixirMult;
+elixirMultSlider.value = game.p2ElixirMult;
 debugDrawRange.checked = debug.drawRange;
 debugDrawViewRange.checked = debug.drawViewRange;
-infinitePlayerElixir.checked = game.playerElixirMult > 10;
+infinitePlayerElixir.checked = game.p1ElixirMult > 10;
 pickSameCards.checked = debug.pickSameCards;
 
 elixirMultSlider.addEventListener('input', () => {
     elixirMultValue.textContent = elixirMultSlider.value;
-    game.enemyElixirMult = Number(elixirMultSlider.value);
+    game.p2ElixirMult = Number(elixirMultSlider.value);
 });
 
 debugDrawRange.addEventListener('change', e => {
@@ -116,12 +116,12 @@ debugDrawViewRange.addEventListener('change', e => {
 infinitePlayerElixir.addEventListener('change', e => {
     window.infinitePlayerElixir = e.target.checked;
     if (e.target.checked) {
-        game.playerElixirMult = 999;
-        game.playerStartElixir = 999;
+        game.p1ElixirMult = 999;
+        game.p1StartElixir = 999;
     } else {
         playerElixir = 5;
-        game.playerStartElixir = 5;
-        game.playerElixirMult = 1;
+        game.p1StartElixir = 5;
+        game.p1ElixirMult = 1;
     }
 });
 
