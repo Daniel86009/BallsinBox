@@ -47,17 +47,21 @@ function setupEvents() {
 
     conn.on('data', (data) => {
         if (isHost && data.type == 'SPAWN_REQUEST') {
-            let e = data.entity;
-            if (e.type == 'unit') {
-                entities.push(new UnitEntity(e.x, e.y, e.team, e.stats));
-            } else if (e.type == 'projectile') {
-                projectiles.push(new Projectile(e.x, e.y, e.stats, {x: e.dir.x, y: -e.dir.y}, e.team, {x: e.target.x, y: c.height - e.target.y}));
-            } else if (e.type == 'log') {
-                projectiles.push(new Projectile(e.x, e.y, e.stats, {x: e.dir.x, y: -e.dir.y}, e.team));
-            } else if (e.type == 'aoe') {
-                aoes.push(new AOE(e.x, e.y, e.stats, e.team));
+            if (data.entity) {
+                let e = data.entity;
+                if (e.type == 'unit') {
+                    entities.push(new UnitEntity(e.x, e.y, e.team, e.stats));
+                } else if (e.type == 'projectile') {
+                    projectiles.push(new Projectile(e.x, e.y, e.stats, {x: e.dir.x, y: -e.dir.y}, e.team, {x: e.target.x, y: c.height - e.target.y}));
+                } else if (e.type == 'log') {
+                    projectiles.push(new Projectile(e.x, e.y, e.stats, {x: e.dir.x, y: -e.dir.y}, e.team));
+                } else if (e.type == 'aoe') {
+                    aoes.push(new AOE(e.x, e.y, e.stats, e.team));
+                }
+            } else {
+                let p = data.particle;
+                particles.push(new Particle(p.x, p.y, p.stats, p.team, p.deployTime));
             }
-            
         } else if (!isHost && data.type == 'SYNC') {
             entities = [];
             aoes = [];
@@ -166,9 +170,10 @@ function setupEvents() {
                    
             for (let i = 0; i < data.particles.length; i++) {
                 let stats = data.particles[i];
-                let p = new Particle(stats.x, stats.y, stats.stats);
+                let p = new Particle(stats.x, stats.y, stats.stats, stats.team, stats.totalTime);
 
                 p.size = stats.size;
+                p.time = stats.time;
 
                 particles.push(p);
             }
@@ -212,6 +217,14 @@ function spawnRequest(x, y, stats, team, type = 'unit', dir, target = 'all') {
         
     } else if (conn && conn.open) {
         conn.send({type: 'SPAWN_REQUEST', entity: {x: x, y: c.height - y, team: game.team2, stats: stats, type: type, dir: dir, target: target}});
+    }
+}
+
+function particleRequest(x, y, stats, team, deployTime = 1000) {
+    if (isHost) {
+        particles.push(new Particle(x, y, stats, team, deployTime));
+    } else {
+        conn.send({type: 'SPAWN_REQUEST', particle: {x: x, y: c.height - y, team: game.team2, stats: stats, deployTime: deployTime}});
     }
 }
 
