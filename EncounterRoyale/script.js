@@ -1820,7 +1820,7 @@ const units = {
         distance: 300,
         knockback: 4,
         targetPriority: 'ground',
-        speed: 200,
+        speed: 100,
         colour: '#b16800',
         lifetime: 9999,
         ctDamage: 40
@@ -2201,7 +2201,7 @@ const units = {
         damage: 240,
         distance: 150,
         targetPriority: 'ground',
-        speed: 200,
+        speed: 100,
         colour: '#b16800ff',
         lifetime: 99999,
         deathSpawnStats: otherUnits.barbarian
