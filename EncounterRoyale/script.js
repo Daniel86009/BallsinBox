@@ -5,9 +5,7 @@ ToDo:
     -Make more responsive
 -Add more units, buildings and spells
     -Mirror
-    -Goblin Giant
     -Rune Giant
-    -Ram Rider
     -Fisherman
     -Goblin Machine
 -Add proper icons
@@ -317,11 +315,13 @@ const aoeStats = {
 const projectileStats = {
     princessTowerArrow: {
         name: 'princessTowerArrow',
-        damage: 109
+        damage: 109,
+        speed: 1000
     },
     kingTowerBullet: {
         name: 'kingTowerBullet',
-        damage: 109
+        damage: 109,
+        speed: 1000
     },
     archerArrow: {
         name: 'archerArrow',
@@ -620,6 +620,12 @@ const projectileStats = {
         speed: 550,
         distance: 156,
         targetPriority: 'all'
+    },
+    ramRiderSnare: {
+        name: 'ramRiderSnare',
+        damage: 104,
+        speed: 600,
+        snareDuration: 2000
     }
 };
 
@@ -995,6 +1001,20 @@ const otherUnits = {
         supportSpawnNum: 1,
         deathSpawnNum: 2,
         deathSpawnStats: null
+    },
+    ramRider: {
+        name: 'Ram Rider',
+        symbol: '👩‍🦲',
+        hp: 9999,
+        projectileStats: projectileStats.ramRiderSnare,
+        attackSpeed: 1100,
+        initHitSpeed: 400,
+        range: 132,
+        viewRange: 150,
+        size: 15,
+        speed: 90,
+        targetPriority: 'units',
+        type: 'unit'
     }
 };
 
@@ -1712,7 +1732,7 @@ const units = {
         damage: 391,
         chargeDamage: 783,
         chargeSpeed: 120,
-        chargeTriggerDistance: 60,
+        chargeTriggerDistance: 48,
         attackSpeed: 1400,
         initHitSpeed: 500,
         range: 40,
@@ -2069,7 +2089,7 @@ const units = {
         aoeStats: aoeStats.darkPrinceAOE,
         chargeAOEStats: aoeStats.darkPrinceAOE,
         chargeSpeed: 120,
-        chargeTriggerDistance: 60,
+        chargeTriggerDistance: 72,
         attackSpeed: 1300,
         initHitSpeed: 400,
         range: 40,
@@ -2124,7 +2144,7 @@ const units = {
         deathSpawnStats: otherUnits.barbarian,
         chargeDamage: 573,
         chargeSpeed: 120,
-        chargeTriggerDistance: 60,
+        chargeTriggerDistance: 72,
         attackSpeed: 9999,
         range: 30,
         viewRange: 150,
@@ -2750,7 +2770,66 @@ const units = {
         deployTime: 1000,
         targetPriority: 'all',
         type: 'unit'
-    }
+    },
+    goblinGiant: {
+        name: 'Goblin Giant',
+        symbol: '🧌',
+        cost: 6,
+        hp: 3022,
+        damage: 176,
+        attackSpeed: 1500,
+        initHitSpeed: 800,
+        range: 35,
+        viewRange: 150,
+        size: 30,
+        speed: 60,
+        deployTime: 1000,
+        targetPriority: 'buildings',
+        type: 'unit',
+        backUnitNum: 2,
+        backUnitStats: otherUnits.spearGoblin,
+        deathSpawnNum: 2,
+        deathSpawnStats: otherUnits.spearGoblin
+    },
+    ramRider: {
+        name: 'Ram Rider',
+        symbol: '🐏',
+        cost: 5,
+        hp: 1697,
+        damage: 250,
+        chargeDamage: 501,
+        chargeSpeed: 120,
+        chargeTriggerDistance: 48,
+        attackSpeed: 1800,
+        initHitSpeed: 600,
+        range: 30,
+        viewRange: 150,
+        size: 25,
+        speed: 60,
+        deployTime: 1000,
+        targetPriority: 'buildings',
+        type: 'unit',
+        backUnitNum: 1,
+        backUnitStats: otherUnits.ramRider
+    },
+    /*runeGiant: {
+        name: 'Rune Giant',
+        symbol: '🔨',
+        cost: 4,
+        hp: 2662,
+        damage: 120,
+        attackSpeed: 1500,
+        initHitSpeed: 500,
+        range: 30,
+        viewRange: 150,
+        size: 25,
+        speed: 60,
+        deployTime: 1000,
+        targetPriority: 'buildings',
+        type: 'unit',
+        enchantCount: 2,
+        enchantDurationAfterDeath: 5000
+    }*/
 };
 
 const p1Units = {
@@ -3009,113 +3088,6 @@ function update() {
 
     if (isHost) {
         hostUpdate();
-    } else if (!isConnected) {
-        for (let i = 0; i < projectiles.length; i++) {
-            let p = projectiles[i];
-            if (p.dead) {
-                let y = p.stats.height ? p.y + p.stats.height : p.y;
-                if (p.stats.deathSpawnStats) {
-                    if (p.stats.deathSpawnNum == 3) {
-                        entities.push(new UnitEntity(p.x + 10, y, p.team, p.stats.deathSpawnStats));
-                        entities.push(new UnitEntity(p.x, y + 10, p.team, p.stats.deathSpawnStats));
-                        entities.push(new UnitEntity(p.x - 10, y, p.team, p.stats.deathSpawnStats));
-                    } else {
-                        entities.push(new UnitEntity(p.x, y, p.team, p.stats.deathSpawnStats));
-                    }
-                }
-                if (p.stats.splitStats) p.split();
-                projectiles.splice(i, 1);
-            }
-            else p.update();
-        }
-
-        for (let i = 0; i < particles.length; i++) {
-            let p = particles[i];
-            if (p.dead) {
-                particles.splice(i, 1);
-            } else {
-                p.update();
-            }
-        }
-
-        for (let i = 0; i < entities.length; i++) {
-            let e = entities[i];
-            if (e.dead) {
-                if (e.stats.name == 'king') {
-                    if (e.team == game.team1) p1TowerDead = {left: true, right: true, king: true};
-                    else p2TowerDead = {left: true, right: true, king: true};
-                    gameover(e.team);
-                }
-
-                if (e.stats.deathAOEStats) {
-                    aoes.push(new AOE(e.x, e.y, e.stats.deathAOEStats, e.team));
-                }
-                if (e.stats.deathSpawnNum) {
-                    for (let j = 0; j < e.stats.deathSpawnNum; j++) {
-                        entities.push(new UnitEntity(e.x + j, e.y, e.team, e.stats.deathSpawnStats));
-                    }
-                }
-
-                if (e.stats.deathEnemyElixir) {
-                    if (e.team == game.team1) {
-                        addElixir(game.team2, e.stats.deathEnemyElixir);
-                    } else {
-                        addElixir(game.team1, e.stats.deathEnemyElixir);
-                    }
-                }
-
-                if (e.stats.deathElixir) {
-                    addElixir(e.team, e.stats.deathElixir);
-                }
-
-                if (e.stats.name == 'princess') {
-                    if (e.team == game.team1) {
-                        p1KingActivated = true;
-                        (e.x < c.width / 2) ? p1TowerDead.left = true : p1TowerDead.right = true;
-                    } else {
-                        p2KingActivated = true;
-                        (e.x < c.width / 2) ? p2TowerDead.left = true : p2TowerDead.right = true;
-                    }
-                }
-
-                let hasSpawned = false;
-                for (let i = 0; i < aoes.length; i++) {
-                    let aoe = aoes[i];
-
-                    if (hasSpawned) continue;
-                    if (!aoe.stats.goblinCurse) continue;
-                    if (aoe.team == e.team) continue;
-
-                    let minDist = aoe.stats.radius + e.stats.size;
-
-                    if (M.dist(aoe, e) < minDist) {
-                        hasSpawned = true;
-                        entities.push(new UnitEntity(e.x, e.y, aoe.team, otherUnits.goblin));
-                    }
-                }
-
-                if (e.pigCurseTime > 0) {
-                    let team = (e.team == game.team1) ? game.team2 : game.team1;
-                    entities.push(new UnitEntity(e.x, e.y, team, otherUnits.cursedPig));
-                }
-
-                entities.splice(i, 1);
-                continue;
-            } else {
-                e.update();
-            }
-        }
-
-        for (let i = 0; i < aoes.length; i++) {
-            let p = aoes[i];
-
-            p.update();
-
-            if (p.dead) {
-                aoes.splice(i, 1);
-                continue;
-            }
-        }
     }
 
     runGameTime();
@@ -3215,6 +3187,12 @@ function hostUpdate() {
                 entities.push(new UnitEntity(e.x, e.y, team, otherUnits.cursedPig));
             }
 
+            if (e.backUnits) {
+                for (let i = 0; i < e.backUnits.length; i++) {
+                    e.backUnits[i].dead = true;
+                }
+            }
+
             entities.splice(i, 1);
             continue;
         } else {
@@ -3244,31 +3222,35 @@ class Entity {
         this.y = y;
         this.team = team;
         this.stats = stats;
+        this.type = stats.type;
         this.attackCooldown = 0;
         this.initAttackCooldown = stats.initHitSpeed;
-        this.hp = stats.hp; //
-        this.sheildHP = stats.sheildHP || 0; //
+        this.hp = stats.hp;
+        this.sheildHP = stats.sheildHP || 0;
         this.dead = false;
-        this.freezeTime = 0; //
-        this.slowTime = 0; //
+        this.freezeTime = 0;
+        this.slowTime = 0;
         this.slowAmount = 1;
-        this.rageTime = 0; //
+        this.rageTime = 0;
         this.speedMult = 1;
         this.moveSpeedMult = 1;
         this.stunTime = 0;
         this.supportSpawnCooldown = stats.initSupportSpawnSpeed || stats.supportSpawnSpeed;
-        this.charging = false; //
-        this.isAttacking = false; //
+        this.charging = false;
+        this.isAttacking = false;
         this.attackTime = 0;
         this.nonAttackTime = 0;
         this.invisible = false;
-        this.hidden = false; //
-        this.pigCurseTime = 0; //
+        this.hidden = false;
+        this.pigCurseTime = 0;
         this.deployTimeLeft = stats.deployTime || 0;
-        this.isFlying = stats.type == 'flying'; //
-        this.vineTime = 0; //
+        this.isFlying = stats.type == 'flying';
+        this.vineTime = 0;
         this.elixirCooldown = stats.elixirSpeed;
         this.target = null;
+        this.snareTime = 0;
+        this.isEnchanted = 0;
+        this.attackCount = 0;
 
         if (stats.spawnInvis) this.invisible = true;
         if (!stats) this.dead = true;
@@ -3309,7 +3291,7 @@ class Entity {
         ctx.fillText(this.stats.symbol, this.x, y);
 
         
-        if (!this.stats.isClone) {
+        if (!this.stats.isClone && this.type != 'waypoint') {
             //Draw crown tower hp
             if (this.stats.name == 'king' || this.stats.name == 'princess') {
                 //Heathbar outer
@@ -3352,7 +3334,7 @@ class Entity {
                 ctx.lineTo(x, y + this.stats.size + 14);
                 ctx.stroke();
             }
-        } else {
+        } else if (this.stats.isClone) {
             ctx.beginPath();
             ctx.fillStyle = '#00fbff5c';
             ctx.arc(this.x, y, this.stats.size, 0, 2 * Math.PI);
@@ -3460,26 +3442,6 @@ class Entity {
             ctx.stroke();
         }
 
-        /*if (this.deployTimeLeft > 1) {
-            let top = y + 20 - 15;
-            let angle = (this.deployTimeLeft / this.stats.deployTime) * Math.PI * 2;
-            ctx.beginPath();
-            ctx.fillStyle = '#000000';
-            ctx.arc(this.x, y + 20, 15, 0, 2 * Math.PI);
-            ctx.fill();
-
-            ctx.beginPath();
-            ctx.fillStyle = (this.team == game.team1) ? '#3966f9ff' : '#fc3b3bff';
-            ctx.strokeStyle = '#000000';
-            ctx.lineWidth = 4;
-            ctx.moveTo(this.x, top);
-            ctx.lineTo(this.x, y + 20);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.arc(this.x, y + 20, 11, 0, 2 * Math.PI);
-            ctx.fill();
-        }*/
-
 
         //---Debug---
 
@@ -3515,6 +3477,8 @@ class Entity {
     }
 
     takeDamage(amount, e = null) {
+        if (this.type == 'waypoint') return;
+
         if (this.sheildHP > 0) {
             this.sheildHP -= amount;
             if (Number.isNaN(this.sheildHP)) console.error('Damage is NaN. Unit: ', e);
@@ -3655,9 +3619,11 @@ class Entity {
     }
 
     checkSpeedChange() {
-        if (this.rageTime > 0) this.speedMult = 1.3;
-        else this.speedMult = 1;
+        this.speedMult = 1;
         this.moveSpeedMult = 1;
+
+        if (this.rageTime > 0) this.speedMult *= 1.3;
+        if (this.snareTime > 0) this.moveSpeedMult *= 0.3;
 
         let rageBoosted = false;
         if (this.rageTime > 0) rageBoosted = true;
@@ -3726,12 +3692,27 @@ class UnitEntity extends Entity {
         this.distance = 0;
         this.knockbackVel = {x: 0, y: 0};
         this.hasDeployed = false;
+        this.backUnits = [];
 
         if (this.stats.spawnAOEStats) this.aoeAttack(this.x, this.y, this.stats.spawnAOEStats);
         if (this.stats.spawnInvis) this.nonAttackTime = this.stats.invisTime;
+        if (this.stats.backUnitNum) {
+            for (let i = -this.stats.backUnitNum / 2 + 0.5; i < this.stats.backUnitNum / 2 + 0.5; i++) {
+                let b = new UnitEntity(this.x + i * 25, this.y, this.team, this.stats.backUnitStats);
+                b.type = 'waypoint';
+
+                this.backUnits.push(b);
+                entities.push(b);
+            }
+        }
     }
 
     update() {
+        if (this.type == 'waypoint') {
+            this.backUpdate();
+            return;
+        }
+
         if (Number.isNaN(this.hp)) {
             this.dead = true;
             return;
@@ -3739,7 +3720,7 @@ class UnitEntity extends Entity {
 
         if (this.deployTimeLeft > 0) {
             this.deployTimeLeft -= 1000 / 60;
-            if (this.stats.type != 'building' && this.stats.type != 'bomb') this.collide();
+            if (this.type != 'building' && this.type != 'bomb') this.collide();
             this.wallCol();
             return;
         }
@@ -3788,6 +3769,8 @@ class UnitEntity extends Entity {
             addElixir(this.team, this.stats.elixirAmount);
         }
 
+        if (this.snareTime > 0) this.snareTime -= 1000 / 60;
+
         if (!this.isAttacking) this.nonAttackTime += 1000 / 60;
         if (this.stats.invisTime && this.nonAttackTime > this.stats.invisTime) this.invisible = true;
         else this.invisible = false;
@@ -3801,7 +3784,7 @@ class UnitEntity extends Entity {
             this.takeDamage(this.stats.hpLostPerSecond / (1000 / 60) / 4);
         }
 
-        if (this.stats.type == 'bomb') return;
+        if (this.type == 'bomb') return;
 
         //Apply knockback
         if (this.knockbackVel && (this.knockbackVel.x != 0 || this.knockbackVel.y != 0)) {
@@ -3840,7 +3823,7 @@ class UnitEntity extends Entity {
                     && dist > this.stats.dashRange.min + this.target.stats.size 
                     && dist < this.stats.dashRange.max + this.target.stats.size 
                     && this.target 
-                    && this.target.stats.type != 'waypoint';
+                    && this.target.type != 'waypoint';
         let distCheck = false;
         if (minRange > 0) distCheck = (dist - this.target.stats.size < maxRange && dist - this.target.stats.size > minRange);
         else distCheck = dist - this.target.stats.size < maxRange;
@@ -3861,8 +3844,6 @@ class UnitEntity extends Entity {
                     else this.aoeAttack(this.x, this.y, this.stats.aoeStats);
                 } else if (this.stats.projectileStats) {
                     this.shoot(this.target);
-                } else if (this.stats.beamDamage) {
-                    this.attack(this.target);
                 } else {
                     this.attack(this.target);
                 }
@@ -3882,18 +3863,53 @@ class UnitEntity extends Entity {
             if (this.dashTime <= 1 && !this.charging) this.moveTowards(this.target);
         }
 
-        if (this.stats.type != 'building' && this.stats.type != 'bomb') this.collide();
+        if (this.type != 'building' && this.type != 'bomb') this.collide();
         this.wallCol();
+
+        for (let i = 0; i < this.backUnits.length; i++) {
+            let b = this.backUnits[i];
+
+            if (this.backUnits.length > 1) b.x = this.x + (i * this.backUnits.length / 2 - 0.5) * 25;
+            else b.x = this.x;
+            b.y = this.y;
+        }
+    }
+
+    backUpdate() {
+        this.findTarget();
+
+        if (this.attackCooldown > 0) this.attackCooldown -= 1000 / 60;
+
+        if (!this.target || this.target.type == 'waypoint') return;
+
+        let minRange = this.stats.range.min || 0;
+        let maxRange = this.stats.range.max || this.stats.range;
+        let dist = M.dist(this.x, this.y, this.target.x, this.target.y);
+
+        let distCheck = false;
+        if (minRange > 0) distCheck = (dist - this.target.stats.size < maxRange && dist - this.target.stats.size > minRange);
+        else distCheck = dist - this.target.stats.size < maxRange;
+        
+        if (distCheck && this.target.stats.size > 0) {
+            if (this.stats.aoeStats) {
+                if (this.charging) this.aoeAttack(this.x, this.y, this.stats.chargeAOEStats);
+                else this.aoeAttack(this.x, this.y, this.stats.aoeStats);
+            } else if (this.stats.projectileStats) {
+                this.shoot(this.target);
+            } else {
+                this.attack(this.target);
+            }
+        }
     }
 
     findTarget() {
-        if (this.target && !this.target.dead && this.isAttacking && this.target.stats.type != 'waypoint') return;
+        if (this.target && !this.target.dead && this.isAttacking && this.target.type != 'waypoint') return;
 
         let minDist = Infinity;
         let closestEnemy = null;
         for (let i = 0; i < entities.length; i++) {
             let e = entities[i];
-            if (e.team == this.team || e.stats.type == 'bomb' || e.invisible || e.hidden) continue;
+            if (e.team == this.team || e.type == 'bomb' || e.invisible || e.hidden || e.type == 'waypoint') continue;
 
             let dist = M.dist(this.x, this.y, e.x, e.y) - e.stats.size;
 
@@ -3905,14 +3921,21 @@ class UnitEntity extends Entity {
             
             if (check) {
                 if (this.stats.targetPriority == 'buildings') {
-                    if (e.stats.type == 'building') {
+                    if (e.type == 'building') {
                         minDist = dist;
                         closestEnemy = e;
                     } else {
                         continue;
                     }
                 } else if (this.stats.targetPriority == 'ground') {
-                    if (e.stats.type != 'flying' && e.isFlying == false) {
+                    if (!e.isFlying && e.isFlying == false) {
+                        minDist = dist;
+                        closestEnemy = e;
+                    } else {
+                        continue;
+                    }
+                } else if (this.stats.targetPriority == 'units') {
+                    if (e.type != 'building') {
                         minDist = dist;
                         closestEnemy = e;
                     } else {
@@ -3954,9 +3977,9 @@ class UnitEntity extends Entity {
 
             let onOwnSide = (this.team == game.team1) ? this.y > game.river : this.y < game.river;
 
-            if (onOwnSide && this.stats.type != 'flying') {
+            if (onOwnSide && !this.isFlying) {
                 if (!(M.dist(this.x, this.y, bridgeX, game.river) < this.stats.speed / 60 + 1)) {
-                    this.target = {x: bridgeX, y: bridgeY, stats:{size: 0, type: 'waypoint'}};
+                    this.target = {x: bridgeX, y: bridgeY, stats: {size: 0, type: 'waypoint'}, type: 'waypoint'};
                     return;
                 }
             }
@@ -3988,12 +4011,13 @@ class UnitEntity extends Entity {
     }
 
     collide() {
+        if (this.type == 'waypoint') return;
         for (let i = 0; i < entities.length; i++) {
             let obj = entities[i];
 
             if (obj == this) continue;
             if (obj.dead) continue;
-            if (obj.stats.type == 'bomb') continue;
+            if (obj.type == 'bomb' || obj.type == 'waypoint') continue;
 
             if (this.isFlying && !obj.isFlying) continue;
             if (!this.isFlying && obj.isFlying) continue;
@@ -4034,7 +4058,7 @@ class UnitEntity extends Entity {
         }
 
         //River collision
-        if (this.stats.type != 'flying') {
+        if (!this.isFlying) {
             let riverTop = game.river - game.riverWidth / 2;
             let riverBottom = game.river + game.riverWidth / 2;
 
@@ -4103,7 +4127,7 @@ class UnitEntity extends Entity {
     }
 
     applyKnockback(dir, amount) {
-        if (this.stats.type != 'building') {
+        if (this.type != 'building') {
             this.knockbackVel.x += dir.x * amount;
             this.knockbackVel.y += dir.y * amount;
         }
@@ -4170,7 +4194,8 @@ class TowerEntity extends Entity {
         let closestEnemy = null;
         for (let i = 0; i < entities.length; i++) {
             let e = entities[i];
-            if (e.team == this.team || e.stats.type == 'bomb' || e.invisible || e.hidden) continue;
+            if (e.team == this.team || e.invisible || e.hidden) continue;
+            if (e.type == 'bomb' || e.type == 'waypoint') continue;
 
             let dist = M.dist(this.x, this.y, e.x, e.y);
 
@@ -4263,7 +4288,7 @@ class AOE {
         let unitsInRange = [];
         for (let i = 0; i < entities.length; i++) {
             let e = entities[i];
-            if (e.stats.type == 'bomb') continue;
+            if (e.type == 'bomb') continue;
             if (e.hidden && !this.stats.canHitHidden) continue;
 
             if (this.stats.target == 'ground' && e.isFlying) continue;
@@ -4296,7 +4321,7 @@ class AOE {
         if (this.stats.stunDuration) e.stunTime += this.stats.stunDuration;
 
         if (this.stats.ctDamage && (e.stats.name == 'king' || e.stats.name == 'princess')) e.takeDamage(this.stats.ctDamage, this.owner);
-        else if (this.stats.buidlingDamage && e.stats.type == 'building') e.takeDamage(this.stats.buidlingDamage, this.owner); 
+        else if (this.stats.buidlingDamage && e.type == 'building') e.takeDamage(this.stats.buidlingDamage, this.owner); 
         else e.takeDamage(this.stats.damage, this.owner);
         if (this.stats.stunDuration) e.stunTime = this.stats.stunDuration;
 
@@ -4361,7 +4386,7 @@ class AOE {
     }
 
     clone(e) {
-        if (e.stats.type == 'building') return;
+        if (e.type == 'building') return;
         if (e.stats.isClone) return;
         let dir = (this.team == game.team1) ? 1 : -1;
         let stats = {...e.stats};
@@ -4460,8 +4485,8 @@ class Projectile {
             }
         }
 
-        let xAmount = this.direction.x * this.stats.speed / 50;
-        let yAmount = this.direction.y * this.stats.speed / 50;
+        let xAmount = this.direction.x * this.stats.speed / 60 * 0.75;
+        let yAmount = this.direction.y * this.stats.speed / 60 * 0.75;
 
         this.x += xAmount;
         this.y += yAmount;
@@ -4475,10 +4500,10 @@ class Projectile {
             for (let i = 0; i < entities.length; i++) {
                 let u = entities[i];
 
-                if (u.team == this.team || u.stats.type == 'bomb') continue;
+                if (u.team == this.team || u.type == 'bomb') continue;
                 if (u.hidden && !this.stats.canHitHidden) continue;
                 if (this.stats.targetPriority == 'ground' && u.isFlying) continue;
-                if (this.stats.target == 'buildings' && (u.stats.type == 'unit' || u.isFlying)) continue;
+                if (this.stats.target == 'buildings' && (u.type == 'unit' || u.isFlying)) continue;
 
                 let isHit = false;
                 for (let j = 0; j < this.hitTargets.length; j++) {
@@ -4529,6 +4554,10 @@ class Projectile {
     damage(u) {
         if (this.stats.pigCurseDuration && u.stats.name != 'princess' && u.stats.name != 'king') {
             u.pigCurseTime = this.stats.pigCurseDuration;
+        }
+
+        if (this.stats.snareDuration) {
+            u.snareTime = this.stats.snareDuration;
         }
 
         if (this.pierce > 0) {
@@ -4615,21 +4644,21 @@ class ChainLighning {
         for (let i = 0; i < entities.length; i++) {
             let e = entities[i];
             if (e.team == this.team) continue;
-            if (e.stats.type == 'bomb') continue;
+            if (e.type == 'bomb') continue;
             if (this.attacked.includes(e)) continue;
 
             let dist = M.dist(this.x, this.y, e.x, e.y);
 
             if (dist < minDist && dist < this.stats.range) {
                 if (this.stats.targetPriority == 'buildings') {
-                    if (e.stats.type == 'building') {
+                    if (e.type == 'building') {
                         minDist = dist;
                         closestEnemy = e;
                     } else {
                         continue;
                     }
                 } else if (this.stats.targetPriority == 'ground') {
-                    if (e.stats.type != 'flying') {
+                    if (!e.isFlying) {
                         minDist = dist;
                         closestEnemy = e;
                     } else {
@@ -5165,9 +5194,10 @@ function cardClick(cardElem, cardStats, index) {
 
 function drawMap() {
     //Lanes
-    ctx.fillStyle = '#1b753aff';
-    ctx.fillRect(game.laneLeftX - (game.bridgeWidth / 2), game.princessY, game.bridgeWidth, c.height - game.princessY - game.princessY);
-    ctx.fillRect(game.laneRightX - (game.bridgeWidth / 2), game.princessY, game.bridgeWidth, c.height - game.princessY - game.princessY);
+    ctx.beginPath();
+    ctx.fillStyle = '#d0aa69';
+    ctx.fillRect(game.laneLeftX - 14, game.princessY, 28, c.height - game.princessY - game.princessY);
+    ctx.fillRect(game.laneRightX - 14, game.princessY, 28, c.height - game.princessY - game.princessY);
 
     //river
     ctx.fillStyle = '#54d0f3ff';
