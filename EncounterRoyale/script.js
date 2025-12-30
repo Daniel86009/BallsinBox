@@ -1548,7 +1548,7 @@ class AOE {
         let unitsInRange = [];
         for (let i = 0; i < entities.length; i++) {
             let e = entities[i];
-            if (e.type == 'bomb') continue;
+            if (e.type == 'bomb' || e.type == 'waypoint') continue;
             if (e.hidden && !this.stats.canHitHidden) continue;
 
             if (this.stats.target == 'ground' && e.isFlying) continue;
