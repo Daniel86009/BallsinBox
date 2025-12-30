@@ -1269,7 +1269,7 @@ const units = {
         hp: 1907,
         attackSpeed: 1500,
         initHitSpeed: 100,
-        range: 1.2,
+        range: 1.2 * game.gridSize,
         viewRange: 150,
         size: 20,
         speed: 60,
