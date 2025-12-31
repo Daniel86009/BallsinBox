@@ -2448,7 +2448,7 @@ function cardClick(cardElem, index) {
     }
 }
 
-function createGrid(c1, c2) {
+function createGrid(hsl1, hsl2, v) {
     const img = document.createElement("canvas");
     img.width = c.width;
     img.height = c.height;
@@ -2460,6 +2460,13 @@ function createGrid(c1, c2) {
 
     for (let y = 0; y < rows; y++) {
         for (let x = 0; x < cols; x++) {
+            const offset1 = Math.random() * (v + v) - v;
+            const nl1 = Math.min(100, Math.max(0, hsl1.l + offset1));
+            const c1 = `hsl(${hsl1.h}, ${hsl1.s}%, ${nl1}%)`;
+            const offset2 = Math.random() * (v + v) - v;
+            const nl2 = Math.min(100, Math.max(0, hsl2.l + offset2));
+            const c2 = `hsl(${hsl2.h}, ${hsl2.s}%, ${nl2}%)`;
+
             g.fillStyle = (x + y) & 1 ? c1 : c2;
             g.fillRect(x * game.gridSize, y * game.gridSize, game.gridSize, game.gridSize);
         }
@@ -2470,7 +2477,7 @@ function createGrid(c1, c2) {
 
 function drawMap() {
     //Grid
-    if (!gridCanvas) gridCanvas = createGrid('#a6c249', '#9abb47');
+    if (!gridCanvas) gridCanvas = createGrid({h: 74, s: 50, l: 52}, {h: 77, s: 46, l: 51}, 2);
     ctx.drawImage(gridCanvas, 0, 0);
 
     //Lanes
@@ -2506,6 +2513,12 @@ function drawMap() {
 
     ctx.fillRect(game.laneRightX - (game.bridgeWidth / 2), game.river - (game.riverWidth / 2), game.bridgeWidth, game.riverWidth);
     ctx.strokeRect(game.laneRightX - (game.bridgeWidth / 2), game.river - (game.riverWidth / 2), game.bridgeWidth, game.riverWidth);
+
+    let g = ctx.createRadialGradient(c.width / 2, c.height / 2, 300, c.width / 2, c.height / 2, 1000);
+    g.addColorStop(0, 'rgba(0, 0, 0, 0)');
+    g.addColorStop(0.5, '#000000');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, c.width, c.height);
 
     //Draw no deploy area
     let isSpell = null;
