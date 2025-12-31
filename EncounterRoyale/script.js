@@ -55,7 +55,8 @@ const debug = {
     drawViewRange: false,
     drawRange: false,
     drawDash: false,
-    pickSameCards: false
+    pickSameCards: false,
+    showFPS: false
 };
 
 const p1Units = {
@@ -131,6 +132,9 @@ let crowns = Number(localStorage.crowns) || 0;
 
 let gridCanvas = null;
 
+let fps = 0;
+let times = [];
+
 function start() {
     document.addEventListener('mousemove', (e) => {
         let rect = c.getBoundingClientRect();
@@ -205,6 +209,14 @@ function start() {
 
 function update() {
     ctx.clearRect(0, 0, c.width, c.height);
+
+    const now = performance.now();
+    while (times.length > 0 && times[0] <= now - 1000) {
+      times.shift();
+    }
+    times.push(now);
+
+    fps = times.length;
 
     drawMap();
 
@@ -297,6 +309,13 @@ function update() {
     }
 
     runGameTime();
+
+    if (debug.showFPS) {
+        ctx.fillStyle = '#000';
+        ctx.font = '20px Arial';
+        ctx.textAlign = 'left';
+        ctx.fillText(`${fps}fps`, 10, 35);
+    }
 
     window.requestAnimationFrame(update);
 }
@@ -930,6 +949,7 @@ class Entity {
             isFlying: this.isFlying,
             vineTime: this.vineTime,
             invisible: this.invisible,
+            enchantTime: this.enchantTime,
             target: null
         };
         if (this.target) s.target = {x: this.target.x, y: this.target.y};

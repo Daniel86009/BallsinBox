@@ -87,12 +87,14 @@ window.addEventListener('touchstart', handleOutsideClick);
 const elixirMultSlider = document.getElementById('enemyElixirMult');
 const elixirMultValue = document.getElementById('enemyElixirValue');
 
+const debugShowFPS = document.getElementById('debugShowFPS');
 const debugDrawRange = document.getElementById('debugDrawRange');
 const debugDrawViewRange = document.getElementById('debugDrawViewRange');
 
 const pickSameCards = document.getElementById('pickSameCards');
 
 elixirMultSlider.value = game.p2ElixirMult;
+debugShowFPS.checked = debug.showFPS;
 debugDrawRange.checked = debug.drawRange;
 debugDrawViewRange.checked = debug.drawViewRange;
 infinitePlayerElixir.checked = game.p1ElixirMult > 10;
@@ -101,6 +103,11 @@ pickSameCards.checked = debug.pickSameCards;
 elixirMultSlider.addEventListener('input', () => {
     elixirMultValue.textContent = elixirMultSlider.value;
     game.p2ElixirMult = Number(elixirMultSlider.value);
+});
+
+debugShowFPS.addEventListener('change', e => {
+    window.debugShowFPS = e.target.checked;
+    debug.showFPS = e.target.checked;
 });
 
 debugDrawRange.addEventListener('change', e => {

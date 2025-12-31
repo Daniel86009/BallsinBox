@@ -119,6 +119,7 @@ function setupEvents() {
                 e.isFlying = stats.isFlying;
                 e.vineTime = stats.vineTime;
                 e.invisible = stats.invisible;
+                e.enchantTime = stats.enchantTime;
                 if (stats.target) e.target = stats.target;
 
                 entities.push(e);
