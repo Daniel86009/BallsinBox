@@ -257,35 +257,108 @@ function update() {
         let x = mouse.x;
         let y = mouse.y;
 
+        if (stats.type == 'building' && stats.size <= 24) {
+            x = Math.round(x / 24) * 24;
+            y = Math.round(y / 24) * 24;
+        } else {
+            x = Math.floor(x / 24) * 24 + 12;
+            y = Math.floor(y / 24) * 24 + 12;
+        }
+
         if (stats.type != 'spell' && stats.deployType != 'spell') {
             let newPos = findMax(x, y);
             if (newPos.x) x = newPos.x;
             if (newPos.y) y = newPos.y;
         }
 
-        ctx.lineWidth = 1;
-        ctx.fillStyle = '#a5a5a574';
-
-        if (stats.range) {
-            if (stats.range.max) {
-                ctx.beginPath();
-                ctx.arc(x, y, stats.range.max, 0, 2 * Math.PI);
-                ctx.fill();
-            } else {
-                ctx.beginPath();
-                ctx.arc(x, y, stats.range, 0, 2 * Math.PI);
-                ctx.fill();
-            }
+        if (stats.type == 'building') {
+            ctx.beginPath();
+            ctx.fillStyle = '#00f7ff71';
+            ctx.strokeStyle = '#1a7d81b3';
+            ctx.roundRect(x - stats.size, y - stats.size, stats.size * 2, stats.size * 2, 2);
+            ctx.fill();
+            ctx.stroke();
+        } else {
+            ctx.beginPath();
+            ctx.fillStyle = '#00f7ff71';
+            ctx.strokeStyle = '#1a7d81b3';
+            ctx.roundRect(x - 12, y - 12, 24, 24, 2);
+            ctx.fill();
+            ctx.stroke();
         }
         
-        if (stats.width) {
+        if (stats.range && stats.type == 'building') {
+            let range = stats.range.max || stats.range;
+            let g = ctx.createRadialGradient(x, y, 0, x, y, range);
+            g.addColorStop(0, '#ffffff00');
+            g.addColorStop(0.8, '#ffffff30');
+            g.addColorStop(1, '#ffffff');
             ctx.beginPath();
-            ctx.fillRect(x - stats.width / 2, y - stats.distance, stats.width, stats.distance + stats.height / 2);
+            ctx.fillStyle = g;
+            ctx.arc(x, y, range, 0, 2 * Math.PI);
             ctx.fill();
         }
 
-        if (stats.type == 'spell' && !stats.hp && !stats.width) {
+        if (stats.size && stats.symbol) {
             ctx.beginPath();
+            ctx.fillStyle = '#3845ff5f';
+            ctx.arc(x, y, stats.size, 0, 2 * Math.PI);
+            ctx.fill();
+
+            ctx.fillStyle = '#ffffff8b';
+            ctx.font = `${stats.size + 5}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(stats.symbol, x, y);
+        }
+        
+        if (stats.width) {
+            let img = document.createElement('canvas');
+            let ctx2 = img.getContext('2d');
+
+            img.width = stats.width; 
+            img.height = stats.distance + stats.height / 2;
+
+            let g = ctx2.createLinearGradient(0, 0, stats.width, 0);
+            g.addColorStop(0, '#ffffff');
+            g.addColorStop(0.2, '#ffffff30');
+            g.addColorStop(0.5, '#ffffff00');
+            g.addColorStop(0.8, '#ffffff30');
+            g.addColorStop(1, '#ffffff');
+
+            ctx2.fillStyle = g;
+            ctx2.fillRect(0, 0, stats.width, stats.distance + stats.height / 2);
+
+            let g2 = ctx2.createLinearGradient(0, 0, 0, stats.distance + stats.height / 2);
+            g2.addColorStop(1, '#ffffffb9');
+            g2.addColorStop(0.01, '#ffffff21');
+            g2.addColorStop(0, '#ffffff00');
+
+            ctx2.fillStyle = g2;
+            ctx2.fillRect(0, 0, stats.width, stats.distance + stats.height / 2);
+
+            let g3 = ctx2.createLinearGradient(0, 0, 0, stats.distance + stats.height / 2);
+            g3.addColorStop(0, '#ffffff00');
+            g3.addColorStop(0.3, '#ffffffbd');
+            g3.addColorStop(1, '#ffffff');
+
+            ctx2.globalCompositeOperation = 'destination-in';
+            ctx2.fillStyle = g3;
+            ctx2.fillRect(0, 0, stats.width, stats.distance + stats.height / 2);
+
+            ctx.drawImage(img, x - stats.width / 2, y - stats.distance);
+            if (stats.colour.length == 8) ctx.fillStyle = stats.colour.slice(0, stats.colour.length - 2) + '99';
+            else ctx.fillStyle = stats.colour + '99';
+            ctx.fillRect(-stats.width / 2 + x, stats.height / 2 + y, stats.width, stats.height);
+        }1
+
+        if (stats.type == 'spell' && !stats.hp && !stats.width) {
+            let g = ctx.createRadialGradient(x, y, 0, x, y, stats.radius);
+            g.addColorStop(0, '#ffffff00');
+            g.addColorStop(0.8, '#ffffff30');
+            g.addColorStop(1, '#ffffff');
+            ctx.beginPath();
+            ctx.fillStyle = g;
             ctx.arc(x, y, stats.radius, 0, 2 * Math.PI);
             ctx.fill();
         }
@@ -297,11 +370,6 @@ function update() {
             ctx.arc(x, y, stats.spawnAOEStats.radius, 0, 2 * Math.PI);
             ctx.stroke();
         }
-
-        ctx.beginPath();
-        ctx.fillStyle = '#000000';
-        ctx.arc(x, y, 5, 0, 2 * Math.PI);
-        ctx.fill();
     }
 
     if (isHost) {
@@ -1319,7 +1387,7 @@ class UnitEntity extends Entity {
         }
 
         //River collision
-        if (!this.isFlying && !this.stats.canJumpRiver) {
+        if (!this.isFlying && !this.stats.canJumpRiver && this.dashTime <= 0) {
             let riverTop = game.river - game.riverWidth / 2;
             let riverBottom = game.river + game.riverWidth / 2;
 
@@ -1710,7 +1778,7 @@ class Projectile {
         
         this.particleCooldown = stats.particleSpeed;
 
-        if (!this.stats.size) this.stats.size = 5;
+        if (!this.stats.size && !this.stats.width) this.stats.size = 5;
         if (!this.stats.speed) this.stats.speed = 500;
         if (!this.stats.distance) this.stats.distance = 200;
     }
@@ -2174,6 +2242,13 @@ function spawnUnit(x, y, index, team) {
         p1Cycles.splice(0, 1);
 
         if (stats.type != 'spell' && stats.deployType != 'spell' || stats.width) {
+            if (stats.type == 'building' && stats.size <= 24) {
+                x = Math.round(x / 24) * 24;
+                y = Math.round(y / 24) * 24;
+            } else {
+                x = Math.floor(x / 24) * 24 + 12;
+                y = Math.floor(y / 24) * 24 + 12;
+            }
             let newPos = findMax(x, y);
             if (newPos.x) x = newPos.x;
             if (newPos.y) y = newPos.y;
