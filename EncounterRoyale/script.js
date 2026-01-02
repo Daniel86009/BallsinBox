@@ -1319,7 +1319,7 @@ class UnitEntity extends Entity {
         }
 
         //River collision
-        if (!this.isFlying) {
+        if (!this.isFlying && !this.stats.canJumpRiver) {
             let riverTop = game.river - game.riverWidth / 2;
             let riverBottom = game.river + game.riverWidth / 2;
 
@@ -1995,23 +1995,62 @@ class Particle {
         if (this.stats.isTimer) {
             const percent = Math.min(this.time / this.totalTime, 1);
             const endAngle = -Math.PI / 2 + percent * Math.PI * 2;
+
+            let g = ctx.createLinearGradient(this.x, this.y - this.size, this.x, this.y + this.size * 2);
+            g.addColorStop(0, '#e3e287ff');
+            g.addColorStop(0.5, '#a1823a');
+            g.addColorStop(1, '#a1823a');
+
             ctx.beginPath();
-            ctx.fillStyle = this.stats.colour;
-            ctx.lineWidth = 10;
-            ctx.arc(this.x, y, this.size, 0, Math.PI * 2);
+            ctx.fillStyle = g;
+            ctx.arc(this.x, this.y - this.size - 2, 5, 0, 2 * Math.PI);
             ctx.fill();
 
             ctx.beginPath();
-            ctx.strokeStyle = (this.team == game.team1) ? '#3966f9ff' : '#fc3b3bff';
+            ctx.strokeStyle = '#5a461c';
+            ctx.lineWidth = 2;
+            ctx.arc(this.x, this.y - this.size - 2, 6, 0, 2 * Math.PI);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.fillStyle = '#5a461c';
+            ctx.arc(this.x, this.y - this.size - 2, 2, 0, 2 * Math.PI);
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.fillStyle = g;
+            ctx.arc(this.x, this.y, this.size, 0, 2 * Math.PI);
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.fillStyle = '#d8d1d2';
+            ctx.arc(this.x, this.y, this.size - 3, 0, 2 * Math.PI);
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.strokeStyle = '#5a461c';
+            ctx.lineWidth = 2;
+            ctx.arc(this.x, this.y, this.size + 1, 0, 2 * Math.PI);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.strokeStyle = (this.team == game.team1) ? '#8ac9f4' : '#f03833';
             ctx.lineWidth = this.size - 2;
             ctx.arc(this.x, y, this.size - (this.size / 2 + 2), -Math.PI / 2, endAngle);
             ctx.stroke();
 
             ctx.beginPath();
-            ctx.strokeStyle = (this.team == game.team1) ? '#1639aeff' : '#a21818ff';
+            ctx.strokeStyle = (this.team == game.team1) ? '#7291de' : '#a7221f';
             ctx.lineWidth = 3;
             ctx.moveTo(this.x, y);
-            ctx.lineTo(Math.cos(endAngle) * (this.size) + this.x, Math.sin(endAngle) * (this.size) + y);
+            ctx.lineTo(this.x, this.y - this.size + 2);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 3;
+            ctx.moveTo(this.x, y);
+            ctx.lineTo(Math.cos(endAngle) * (this.size - 2) + this.x, Math.sin(endAngle) * (this.size - 2) + y);
             ctx.stroke();
         } else {
             ctx.beginPath();

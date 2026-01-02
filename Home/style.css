@@ -80,7 +80,20 @@ main {
     font-weight: bold;
 }
 
+.title div {
+    text-align: left;
+    width: 50px;
+    border: red 1px dashed;
+}
+
 a {
   text-decoration: none;
   color: var(--text-color);
+}
+
+.viewIcon {
+    filter: invert(1);
+}
+body.light .viewIcon {
+    filter: invert(0);
 }

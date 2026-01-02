@@ -374,7 +374,7 @@ const projectileStats = {
         type: 'lightning',
         stunDuration: 500,
         chainAmount: 9,
-        range: 100
+        range: 4 * game.gridSize
     },
     eDragonLightning: {
         name: 'eDragonLightning',
@@ -1942,7 +1942,7 @@ const units = {
         size: game.gridSize,
         speed: 0,
         deployTime: 3500,
-        targetPriority: 'all',
+        targetPriority: 'ground',
         type: 'building',
         hpLostPerSecond: 27.4
     },
@@ -1998,7 +1998,8 @@ const units = {
         targetPriority: 'ground',
         type: 'unit',
         invisTime: 1800,
-        spawnInvis: true
+        spawnInvis: true,
+        canJumpRiver: true
     },
     princess: {
         name: 'Princess',
