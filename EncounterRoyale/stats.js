@@ -428,7 +428,8 @@ const projectileStats = {
         type: 'lightning',
         stunDuration: 500,
         chainAmount: 1,
-        range: 1
+        range: 1,
+        coolDown: 250
     },
     motherWitchBullet: {
         name: 'motherWitchBullet',
@@ -459,7 +460,8 @@ const projectileStats = {
         damage: 220,
         type: 'lightning',
         chainAmount: 1,
-        range: 1
+        range: 1,
+        coolDown: 250
     },
     healSpirit: {
         name: 'healSpirit',
@@ -507,7 +509,8 @@ const projectileStats = {
         type: 'lightning',
         ctDamage: 128,
         chainAmount: 1,
-        range: 1
+        range: 1,
+        coolDown: 200
     },
     flyingMachineBullet: {
         name: 'flyingMachineBullet',

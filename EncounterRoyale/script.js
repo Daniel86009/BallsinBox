@@ -299,7 +299,7 @@ function update() {
             ctx.fill();
         }
 
-        if (stats.size && stats.symbol) {
+        if (stats.size && stats.symbol && !stats.distance) {
             ctx.beginPath();
             ctx.fillStyle = '#3845ff5f';
             ctx.arc(x, y, stats.size, 0, 2 * Math.PI);
@@ -350,9 +350,9 @@ function update() {
             if (stats.colour.length == 8) ctx.fillStyle = stats.colour.slice(0, stats.colour.length - 2) + '99';
             else ctx.fillStyle = stats.colour + '99';
             ctx.fillRect(-stats.width / 2 + x, stats.height / 2 + y, stats.width, stats.height);
-        }1
+        }
 
-        if (stats.type == 'spell' && !stats.hp && !stats.width) {
+        if (stats.type == 'spell' && !stats.hp && !stats.width && !stats.size) {
             let g = ctx.createRadialGradient(x, y, 0, x, y, stats.radius);
             g.addColorStop(0, '#ffffff00');
             g.addColorStop(0.8, '#ffffff30');
@@ -1955,34 +1955,87 @@ class ChainLighning {
         this.ox = ox;
         this.oy = oy;
         this.stats = stats;
-        this.coolDown = 0;
+        this.coolDown = stats.coolDown || 0;
         this.chainsLeft = stats.chainAmount;
         this.dead = false;
         this.team = team;
         this.target = target;
         this.attacked = [];
         this.owner = owner;
+
+        this.strikeCooldown = 0;
+        this.segments = [];
+        this.backSegments = [];
+        this.segmentCount = 10;
+        this.dist = M.dist(this.x, this.y, this.ox, this.oy);
+
+        this.strike();
     }
 
     draw() {
         let y = isHost ? this.y : c.height - this.y;
         let oy = isHost ? this.oy : c.height - this.oy;
+
         ctx.beginPath();
-        ctx.lineWidth = 5;
-        ctx.strokeStyle = '#00e1ff';
-        ctx.moveTo(this.x, y);
-        ctx.lineTo(this.ox, oy);
+        ctx.moveTo(this.x, this.y);
+        for (let i = 0; i < this.segments.length; i++) {
+            let s = this.backSegments[i];
+            let sy = isHost ? s.y : c.height - s.y;
+            ctx.strokeStyle = '#00fbff78';
+            ctx.lineWidth = 5;
+            ctx.lineTo(s.x, sy);
+        }
+        ctx.lineTo(this.ox, this.oy);
         ctx.stroke();
 
         ctx.beginPath();
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = '#ffffff';
-        ctx.moveTo(this.x, y);
-        ctx.lineTo(this.ox, oy);
+        ctx.moveTo(this.x, this.y);
+        for (let i = 0; i < this.segments.length; i++) {
+            let s = this.backSegments[i];
+            let sy = isHost ? s.y : c.height - s.y;
+            ctx.strokeStyle = '#ffffff78';
+            ctx.lineWidth = 3;
+            ctx.lineTo(s.x, sy);
+        }
+        ctx.lineTo(this.ox, this.oy);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(this.x, this.y);
+        for (let i = 0; i < this.segments.length; i++) {
+            let s = this.segments[i];
+            let sy = isHost ? s.y : c.height - s.y;
+            ctx.strokeStyle = '#00fbffff';
+            ctx.lineWidth = 5;
+            ctx.lineTo(s.x, sy);
+        }
+        ctx.lineTo(this.ox, this.oy);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(this.x, this.y);
+        for (let i = 0; i < this.segments.length; i++) {
+            let s = this.segments[i];
+            let sy = isHost ? s.y : c.height - s.y;
+            ctx.strokeStyle = '#ffffffff';
+            ctx.lineWidth = 3;
+            ctx.lineTo(s.x, sy);
+        }
+        ctx.lineTo(this.ox, this.oy);
         ctx.stroke();
     }
 
     update() {
+        this.dist = M.dist(this.x, this.y, this.ox, this.oy);
+        this.segmentCount = Math.round(this.dist / 20);
+
+        if (this.strikeCooldown > 0) {
+            this.strikeCooldown -= 1000 / 60;
+        } else {
+            this.strikeCooldown = 30;
+            this.strike();
+        }
+
         if (this.coolDown > 0) {
             this.coolDown -= 1000 / 60;
             return;
@@ -2036,6 +2089,34 @@ class ChainLighning {
             else this.dead = true;
         } else {
             this.dead = true;
+        }
+    }
+
+    strike() {
+        this.segments = [];
+        this.backSegments = [];
+
+        let norm = M.normalise({x: this.ox - this.x, y: this.oy - this.y});
+        let r = 15;
+
+        for (let i = 1; i <= this.segmentCount - 1; i++) {
+            let progress = (this.dist / this.segmentCount) * i;
+            let perp = {x: -norm.y, y: norm.x};
+            
+            let x = this.x + (norm.x * progress) + (perp.x * (Math.random() * (r + r) - r));
+            let y = this.y + (norm.y * progress) + (perp.y * (Math.random() * (r + r) - r));
+            
+            this.backSegments.push({x: x, y: y});
+        }
+
+        for (let i = 1; i <= this.segmentCount - 1; i++) {
+            let progress = (this.dist / this.segmentCount) * i;
+            let perp = {x: -norm.y, y: norm.x};
+            
+            let x = this.x + (norm.x * progress) + (perp.x * (Math.random() * (r + r) - r));
+            let y = this.y + (norm.y * progress) + (perp.y * (Math.random() * (r + r) - r));
+            
+            this.segments.push({x: x, y: y});
         }
     }
 
