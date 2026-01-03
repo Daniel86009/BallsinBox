@@ -1975,65 +1975,12 @@ class ChainLighning {
         this.segmentCount = 10;
         this.dist = M.dist(this.x, this.y, this.ox, this.oy);
 
-        this.strike();
+        if (isHost) this.strike();
     }
 
     draw() {
         let y = isHost ? this.y : c.height - this.y;
         let oy = isHost ? this.oy : c.height - this.oy;
-
-        ctx.beginPath();
-        ctx.moveTo(this.x, this.y);
-        for (let i = 0; i < this.segments.length; i++) {
-            let s = this.backSegments[i];
-            let sy = isHost ? s.y : c.height - s.y;
-            ctx.strokeStyle = '#00fbff78';
-            ctx.lineWidth = 5;
-            ctx.lineTo(s.x, sy);
-        }
-        ctx.lineTo(this.ox, this.oy);
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.moveTo(this.x, this.y);
-        for (let i = 0; i < this.segments.length; i++) {
-            let s = this.backSegments[i];
-            let sy = isHost ? s.y : c.height - s.y;
-            ctx.strokeStyle = '#ffffff78';
-            ctx.lineWidth = 3;
-            ctx.lineTo(s.x, sy);
-        }
-        ctx.lineTo(this.ox, this.oy);
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.moveTo(this.x, this.y);
-        for (let i = 0; i < this.segments.length; i++) {
-            let s = this.segments[i];
-            let sy = isHost ? s.y : c.height - s.y;
-            ctx.strokeStyle = '#00fbffff';
-            ctx.lineWidth = 5;
-            ctx.lineTo(s.x, sy);
-        }
-        ctx.lineTo(this.ox, this.oy);
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.moveTo(this.x, this.y);
-        for (let i = 0; i < this.segments.length; i++) {
-            let s = this.segments[i];
-            let sy = isHost ? s.y : c.height - s.y;
-            ctx.strokeStyle = '#ffffffff';
-            ctx.lineWidth = 3;
-            ctx.lineTo(s.x, sy);
-        }
-        ctx.lineTo(this.ox, this.oy);
-        ctx.stroke();
-    }
-
-    update() {
-        this.dist = M.dist(this.x, this.y, this.ox, this.oy);
-        this.segmentCount = Math.round(this.dist / 20);
 
         if (this.strikeCooldown > 0) {
             this.strikeCooldown -= 1000 / 60;
@@ -2042,6 +1989,56 @@ class ChainLighning {
             this.strike();
         }
 
+        ctx.beginPath();
+        ctx.strokeStyle = '#00fbff78';
+        ctx.lineWidth = 5;
+        ctx.moveTo(this.x, y);
+        for (let i = 0; i < this.segments.length; i++) {
+            let s = this.backSegments[i];
+            let sy = isHost ? s.y : c.height - s.y;
+            ctx.lineTo(s.x, sy);
+        }
+        ctx.lineTo(this.ox, oy);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(this.x, y);
+        ctx.strokeStyle = '#ffffff78';
+        ctx.lineWidth = 3;
+        for (let i = 0; i < this.segments.length; i++) {
+            let s = this.backSegments[i];
+            let sy = isHost ? s.y : c.height - s.y;
+            ctx.lineTo(s.x, sy);
+        }
+        ctx.lineTo(this.ox, oy);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(this.x, y);
+        ctx.strokeStyle = '#00fbffff';
+        ctx.lineWidth = 5;
+        for (let i = 0; i < this.segments.length; i++) {
+            let s = this.segments[i];
+            let sy = isHost ? s.y : c.height - s.y;
+            ctx.lineTo(s.x, sy);
+        }
+        ctx.lineTo(this.ox, oy);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.strokeStyle = '#ffffffff';
+        ctx.lineWidth = 3;
+        ctx.moveTo(this.x, y);
+        for (let i = 0; i < this.segments.length; i++) {
+            let s = this.segments[i];
+            let sy = isHost ? s.y : c.height - s.y;
+            ctx.lineTo(s.x, sy);
+        }
+        ctx.lineTo(this.ox, oy);
+        ctx.stroke();
+    }
+
+    update() {
         if (this.coolDown > 0) {
             this.coolDown -= 1000 / 60;
             return;
@@ -2099,8 +2096,12 @@ class ChainLighning {
     }
 
     strike() {
+        let y = isHost ? this.y : c.height - this.y;
+        let oy = isHost ? this.oy : c.height - this.oy;
         this.segments = [];
         this.backSegments = [];
+        this.dist = M.dist(this.x, y, this.ox, oy);
+        this.segmentCount = Math.round(this.dist / 20);
 
         let norm = M.normalise({x: this.ox - this.x, y: this.oy - this.y});
         let r = 15;
@@ -2118,7 +2119,7 @@ class ChainLighning {
         for (let i = 1; i <= this.segmentCount - 1; i++) {
             let progress = (this.dist / this.segmentCount) * i;
             let perp = {x: -norm.y, y: norm.x};
-            
+
             let x = this.x + (norm.x * progress) + (perp.x * (Math.random() * (r + r) - r));
             let y = this.y + (norm.y * progress) + (perp.y * (Math.random() * (r + r) - r));
             
@@ -2151,56 +2152,80 @@ class Particle {
             const percent = Math.min(this.time / this.totalTime, 1);
             const endAngle = -Math.PI / 2 + percent * Math.PI * 2;
 
-            let g = ctx.createLinearGradient(this.x, this.y - this.size, this.x, this.y + this.size * 2);
+            let g = ctx.createLinearGradient(this.x, y - this.size, this.x, y + this.size * 2);
             g.addColorStop(0, '#e3e287ff');
             g.addColorStop(0.5, '#a1823a');
             g.addColorStop(1, '#a1823a');
 
             ctx.beginPath();
             ctx.fillStyle = g;
-            ctx.arc(this.x, this.y - this.size - 2, 5, 0, 2 * Math.PI);
+            ctx.arc(this.x, y - this.size - 2, 5, 0, 2 * Math.PI);
             ctx.fill();
 
             ctx.beginPath();
             ctx.strokeStyle = '#5a461c';
             ctx.lineWidth = 2;
-            ctx.arc(this.x, this.y - this.size - 2, 6, 0, 2 * Math.PI);
+            ctx.arc(this.x, y - this.size - 2, 6, 0, 2 * Math.PI);
             ctx.stroke();
 
             ctx.beginPath();
             ctx.fillStyle = '#5a461c';
-            ctx.arc(this.x, this.y - this.size - 2, 2, 0, 2 * Math.PI);
+            ctx.arc(this.x, y - this.size - 2, 2, 0, 2 * Math.PI);
             ctx.fill();
 
             ctx.beginPath();
             ctx.fillStyle = g;
-            ctx.arc(this.x, this.y, this.size, 0, 2 * Math.PI);
+            ctx.arc(this.x, y, this.size, 0, 2 * Math.PI);
             ctx.fill();
 
             ctx.beginPath();
             ctx.fillStyle = '#d8d1d2';
-            ctx.arc(this.x, this.y, this.size - 3, 0, 2 * Math.PI);
+            ctx.arc(this.x, y, this.size - 3, 0, 2 * Math.PI);
             ctx.fill();
 
             ctx.beginPath();
             ctx.strokeStyle = '#5a461c';
             ctx.lineWidth = 2;
-            ctx.arc(this.x, this.y, this.size + 1, 0, 2 * Math.PI);
+            ctx.arc(this.x, y, this.size + 1, 0, 2 * Math.PI);
             ctx.stroke();
 
+            //Inside dots
+            ctx.beginPath();
+            ctx.fillStyle = '#5a461c';
+            ctx.arc(this.x, y + this.size - 5, 1.8, 0, 2 * Math.PI);
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.fillStyle = '#5a461c';
+            ctx.arc(this.x, y - this.size + 5, 1.8, 0, 2 * Math.PI);
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.fillStyle = '#5a461c';
+            ctx.arc(this.x + this.size - 5, y, 1.8, 0, 2 * Math.PI);
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.fillStyle = '#5a461c';
+            ctx.arc(this.x - this.size + 5, y, 1.8, 0, 2 * Math.PI);
+            ctx.fill();
+
+            //Progress fill
             ctx.beginPath();
             ctx.strokeStyle = (this.team == game.team1) ? '#8ac9f4' : '#f03833';
             ctx.lineWidth = this.size - 2;
             ctx.arc(this.x, y, this.size - (this.size / 2 + 2), -Math.PI / 2, endAngle);
             ctx.stroke();
 
+            //Progress start line
             ctx.beginPath();
             ctx.strokeStyle = (this.team == game.team1) ? '#7291de' : '#a7221f';
             ctx.lineWidth = 3;
             ctx.moveTo(this.x, y);
-            ctx.lineTo(this.x, this.y - this.size + 2);
+            ctx.lineTo(this.x, y - this.size + 2);
             ctx.stroke();
 
+            //Progress end line
             ctx.beginPath();
             ctx.strokeStyle = '#333';
             ctx.lineWidth = 3;
