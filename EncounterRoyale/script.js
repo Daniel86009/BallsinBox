@@ -1131,6 +1131,8 @@ class UnitEntity extends Entity {
             this.takeDamage(this.stats.hpLostPerSecond / (1000 / 60) / 4);
         }
 
+        if (this.enchantTime > 0) this.enchantTime -= 1000 / 60;
+
         if (this.type == 'bomb') return;
 
         //Apply knockback
@@ -1151,6 +1153,10 @@ class UnitEntity extends Entity {
                 e.hp = this.hp;
                 entities.push(e);
             }
+        }
+
+        if (this.enchantedUnits.length < this.stats.enchantCount) {
+            this.enchant();
         }
 
         this.checkDash();
@@ -1460,7 +1466,7 @@ class UnitEntity extends Entity {
             let e = entities[i];
 
             if (e.type == 'building' || e.team != this.team) continue;
-            if (e == this) continue;
+            if (e == this || e.enchantTime > 0) continue;
 
             let dist = M.dist(this, e) + e.stats.size;
 
