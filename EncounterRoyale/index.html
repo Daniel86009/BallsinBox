@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <link rel="shortcut icon" href="#">
     <title>Encounter Royale</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
@@ -61,8 +61,6 @@
 
         <canvas id="c" width="432" height="768"></canvas>
 
-        <button id="theme-toggle">Switch to Light Mode</button>
-
         <div id="playerUI">
             <div id="elixirBarDiv">
                 <span>Elixir: <span id="elixirNum">5</span>/10</span>
@@ -98,6 +96,7 @@
         <h2 id="gameoverMessage">Choose Cards</h2>
         <h1 id="newCrownDisplay">+0👑</h1>
         <button id="restartButton" onclick="requestStart()">Play</button>
+        <button id="theme-toggle">Switch to Light Mode</button>
         <div id="chosenCards">
             <div class="card"></div>
             <div class="card"></div>

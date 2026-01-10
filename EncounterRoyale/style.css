@@ -25,8 +25,11 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 100%;
-    width: 100%;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    box-sizing: border-box;
+    padding: 10px;
 }
 
 #theme-toggle {
@@ -54,6 +57,8 @@ body {
     opacity: 1;
     padding: 20px;
     overflow-y: auto;
+    width: 100vw;
+    height: 100vh;
 }
 
 #gameoverMessage {
@@ -89,7 +94,7 @@ body {
 
     border: var(--card-border) 8px solid;
     border-radius: 15px;
-    width: min(450px, 100%);
+    width: min(400px, 70%);
     max-height: 400px;
 }
 
@@ -106,21 +111,35 @@ body {
 }
 
 #c {
+    height: 65vh;
+    width: auto;
+    aspect-ratio: 432 / 768; 
     border: 2px solid black;
     border-radius: 8px;
     background: #088c36;
+    max-width: 100%;
 }
 
 .card {
-    transition: all 0.2s ease-in-out;
+    flex: 0 1 100px;
+    max-width: 100px;
+    
+    aspect-ratio: 100 / 125;
+    height: auto; 
+    
     image-rendering: pixelated;
     border: 2px black solid;
     border-radius: 5px;
-    width: 100px;
-    height: 125px;
     text-align: center;
-    color: var(--text-color);
     background-color: var(--card-bg);
+    color: var(--text-color);
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 5px;
+    box-sizing: border-box;
 }
 .card.selected {
     transform: scale(1.1);
@@ -130,10 +149,18 @@ body {
 .card.disabled {
     opacity: 0.2;
 }
+.card img {
+    max-width: 100%;
+    max-height: 80%;
+    object-fit: contain;
+    image-rendering: pixelated;
+}
 
 #playerUI {
     color: var(--text-color);
-    width: 500px;
+    margin-top: 10px;
+    width: 100%;
+    max-width: 432px; 
 }
 
 #elixirBarOuter {
@@ -142,7 +169,7 @@ body {
     background-color: var(--card-bg);
     border: #960096 3px solid;
     height: 25px;
-    width: 500px;
+    width: 100%;
     position: relative;
 }
 
@@ -170,7 +197,10 @@ body {
 #cardBar {
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
+    gap: 5px;
+    flex-grow: 1;
+    justify-content: space-evenly;
+    min-width: 0;
 }
 
 /*Options menu button*/
@@ -225,12 +255,15 @@ body {
 #cardUI {
     display: flex;
     flex-direction: row;
-    gap: 10px;
     align-items: flex-end;
+    gap: 8px;
+    width: 100%;
+    justify-content: center;
+    box-sizing: border-box;
 }
 
 #nextCard {
-    width: 50px;
+    flex: 0 0 50px;
     height: 61px;
     font-size: 7px;
 }
@@ -270,4 +303,24 @@ button {
 .btn-join {
     background: #3b82f6;
     color: white;
+}
+
+@media (orientation: portrait) {
+    #playerUI {
+        max-width: 100vw;
+    }
+    #chosenCards .card {
+        max-width: calc(100% / 4);
+    }
+}
+
+@media (orientation: landscape) {
+    #playerUI {
+        max-width: auto;
+        width: calc(65vh * (432/768));
+    }l
+    #c {
+        max-height: 70vh; 
+        width: auto;
+    }
 }

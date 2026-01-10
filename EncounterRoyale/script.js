@@ -8,6 +8,9 @@ ToDo:
     -Goblin Machine
 -Add proper icons
 -Add better visuals and particle effects
+-Add tiebreaker
+-Make mobile ui work
+-Fix mirror with display images
 */
 
 //1 range ≈ 24
@@ -141,10 +144,8 @@ function start() {
         mouse.x = e.clientX - rect.left;
         mouse.y = e.clientY - rect.top;
 
-        if (c.style.width == `${window.innerWidth - 10}px`) {
-            mouse.x += window.innerHeight - 10;
-            mouse.y += window.innerWidth - 240;
-        }
+        mouse.x *= c.width / rect.width;
+        mouse.y *= c.height / rect.height;
     });
 
     c.addEventListener('mousedown', (e) => {
@@ -163,18 +164,13 @@ function start() {
 
     c.addEventListener('touchstart', (e) => {
         e.preventDefault();
+        mouse.down = true;
         let rect = c.getBoundingClientRect();
         mouse.x = e.touches[0].clientX - rect.left;
         mouse.y = e.touches[0].clientY - rect.top;
-        mouse.down = true;
 
-        let cWidth = c.style.width.replace('px', '');
-        let cHeight = c.style.height.replace('px', '');
-
-        if (Number(cWidth) < 800) {
-            mouse.x *= 500 / Number(cWidth);
-            mouse.y *= 800 / Number(cHeight);
-        }
+        mouse.x *= c.width / rect.width;
+        mouse.y *= c.height / rect.height;
 
         spawnUnit(mouse.x, mouse.y, mouse.selection, game.team1, p1Elixir);
 
@@ -190,16 +186,16 @@ function start() {
     document.addEventListener('keydown', (e) => {
         switch (e.key) {
             case '1':
-                cardClick(cardBar.children[0], 0);
+                if (cardBar.children[0]) cardClick(cardBar.children[0], 0);
                 break;
             case '2':
-                cardClick(cardBar.children[1], 1);
+                if (cardBar.children[1]) cardClick(cardBar.children[1], 1);
                 break;
             case '3':
-                cardClick(cardBar.children[2], 2);
+                if (cardBar.children[2]) cardClick(cardBar.children[2], 2);
                 break;
             case '4':
-                cardClick(cardBar.children[3], 3);
+                if (cardBar.children[3]) cardClick(cardBar.children[3], 3);
                 break;
         }
     });
@@ -250,7 +246,7 @@ function update() {
         if (p.stats.isTimer) p.draw();
     }
 
-    if (mouse.selection != -1) {
+    if (mouse.selection != -1 && window.innerWidth > 800) {
         let stats = p1Units[p1Hand[mouse.selection]];
         if (stats.name == 'Mirror') stats = p1Units[p1Cycles[p1Cycles.length - 1]];
 
@@ -305,11 +301,27 @@ function update() {
             ctx.arc(x, y, stats.size, 0, 2 * Math.PI);
             ctx.fill();
 
-            ctx.fillStyle = '#ffffff8b';
-            ctx.font = `${stats.size + 5}px Arial`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(stats.symbol, x, y);
+            if (stats.imgPath) {
+                let img = new Image();
+                img.src = stats.imgPath;
+                let c2 = document.createElement('canvas');
+                c2.width = stats.size * 2;
+                c2.height = stats.size * 2;
+                let ctx2 = c2.getContext('2d');
+
+                ctx2.globalAlpha = 0.55;
+
+                ctx2.drawImage(img, 0, 0, stats.size * 2, stats.size * 2);
+
+                ctx.drawImage(c2, x - stats.size, y - stats.size, stats.size * 2, stats.size * 2);
+            } else {
+                ctx.fillStyle = '#ffffff8b';
+                ctx.font = `${stats.size + 5}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(stats.symbol, x, y);
+            }
+            
         }
         
         if (stats.width) {
@@ -593,11 +605,25 @@ class Entity {
 
         //Symbol
         ctx.fillStyle = this.invisible ? '#ffffff63' : '#ffffff';
-        ctx.font = `${this.stats.size + 5}px Arial`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(this.stats.symbol, this.x, y);
+        if (this.stats.imgPath) {
+            let img = new Image();
+            img.src = this.stats.imgPath;
+            let c2 = document.createElement('canvas');
+            c2.width = this.stats.size * 2;
+            c2.height = this.stats.size * 2;
+            let ctx2 = c2.getContext('2d');
 
+            ctx2.globalAlpha = this.isInvisible ? 0.39 : 1;
+
+            ctx2.drawImage(img, 0, 0, this.stats.size * 2, this.stats.size * 2);
+
+            ctx.drawImage(c2, this.x - this.stats.size, this.y - this.stats.size, this.stats.size * 2, this.stats.size * 2);
+        } else {
+            ctx.font = `${this.stats.size + 5}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(this.stats.symbol, this.x, y);
+        }
         
         if (!this.stats.isClone && this.type != 'waypoint') {
             //Draw crown tower hp
@@ -2592,8 +2618,8 @@ function randomiseP1Units() {
         if (!u) continue;
 
         let exit = false;
-        for (let j = 0; j < unitsArr; j++) {
-            if (units[unitsArr[j]] == u) {
+        for (let j = 0; j < unitsArr.length; j++) {
+            if (units[unitsArr[j]].name == u.name) {
                 unitsArr.splice(j, 1);
                 continue;
             }
@@ -2629,11 +2655,20 @@ function drawHandUI() {
         let symbol = cardStats.name == 'Mirror' ? '🪞' + p1Units[p1Cycles[p1Cycles.length - 1]].symbol : (cardStats.displaySymbol || cardStats.symbol);
         let cost = cardStats.name == 'Mirror' ? p1Units[p1Cycles[p1Cycles.length - 1]].cost + 1 : cardStats.cost;
 
-        cardElem.innerHTML = `
-            <h2>${symbol}</h2>
-            <div style="font-weight: 700;">${cardStats.name}</div>
-            <div style="font-weight: 700;">Cost: <span style="color: #df00df;">${cost}</span></div>
-        `;
+        if (cardStats.imgPath) {
+            let size = window.innerWidth < 800 ? 35 : 70;
+            cardElem.innerHTML = `
+                <img src="${cardStats.displayImgPath || cardStats.imgPath}" width="${size}" height="${size}">
+                <div style="font-weight: 700;">${cardStats.name}</div>
+                <div style="font-weight: 700;">Cost: <span style="color: #df00df;">${cost}</span></div>
+            `;
+        } else {
+            cardElem.innerHTML = `
+                <h2>${symbol}</h2>
+                <div style="font-weight: 700;">${cardStats.name}</div>
+                <div style="font-weight: 700;">Cost: <span style="color: #df00df;">${cost}</span></div>
+            `;
+        }
 
         if (window.innerWidth < 800) {
             cardElem.style.width = `${(window.innerWidth - 25) / 4}px`
@@ -2656,11 +2691,19 @@ function drawHandUI() {
     let nextCardStats = p1Units[p1Cycles[0]];
 
     if (nextCardStats) {
-        nextCard.innerHTML = `
-            <h2>${nextCardStats.displaySymbol || nextCardStats.symbol}</h2>
-            <div style="font-weight: 700;">${nextCardStats.name}</div>
-            <div style="font-weight: 700;">Cost: <span style="color: #df00df;">${nextCardStats.cost}</span></div>
-        `;
+        if (nextCardStats.imgPath) {
+            nextCard.innerHTML = `
+                <img src="${nextCardStats.displayImgPath || nextCardStats.imgPath}" width="20" height="20">
+                <div style="font-weight: 700;">${nextCardStats.name}</div>
+                <div style="font-weight: 700;">Cost: <span style="color: #df00df;">${nextCardStats.cost}</span></div>
+            `;
+        } else {
+            nextCard.innerHTML = `
+                <h2>${nextCardStats.displaySymbol || nextCardStats.symbol}</h2>
+                <div style="font-weight: 700;">${nextCardStats.name}</div>
+                <div style="font-weight: 700;">Cost: <span style="color: #df00df;">${nextCardStats.cost}</span></div>
+            `;
+        }
     }
 }
 
@@ -2826,11 +2869,20 @@ function populateChoices() {
 
         cardElem.classList.add('card');
 
-        cardElem.innerHTML = `
-            <h2>${cardStats.displaySymbol || cardStats.symbol}</h2>
-            <div style="font-weight: 700;">${cardStats.name}</div>
-            <div style="font-weight: 700;">Cost: <span style="color: #df00df;">${cardStats.cost}</span></div>
-        `;
+        if (cardStats.imgPath) {
+            let size = window.innerWidth < 800 ? 35 : 70;
+            cardElem.innerHTML = `
+                <img src="${cardStats.displayImgPath || cardStats.imgPath}" width="${size}" height="${size}">
+                <div style="font-weight: 700;">${cardStats.name}</div>
+                <div style="font-weight: 700;">Cost: <span style="color: #df00df;">${cardStats.cost}</span></div>
+            `;
+        } else {
+            cardElem.innerHTML = `
+                <h2>${cardStats.displaySymbol || cardStats.symbol}</h2>
+                <div style="font-weight: 700;">${cardStats.name}</div>
+                <div style="font-weight: 700;">Cost: <span style="color: #df00df;">${cardStats.cost}</span></div>
+            `;
+        }
 
         cardElem.addEventListener('click', () => cardChoiceClick(cardElem, cardStats, false, i));
         cardChoices.appendChild(cardElem);
@@ -2852,11 +2904,21 @@ function cardChoiceClick(cardElem, stats, inDeck, index, handIndex = null) {
             let child = children[i];
             if (child.classList.contains('occupied')) continue;
 
-            child.innerHTML = `
-                <h2>${stats.displaySymbol || stats.symbol}</h2>
-                <div style="font-weight: 700;">${stats.name}</div>
-                <div style="font-weight: 700;">Cost: <span style="color: #df00df;">${stats.cost}</span></div>
-            `;
+            if (stats.imgPath) {
+                let size = window.innerWidth < 800 ? 35 : 70;
+                child.innerHTML = `
+                    <img src="${stats.displayImgPath || stats.imgPath}" width="${size}" height="${size}">
+                    <div style="font-weight: 700;">${stats.name}</div>
+                    <div style="font-weight: 700;">Cost: <span style="color: #df00df;">${stats.cost}</span></div>
+                `;
+            } else {
+                child.innerHTML = `
+                    <h2>${stats.displaySymbol || stats.symbol}</h2>
+                    <div style="font-weight: 700;">${stats.name}</div>
+                    <div style="font-weight: 700;">Cost: <span style="color: #df00df;">${stats.cost}</span></div>
+                `;
+            }
+            
             child.classList.add('occupied');
 
             cardElem.style.opacity = 0.2;

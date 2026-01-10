@@ -21,7 +21,7 @@ totalCrownDisplay.innerHTML = `${localStorage.crowns || 0} 👑`;
 
 //Change card size on mobile
 if (window.innerWidth < 800) {
-    const cards = document.getElementsByClassName('card');
+    /*const cards = document.getElementsByClassName('card');
     const nextCard = document.getElementById('nextCard');
     const c = document.getElementById('c');
 
@@ -38,17 +38,21 @@ if (window.innerWidth < 800) {
 
     c.style.width = `${window.innerWidth - 10}px`;
     c.style.height = `${window.innerHeight - 120}px`;
-    c.style.paddingLeft = '5px';
+    c.style.paddingLeft = '5px';*/
 
-    multiplayerMenu.style.transform = 'scale(0.7)';
+    multiplayerMenu.style.transform = 'scale(0.6)';
     multiplayerMenu.style.transformOrigin = 'top left';
 
-    document.getElementById('elixirBarOuter').style.width = `${window.innerWidth - 10}px`;
+    /*document.getElementById('elixirBarOuter').style.width = `${window.innerWidth - 10}px`;
     document.getElementById('playerUI').style.width = `${window.innerWidth - 10}px`;
     document.getElementById('chosenCards').style.width = '225px';
     document.getElementById('gameoverMessage').style.fontSize = '20px';
-    document.getElementById('gameoverScreen').style.height = `${window.innerHeight}`;
+    document.getElementById('gameoverScreen').style.height = `${window.innerHeight}`;*/
 }
+
+/*let scale = window.innerWidth / 1800;
+body.style.transform = `scale(${scale})`;
+body.style.transformOrigin = 'top left';*/
 
 //Options Menu
 function updateOptionsMenuVisibility() {
