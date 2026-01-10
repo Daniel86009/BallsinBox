@@ -1139,6 +1139,7 @@ const units = {
     poison: {
         name: 'Poison',
         symbol: '🔴',
+        imgPath: '../Imgs/Sprites/Poison.png',
         cost: 4,
         type: 'spell',
         radius: 3.5 * game.gridSize,
