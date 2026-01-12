@@ -1987,13 +1987,15 @@ class ChainLighning {
         this.ox = ox;
         this.oy = oy;
         this.stats = stats;
-        this.coolDown = stats.coolDown || 0;
+        this.coolDown = stats.coolDown || 150;
         this.chainsLeft = stats.chainAmount;
         this.dead = false;
         this.team = team;
         this.target = target;
         this.attacked = [];
         this.owner = owner;
+        this.hasAttacked = false;
+        this.closestEnemy = null;
 
         this.strikeCooldown = 0;
         this.segments = [];
@@ -2065,13 +2067,45 @@ class ChainLighning {
     }
 
     update() {
+        //Do damage if hasn't done before
+        //Decrease cooldown timer
+        //If timer is up find new target
         if (this.coolDown > 0) {
             this.coolDown -= 1000 / 60;
+            if (!this.hasAttacked) {
+                this.findTarget();
+
+                if (this.closestEnemy) {
+                    this.hasAttacked = true;
+                    this.attacked.push(this.closestEnemy);
+                    this.closestEnemy.stunTime = this.stats.stunDuration;
+                    if (this.stats.ctDamage && (this.closestEnemy.stats.name == 'king' || this.closestEnemy.stats.name == 'princess')) this.closestEnemy.takeDamage(this.stats.ctDamage, this.owner);
+                    else this.closestEnemy.takeDamage(this.stats.damage, this.owner);
+                }
+            }
             return;
         }
 
+
+        if (this.closestEnemy) {
+            if (this.chainsLeft != this.stats.chainAmount) {
+                this.ox = this.x;
+                this.oy = this.y;
+            }
+            this.x = this.closestEnemy.x;
+            this.y = this.closestEnemy.y;
+            this.coolDown = 150;
+            this.hasAttacked = false;
+            if (this.chainsLeft > 1) this.chainsLeft--;
+            else this.dead = true;
+        } else {
+            this.dead = true;
+        }
+    }
+
+    findTarget() {
         let minDist = Infinity;
-        let closestEnemy = null;
+        this.closestEnemy = null;
         for (let i = 0; i < entities.length; i++) {
             let e = entities[i];
             if (e.team == this.team) continue;
@@ -2084,40 +2118,22 @@ class ChainLighning {
                 if (this.stats.targetPriority == 'buildings') {
                     if (e.type == 'building') {
                         minDist = dist;
-                        closestEnemy = e;
+                        this.closestEnemy = e;
                     } else {
                         continue;
                     }
                 } else if (this.stats.targetPriority == 'ground') {
                     if (!e.isFlying) {
                         minDist = dist;
-                        closestEnemy = e;
+                        this.closestEnemy = e;
                     } else {
                         continue;
                     }
                 } else {
                     minDist = dist;
-                    closestEnemy = e;
+                    this.closestEnemy = e;
                 }
             }
-        }
-
-        if (closestEnemy) {
-            if (this.chainsLeft != this.stats.chainAmount) {
-                this.ox = this.x;
-                this.oy = this.y;
-            }
-            this.x = closestEnemy.x;
-            this.y = closestEnemy.y;
-            this.attacked.push(closestEnemy);
-            closestEnemy.stunTime = this.stats.stunDuration;
-            if (this.stats.ctDamage && (closestEnemy.stats.name == 'king' || closestEnemy.stats.name == 'princess')) closestEnemy.takeDamage(this.stats.ctDamage, this.owner);
-            else closestEnemy.takeDamage(this.stats.damage, this.owner);
-            this.coolDown = 150;
-            if (this.chainsLeft > 1) this.chainsLeft--;
-            else this.dead = true;
-        } else {
-            this.dead = true;
         }
     }
 

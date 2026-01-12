@@ -1941,7 +1941,7 @@ const units = {
         attackSpeed: 2100,
         initHitSpeed: 700,
         range: 84,
-        viewRange: 5.5,
+        viewRange: 5.5 * game.gridSize,
         size: 20,
         speed: 60,
         deployTime: 1000,

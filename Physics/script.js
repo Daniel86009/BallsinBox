@@ -172,11 +172,9 @@ function inputs() {
                     else mouse.s.aVel += 0.01;
                 }
                 break;
-
             case 'r':
                 resetShapes();
-                break;
-            
+                break;    
             case 'z':
                 //Debug Key
                 console.log('');
