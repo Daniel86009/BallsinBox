@@ -9,12 +9,8 @@ ToDo:
 -Add proper icons
 -Add better visuals and particle effects
 -Add tiebreaker
--Make mobile ui work
 -Fix mirror with display images
 */
-
-//1 range ≈ 24
-//x = cos(anle) y = sin(angle)
 
 const c = document.getElementById('c');
 const ctx = c.getContext('2d');
@@ -1412,7 +1408,7 @@ class UnitEntity extends Entity {
 
         //Top bottom collision
         if (this.y - this.stats.size < 0) {
-            this.y = this.stats.y;
+            this.y = this.stats.size;
         }
         if (this.y + this.stats.size > c.height) {
             this.y = c.height - this.stats.size;
@@ -2067,9 +2063,6 @@ class ChainLighning {
     }
 
     update() {
-        //Do damage if hasn't done before
-        //Decrease cooldown timer
-        //If timer is up find new target
         if (this.coolDown > 0) {
             this.coolDown -= 1000 / 60;
             if (!this.hasAttacked) {

@@ -579,6 +579,13 @@ const projectileStats = {
         damage: 104,
         speed: 600,
         snareDuration: 2000
+    },
+    fishermanHook: {
+        name: 'fishermanHook',
+        damage: 0,
+        speed: 800,
+        slowAmount: 0.7,
+        slowDuration: 1500
     }
 };
 
@@ -2825,6 +2832,24 @@ const units = {
         enchantCount: 2,
         enchantDurationAfterDeath: 5000,
         enchantRange: 8.5 * game.gridSize
+    },
+    fisherman: {
+        name: 'Fisherman',
+        symbol: '⚓️',
+        cost: 3,
+        hp: 870,
+        damage: 194,
+        attackSpeed: 1300,
+        initHitSpeed: 100,
+        range: 1.2 * game.gridSize,
+        viewRange: 7 * game.gridSize,
+        hookRange: {min: 3.5 * game.gridSize, max: 7 * game.gridSize},
+        size: 20,
+        speed: 60,
+        deployTime: 1000,
+        targetPriority: 'ground',
+        type: 'unit',
+        hookProjectileStats: projectileStats.fishermanHook
     },
     mirror: {
         name: 'Mirror',
