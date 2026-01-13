@@ -2833,7 +2833,7 @@ const units = {
         enchantDurationAfterDeath: 5000,
         enchantRange: 8.5 * game.gridSize
     },
-    fisherman: {
+    /*fisherman: {
         name: 'Fisherman',
         symbol: '⚓️',
         cost: 3,
@@ -2850,7 +2850,7 @@ const units = {
         targetPriority: 'ground',
         type: 'unit',
         hookProjectileStats: projectileStats.fishermanHook
-    },
+    },*/
     mirror: {
         name: 'Mirror',
         symbol: '🪞',
