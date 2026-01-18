@@ -584,8 +584,11 @@ const projectileStats = {
         name: 'fishermanHook',
         damage: 0,
         speed: 800,
+        distance: 500,
         slowAmount: 0.7,
-        slowDuration: 1500
+        slowDuration: 1500,
+        isHook: true,
+        groundProj: true
     }
 };
 
@@ -996,6 +999,7 @@ const units = {
         deployTime: 1000,
         targetPriority: 'ground',
         type: 'unit',
+        rarity: 'common'
     },
     archers: {
         name: 'Archers',
@@ -1013,7 +1017,8 @@ const units = {
         count: 2,
         deployTime: 1000,
         targetPriority: 'all',
-        type: 'unit'
+        type: 'unit',
+        rarity: 'common'
     },
     giant: {
         name: 'Giant',
@@ -1030,7 +1035,8 @@ const units = {
         speed: 45,
         deployTime: 1000,
         targetPriority: 'buildings', 
-        type: 'unit'
+        type: 'unit',
+        rarity: 'rare'
     },
     skeletons: {
         name: 'Skeletons',
@@ -1048,7 +1054,8 @@ const units = {
         count: 3,
         deployTime: 1000,
         targetPriority: 'ground',
-        type: 'unit'
+        type: 'unit',
+        rarity: 'common'
     },
     skarmy: {
         name: 'Skeleton Army',
@@ -1067,7 +1074,8 @@ const units = {
         count: 15,
         deployTime: 1000,
         targetPriority: 'ground',
-        type: 'unit'
+        type: 'unit',
+        rarity: 'epic'
     },
     fireball: {
         name: 'Fireball',
@@ -1078,7 +1086,8 @@ const units = {
         radius: 2.5 * game.gridSize,
         damage: 688,
         ctDamage: 207,
-        knockback: 4
+        knockback: 4,
+        rarity: 'rare'
     },
     arrows: {
         name: 'Arrows',
@@ -1091,7 +1100,8 @@ const units = {
         lifetime: 500,
         ctDamage: 31,
         pulseTime: 200,
-        pulseCount: 3
+        pulseCount: 3,
+        rarity: 'common'
     },
     rage: {
         name: 'Rage',
@@ -1106,7 +1116,8 @@ const units = {
         speedMult: 1.3,
         rageDuration: 2000,
         ctDamage: 54,
-        colour: '#ff32f85d'
+        colour: '#ff32f85d',
+        rarity: 'epic'
     },
     zap: {
         name: 'Zap',
@@ -1118,7 +1129,8 @@ const units = {
         damage: 192,
         lifetime: 500,
         stunDuration: 500,
-        ctDamage: 58
+        ctDamage: 58,
+        rarity: 'common'
     },
     rocket: {
         name: 'Rocket',
@@ -1128,7 +1140,8 @@ const units = {
         type: 'spell',
         radius: 2 * game.gridSize,
         damage: 1484,
-        ctDamage: 371
+        ctDamage: 371,
+        rarity: 'rare'
     },
     snowball: {
         name: 'Giant Snowball',
@@ -1141,7 +1154,8 @@ const units = {
         slowDuration: 3000,
         slowAmount: 0.7,
         ctDamage: 54,
-        knockback: 4
+        knockback: 4,
+        rarity: 'common'
     },
     poison: {
         name: 'Poison',
@@ -1157,7 +1171,8 @@ const units = {
         pulseTime: 1000,
         pulseCount: 8,
         shrink: false,
-        colour: '#7b000086'
+        colour: '#7b000086',
+        rarity: 'epic'
     },
     earthquake: {
         name: 'Earthquake',
@@ -1175,7 +1190,8 @@ const units = {
         pulseCount: 3,
         shrink: false,
         colour: '#7b000086',
-        target: 'ground'
+        target: 'ground',
+        rarity: 'rare'
     },
     tornado: {
         name: 'Tornado',
@@ -1192,7 +1208,8 @@ const units = {
         pullForce: 0.5,
         shrink: false,
         colour: '#b0b0b05d',
-        target: 'ground'
+        target: 'ground',
+        rarity: 'epic'
     },
     vines: {
         name: 'Vines',
@@ -1207,7 +1224,8 @@ const units = {
         pulseCount: 2,
         pulseTime: 1000,
         vineDuration: 2500,
-        colour: '#186d0097'
+        colour: '#186d0097',
+        rarity: 'epic'
     },
     goblinCurse: {
         name: 'Goblin Curse',
@@ -1222,7 +1240,8 @@ const units = {
         pulseTime: 1000,
         goblinCurse: true,
         shrink: false,
-        colour: '#1efd0066'
+        colour: '#1efd0066',
+        rarity: 'epic'
     },
     freeze: {
         name: 'Freeze',
@@ -1236,7 +1255,8 @@ const units = {
         freezeDuration: 4000,
         shrink: false,
         canHitHidden: true,
-        colour: '#00c8ffc5'
+        colour: '#00c8ffc5',
+        rarity: 'epic'
     },
     clone: {
         name: 'Clone',
@@ -1246,7 +1266,8 @@ const units = {
         type: 'spell',
         radius: 3 * game.gridSize,
         damage: 0,
-        clone: true
+        clone: true,
+        rarity: 'epic'
     },
     graveyard: {
         name: 'Graveyard',
@@ -1261,7 +1282,8 @@ const units = {
         initSpawnSpeed: 2200,
         spawnStats: otherUnits.skeleton,
         shrink: false,
-        colour: '#70009294'
+        colour: '#70009294',
+        rarity: 'legendary'
     },
     void: {
         name: 'Void',
@@ -1275,7 +1297,8 @@ const units = {
         pulseTime: 1000,
         pulseCount: 3,
         lifetime: 4000,
-        shrink: false
+        shrink: false,
+        rarity: 'epic'
     },
     lighting: {
         name: 'Lightning',
@@ -1287,7 +1310,8 @@ const units = {
         damage: 1057,
         ctDamage: 286,
         hitCount: 3,
-        stunDuration: 500
+        stunDuration: 500,
+        rarity: 'epic'
     },
     valkyrie: {
         name: 'Valkyrie',
@@ -1304,7 +1328,8 @@ const units = {
         deployTime: 1000,
         targetPriority: 'ground',
         type: 'unit',
-        aoeStats: aoeStats.valkyrieAOE
+        aoeStats: aoeStats.valkyrieAOE,
+        rarity: 'rare'
     },
     hogRider: {
         name: 'Hog Rider',
@@ -1320,7 +1345,8 @@ const units = {
         speed: 120,
         deployTime: 1000,
         targetPriority: 'buildings',
-        type: 'unit'
+        type: 'unit',
+        rarity: 'rare'
     },
     miniPekka: {
         name: 'Mini Pekka',
@@ -1337,7 +1363,8 @@ const units = {
         speed: 60,
         deployTime: 1000,
         targetPriority: 'ground',
-        type: 'unit'
+        type: 'unit',
+        rarity: 'rare'
     },
     iceGolem: {
         name: 'Ice Golem',
@@ -1356,7 +1383,8 @@ const units = {
         speed: 45,
         deployTime: 1000,
         targetPriority: 'buildings',
-        type: 'unit'
+        type: 'unit',
+        rarity: 'rare'
     },
     goblinBarrel: {
         name: 'Goblin Barrel',
@@ -1371,7 +1399,8 @@ const units = {
         colour: '#b16800ff',
         lifetime: 9999,
         deathSpawnStats: otherUnits.goblin,
-        deathSpawnNum: 3
+        deathSpawnNum: 3,
+        rarity: 'epic'
     },
     fireSpirit: {
         name: 'Fire Spirit',
@@ -1388,7 +1417,8 @@ const units = {
         deployTime: 1000,
         targetPriority: 'all',
         type: 'unit',
-        dieOnAttack: true
+        dieOnAttack: true,
+        rarity: 'common'
     },
     pekka: {
         name: 'Pekka',
@@ -1405,7 +1435,8 @@ const units = {
         speed: 45,
         deployTime: 1000,
         targetPriority: 'ground',
-        type: 'unit'
+        type: 'unit',
+        rarity: 'epic'
     },
     dartGoblin: {
         name: 'Dart Goblin',
@@ -1422,7 +1453,8 @@ const units = {
         speed: 120,
         deployTime: 1000,
         targetPriority: 'all',
-        type: 'unit'
+        type: 'unit',
+        rarity: 'rare'
     },
     cannon: {
         name: 'Cannon',
@@ -1439,7 +1471,8 @@ const units = {
         deployTime: 1000,
         targetPriority: 'ground',
         type: 'building',
-        hpLostPerSecond: 27.4
+        hpLostPerSecond: 27.4,
+        rarity: 'common'
     },
     minions: {
         name: 'Minions',
@@ -1457,7 +1490,8 @@ const units = {
         count: 3,
         deployTime: 1000,
         targetPriority: 'all',
-        type: 'flying'
+        type: 'flying',
+        rarity: 'common'
     },
     minionHorde: {
         name: 'Minion Horde',
@@ -1476,7 +1510,8 @@ const units = {
         count: 6,
         deployTime: 1000,
         targetPriority: 'all',
-        type: 'flying'
+        type: 'flying',
+        rarity: 'common'
     },
     megaMinion: {
         name: 'Mega Minion',
@@ -1493,7 +1528,8 @@ const units = {
         speed: 60,
         deployTime: 1000,
         targetPriority: 'all',
-        type: 'flying'
+        type: 'flying',
+        rarity: 'rare'
     },
     golem: {
         name: 'Golem',
@@ -1513,7 +1549,8 @@ const units = {
         speed: 45,
         deployTime: 3000,
         targetPriority: 'buildings',
-        type: 'unit'
+        type: 'unit',
+        rarity: 'epic'
     },
     wallBreakers: {
         name: 'Wall Breakers',
@@ -1531,7 +1568,8 @@ const units = {
         deployTime: 1000,
         targetPriority: 'buildings',
         type: 'unit',
-        aoeStats: aoeStats.wallBreakerAOE
+        aoeStats: aoeStats.wallBreakerAOE,
+        rarity: 'epic'
     },
     lavaHound: {
         name: 'Lava Hound',
@@ -1549,7 +1587,8 @@ const units = {
         speed: 45,
         deployTime: 1000,
         targetPriority: 'buildings',
-        type: 'flying'
+        type: 'flying',
+        rarity: 'legendary'
     },
     iceSpirit: {
         name: 'Ice Spirit',
@@ -1566,7 +1605,8 @@ const units = {
         deployTime: 1000,
         targetPriority: 'all',
         type: 'unit',
-        dieOnAttack: true
+        dieOnAttack: true,
+        rarity: 'common'
     },
     witch: {
         name: 'Witch',
@@ -1586,7 +1626,8 @@ const units = {
         speed: 60,
         deployTime: 1000,
         targetPriority: 'all',
-        type: 'unit'
+        type: 'unit',
+        rarity: 'epic'
     },
     royalGiant: {
         name: 'Royal Giant', 
@@ -1602,7 +1643,8 @@ const units = {
         speed: 45,
         deployTime: 1000,
         targetPriority: 'buildings', 
-        type: 'unit'
+        type: 'unit',
+        rarity: 'common'
     },
     bandit: {
         name: 'Bandit',
@@ -1622,7 +1664,8 @@ const units = {
         speed: 90,
         deployTime: 1000,
         targetPriority: 'ground',
-        type: 'unit'
+        type: 'unit',
+        rarity: 'legendary'
     },
     megaKnight: {
         name: 'Mega Knight',
@@ -1644,7 +1687,8 @@ const units = {
         targetPriority: 'ground',
         type: 'unit',
         aoeStats: aoeStats.megaKnightAttackAOE,
-        spawnAOEStats: aoeStats.megaKnightSpawnAOE
+        spawnAOEStats: aoeStats.megaKnightSpawnAOE,
+        rarity: 'legendary'
     },
     bats: {
         name: 'Bats',
@@ -1661,7 +1705,8 @@ const units = {
         count: 5,
         deployTime: 1000,
         targetPriority: 'all',
-        type: 'flying'
+        type: 'flying',
+        rarity: 'common'
     },
     balloon: {
         name: 'Balloon',
@@ -1679,7 +1724,8 @@ const units = {
         speed: 60,
         deployTime: 1000,
         targetPriority: 'buildings',
-        type: 'flying'
+        type: 'flying',
+        rarity: 'epic'
     },
     diddyCage: {
         name: 'Diddy Cage',
@@ -1697,7 +1743,8 @@ const units = {
         deployTime: 1000,
         targetPriority: 'all',
         type: 'building',
-        hpLostPerSecond: 39
+        hpLostPerSecond: 39,
+        rarity: 'rare'
     },
     lumberjack: {
         name: 'Lumberjack',
@@ -1714,7 +1761,8 @@ const units = {
         speed: 120,
         deployTime: 1000,
         targetPriority: 'ground',
-        type: 'unit'
+        type: 'unit',
+        rarity: 'legendary'
     },
     prince: {
         name: 'Prince',
@@ -1733,7 +1781,8 @@ const units = {
         speed: 60,
         deployTime: 1000,
         targetPriority: 'ground',
-        type: 'unit'
+        type: 'unit',
+        rarity: 'epic'
     },
     mArcher: {
         name: 'Magic Archer',
@@ -1749,7 +1798,8 @@ const units = {
         speed: 60,
         deployTime: 1000,
         targetPriority: 'all',
-        type: 'unit'
+        type: 'unit',
+        rarity: 'legendary'
     },
     bowler: {
         name: 'Bowler',
@@ -1765,7 +1815,8 @@ const units = {
         speed: 45,
         deployTime: 1000,
         targetPriority: 'ground',
-        type: 'unit'
+        type: 'unit',
+        rarity: 'epic'
     },
     guards: {
         name: 'Guards',
@@ -1783,7 +1834,8 @@ const units = {
         count: 3,
         deployTime: 1000,
         targetPriority: 'ground',
-        type: 'unit'
+        type: 'unit',
+        rarity: 'epic'
     },
     recruits: {
         name: 'Royal Recruits',
@@ -1802,7 +1854,8 @@ const units = {
         count: 6,
         deployTime: 1000,
         targetPriority: 'ground',
-        type: 'unit'
+        type: 'unit',
+        rarity: 'common'
     },
     barbarians: {
         name: 'Barbarians',
@@ -1819,7 +1872,8 @@ const units = {
         count: 5,
         deployTime: 1000,
         targetPriority: 'ground',
-        type: 'unit'
+        type: 'unit',
+        rarity: 'common'
     },
     log: {
         name: 'Log',
@@ -1837,7 +1891,8 @@ const units = {
         speed: 100,
         colour: '#b16800',
         lifetime: 9999,
-        ctDamage: 40
+        ctDamage: 40,
+        rarity: 'legendary'
     },
     musketeer: {
         name: 'Musketeer',
@@ -1853,7 +1908,8 @@ const units = {
         speed: 60,
         deployTime: 1000,
         targetPriority: 'all',
-        type: 'unit'
+        type: 'unit',
+        rarity: 'rare'
     },
     eBarbarians: {
         name: 'Elite Barbarians',
@@ -1870,7 +1926,8 @@ const units = {
         count: 2,
         deployTime: 1000,
         targetPriority: 'ground',
-        type: 'unit'
+        type: 'unit',
+        rarity: 'common'
     },
     skeletonDragons: {
         name: 'Skeleton Dragons',
@@ -1887,7 +1944,8 @@ const units = {
         count: 2,
         deployTime: 1000,
         targetPriority: 'all',
-        type: 'flying'
+        type: 'flying',
+        rarity: 'common'
     },
     spearGoblins: {
         name: 'Spear Goblins',
@@ -1904,7 +1962,8 @@ const units = {
         count: 3,
         deployTime: 1000,
         targetPriority: 'all',
-        type: 'unit'
+        type: 'unit',
+        rarity: 'common'
     },
     goblins: {
         name: 'Goblins',
@@ -1921,7 +1980,8 @@ const units = {
         count: 4,
         deployTime: 1000,
         targetPriority: 'ground',
-        type: 'unit'
+        type: 'unit',
+        rarity: 'common'
     },
     eSpirit: {
         name: 'Electro Spirit',
@@ -1937,7 +1997,8 @@ const units = {
         deployTime: 1000,
         targetPriority: 'all',
         type: 'unit',
-        dieOnAttack: true
+        dieOnAttack: true,
+        rarity: 'common'
     },
     eDragon: {
         name: 'Electro Dragon',
@@ -1953,7 +2014,8 @@ const units = {
         speed: 60,
         deployTime: 1000,
         targetPriority: 'all',
-        type: 'flying'
+        type: 'flying',
+        rarity: 'epic'
     },
     iDragon: {
         name: 'Inferno Dragon',
@@ -1970,7 +2032,8 @@ const units = {
         speed: 60,
         deployTime: 1000,
         targetPriority: 'all',
-        type: 'flying'
+        type: 'flying',
+        rarity: 'legendary'
     },
     xBow: {
         name: 'X-Bow',
@@ -1987,7 +2050,8 @@ const units = {
         deployTime: 3500,
         targetPriority: 'ground',
         type: 'building',
-        hpLostPerSecond: 27.4
+        hpLostPerSecond: 27.4,
+        rarity: 'epic'
     },
     infernoTower: {
         name: 'Inferno Tower',
@@ -2004,7 +2068,8 @@ const units = {
         deployTime: 1000,
         targetPriority: 'all',
         type: 'building',
-        hpLostPerSecond: 58.3
+        hpLostPerSecond: 58.3,
+        rarity: 'rare'
     },
     bombTower: {
         name: 'Bomb Tower',
@@ -2023,7 +2088,8 @@ const units = {
         deployTime: 1000,
         targetPriority: 'all',
         type: 'building',
-        hpLostPerSecond: 45.2
+        hpLostPerSecond: 45.2,
+        rarity: 'rare'
     },
     royalGhost: {
         name: 'Royal Ghost',
@@ -2042,7 +2108,8 @@ const units = {
         type: 'unit',
         invisTime: 1800,
         spawnInvis: true,
-        canJumpRiver: true
+        canJumpRiver: true,
+        rarity: 'legendary'
     },
     princess: {
         name: 'Princess',
@@ -2058,7 +2125,8 @@ const units = {
         speed: 60,
         deployTime: 1000,
         targetPriority: 'all',
-        type: 'unit'
+        type: 'unit',
+        rarity: 'legendary'
     },
     babyDragon: {
         name: 'Baby Dragon',
@@ -2074,7 +2142,8 @@ const units = {
         speed: 90,
         deployTime: 1000,
         targetPriority: 'all',
-        type: 'flying'
+        type: 'flying',
+        rarity: 'epic'
     },
     darkPrince: {
         name: 'Dark Prince',
@@ -2095,7 +2164,8 @@ const units = {
         speed: 60,
         deployTime: 1000,
         targetPriority: 'ground',
-        type: 'unit'
+        type: 'unit',
+        rarity: 'epic'
     },
     berserker: {
         name: 'Berserker',
@@ -2111,7 +2181,8 @@ const units = {
         speed: 90,
         deployTime: 1000,
         targetPriority: 'ground',
-        type: 'unit'
+        type: 'unit',
+        rarity: 'common'
     },
     miner: {
         name: 'Miner',
@@ -2129,7 +2200,8 @@ const units = {
         particle: particleStats.dirt,
         particleSpread: 15,
         particleCount: 1,
-        particleSpeed: 250
+        particleSpeed: 250,
+        rarity: 'legendary'
     },
     battleRam: {
         name: 'Battle Ram',
@@ -2150,7 +2222,8 @@ const units = {
         deployTime: 1000,
         targetPriority: 'buildings',
         type: 'unit',
-        dieOnAttack: true
+        dieOnAttack: true,
+        rarity: 'rare'
     },
     bomber: {
         name: 'Bomber',
@@ -2166,7 +2239,8 @@ const units = {
         speed: 60,
         deployTime: 1000,
         targetPriority: 'ground',
-        type: 'unit'
+        type: 'unit',
+        rarity: 'common'
     },
     royalHogs: {
         name: 'Royal Hogs',
@@ -2183,7 +2257,8 @@ const units = {
         count: 4,
         deployTime: 1000,
         targetPriority: 'buildings',
-        type: 'unit'
+        type: 'unit',
+        rarity: 'rare'
     },
     eWizard: {
         name: 'Electro Wizard',
@@ -2200,12 +2275,14 @@ const units = {
         deployTime: 1000,
         targetPriority: 'all',
         type: 'unit',
-        spawnAOEStats: aoeStats.eWizardSpawnAOE
+        spawnAOEStats: aoeStats.eWizardSpawnAOE,
+        rarity: 'legendary'
     },
     goblinGang: {
         name: 'Goblin Gang',
         cost: 3,
-        symbol: '🤢👺'
+        symbol: '🤢👺',
+        rarity: 'common'
     },
     barbarianBarrel: {
         name: 'Barbarian Barrel',
@@ -2221,7 +2298,8 @@ const units = {
         speed: 100,
         colour: '#b16800ff',
         lifetime: 99999,
-        deathSpawnStats: otherUnits.barbarian
+        deathSpawnStats: otherUnits.barbarian,
+        rarity: 'epic'
     },
     motherWitch: {
         name: 'Mother Witch',
@@ -2237,7 +2315,8 @@ const units = {
         speed: 60,
         deployTime: 1000,
         targetPriority: 'all',
-        type: 'unit'
+        type: 'unit',
+        rarity: 'legendary'
     },
     battleHealer: {
         name: 'Battle Healer',
@@ -2254,7 +2333,8 @@ const units = {
         deployTime: 1000,
         targetPriority: 'ground',
         type: 'unit',
-        spawnAOEStats: aoeStats.battleHealerSpawnAOE
+        spawnAOEStats: aoeStats.battleHealerSpawnAOE,
+        rarity: 'rare'
     },
     wizard: {
         name: 'Wizard',
@@ -2270,7 +2350,8 @@ const units = {
         speed: 60,
         deployTime: 1000,
         targetPriority: 'all',
-        type: 'unit'
+        type: 'unit',
+        rarity: 'rare'
     },
     mortar: {
         name: 'Mortar',
@@ -2287,7 +2368,8 @@ const units = {
         deployTime: 3500,
         targetPriority: 'ground',
         type: 'building',
-        hpLostPerSecond: 45.6
+        hpLostPerSecond: 45.6,
+        rarity: 'common'
     },
     tesla: {
         name: 'Tesla',
@@ -2305,7 +2387,8 @@ const units = {
         targetPriority: 'all',
         type: 'building',
         hpLostPerSecond: 38.4,
-        canHide: true
+        canHide: true,
+        rarity: 'common'
     },
     skeletonBarrel: {
         name: 'Skeleton Barrel',
@@ -2324,7 +2407,8 @@ const units = {
         deployTime: 1000,
         targetPriority: 'buildings',
         type: 'flying',
-        dieOnAttack: true
+        dieOnAttack: true,
+        rarity: 'common'
     },
     eGiant: {
         name: 'Electro Giant',
@@ -2343,7 +2427,8 @@ const units = {
         speed: 45,
         deployTime: 1000,
         targetPriority: 'buildings', 
-        type: 'unit'
+        type: 'unit',
+        rarity: 'epic'
     },
     healSpirit: {
         name: 'Heal Spirit',
@@ -2359,7 +2444,8 @@ const units = {
         deployTime: 1000,
         targetPriority: 'all',
         type: 'unit',
-        dieOnAttack: true
+        dieOnAttack: true,
+        rarity: 'rare'
     },
     iceWizard: {
         name: 'Ice Wizard',
@@ -2376,7 +2462,8 @@ const units = {
         deployTime: 1000,
         targetPriority: 'all',
         type: 'unit',
-        spawnAOEStats: aoeStats.iceWizardSpawnAOE
+        spawnAOEStats: aoeStats.iceWizardSpawnAOE,
+        rarity: 'legendary'
     },
     firecracker: {
         name: 'Firecracker',
@@ -2393,7 +2480,8 @@ const units = {
         deployTime: 1000,
         targetPriority: 'all',
         type: 'unit',
-        recoil: 4
+        recoil: 4,
+        rarity: 'common'
     },
     suspiciousBush: {
         name: 'Suspicious Bush',
@@ -2413,7 +2501,8 @@ const units = {
         type: 'unit',
         invisTime: 1,
         spawnInvis: true,
-        dieOnAttack: true
+        dieOnAttack: true,
+        rarity: 'rare'
     },
     tombstone: {
         name: 'Tombstone',
@@ -2433,7 +2522,8 @@ const units = {
         deployTime: 1000,
         targetPriority: 'ground',
         type: 'building',
-        hpLostPerSecond: 17.6
+        hpLostPerSecond: 17.6,
+        rarity: 'rare'
     },
     flyingMachine: {
         name: 'Flying Machine',
@@ -2449,7 +2539,8 @@ const units = {
         speed: 90,
         deployTime: 1000,
         targetPriority: 'all',
-        type: 'flying'
+        type: 'flying',
+        rarity: 'rare'
     },
     zappies: {
         name: 'Zappies',
@@ -2467,6 +2558,7 @@ const units = {
         deployTime: 1000,
         targetPriority: 'all',
         type: 'unit',
+        rarity: 'rare'
     },
     furnace: {
         name: 'Furnace',
@@ -2484,7 +2576,8 @@ const units = {
         speed: 60,
         deployTime: 1000,
         targetPriority: 'all',
-        type: 'unit'
+        type: 'unit',
+        rarity: 'rare'
     },
     threeMusketeers: {
         name: 'Three Musketees',
@@ -2502,7 +2595,8 @@ const units = {
         deployTime: 1000,
         count: 3,
         targetPriority: 'all',
-        type: 'unit'
+        type: 'unit',
+        rarity: 'rare'
     },
     nightWitch: {
         name: 'Night Witch',
@@ -2512,6 +2606,7 @@ const units = {
         damage: 286,
         supportSpawnNum: 2,
         supportSpawnSpeed: 5000,
+        initSupportSpawnSpeed: 1000,
         supportStats: otherUnits.bat,
         attackSpeed: 1300,
         initHitSpeed: 750,
@@ -2521,7 +2616,8 @@ const units = {
         speed: 60,
         deployTime: 1000,
         targetPriority: 'ground',
-        type: 'unit'
+        type: 'unit',
+        rarity: 'legendary'
     },
     royalDelivery: {
         name: 'Royal Delivery',
@@ -2542,7 +2638,8 @@ const units = {
         targetPriority: 'ground',
         type: 'unit',
         spawnAOEStats: aoeStats.royalDeliveryAOE,
-        spawnDelay: 3000
+        spawnDelay: 3000,
+        rarity: 'common'
     },
     barbHut: {
         name: 'Barbarian Hut',
@@ -2563,7 +2660,8 @@ const units = {
         deployTime: 1000,
         targetPriority: 'ground',
         type: 'building',
-        hpLostPerSecond: 38.8
+        hpLostPerSecond: 38.8,
+        rarity: 'rare'
     },
     goblinHut: {
         name: 'Goblin Hut',
@@ -2584,12 +2682,14 @@ const units = {
         targetPriority: 'all',
         type: 'building',
         hpLostPerSecond: 40.9,
-        spawnInRange: true
+        spawnInRange: true,
+        rarity: 'rare'
     },
     rascals: {
         name: 'Rascals',
         cost: 5,
-        symbol: '👨🏻👩🏻'
+        symbol: '👨🏻👩🏻',
+        rarity: 'common'
     },
     elixirGolem: {
         name: 'Elixir Golem',
@@ -2609,7 +2709,8 @@ const units = {
         deployTime: 1000,
         targetPriority: 'buildings',
         type: 'unit',
-        deathEnemyElixir: 1
+        deathEnemyElixir: 1,
+        rarity: 'rare'
     },
     giantSkeleton: {
         name: 'Giant Skeleton',
@@ -2627,7 +2728,8 @@ const units = {
         speed: 60,
         deployTime: 1000,
         targetPriority: 'ground',
-        type: 'unit'
+        type: 'unit',
+        rarity: 'epic'
     },
     sparky: {
         name: 'sparky',
@@ -2645,7 +2747,8 @@ const units = {
         targetPriority: 'ground',
         type: 'unit',
         chargeAttack: true,
-        recoil: 4
+        recoil: 4,
+        rarity: 'legendary'
     },
     goblinDemolisher: {
         name: 'Goblin Demolisher',
@@ -2663,7 +2766,8 @@ const units = {
         targetPriority: 'ground',
         type: 'unit',
         activatedStats: otherUnits.kamikazeGoblin,
-        activationHP: 0.5
+        activationHP: 0.5,
+        rarity: 'rare'
     },
     cannonCart: {
         name: 'Cannon Cart',
@@ -2681,7 +2785,8 @@ const units = {
         targetPriority: 'ground',
         type: 'unit',
         activatedStats: otherUnits.brokenCannonCart,
-        activationHP: 0.5
+        activationHP: 0.5,
+        rarity: 'epic'
     },
     phoenix: {
         name: 'Phoenix',
@@ -2700,7 +2805,8 @@ const units = {
         speed: 60,
         deployTime: 1000,
         targetPriority: 'all',
-        type: 'flying'
+        type: 'flying',
+        rarity: 'legendary'
     },
     elixirCollector: {
         name: 'Elixir Collector',
@@ -2719,7 +2825,8 @@ const units = {
         hpLostPerSecond: 12.4,
         elixirSpeed: 12000,
         elixirAmount: 1,
-        deathElixir: 1
+        deathElixir: 1,
+        rarity: 'rare'
     },
     goblinDrill: {
         name: 'Goblin Drill',
@@ -2737,7 +2844,8 @@ const units = {
         particle: particleStats.dirt,
         particleSpread: 15,
         particleCount: 1,
-        particleSpeed: 250
+        particleSpeed: 250,
+        rarity: 'epic'
     },
     executioner: {
         name: 'Executioner',
@@ -2753,7 +2861,8 @@ const units = {
         speed: 60,
         deployTime: 1000,
         targetPriority: 'all',
-        type: 'unit'
+        type: 'unit',
+        rarity: 'epic'
     },
     hunter: {
         name: 'Hunter',
@@ -2771,7 +2880,8 @@ const units = {
         speed: 60,
         deployTime: 1000,
         targetPriority: 'all',
-        type: 'unit'
+        type: 'unit',
+        rarity: 'epic'
     },
     goblinGiant: {
         name: 'Goblin Giant',
@@ -2791,7 +2901,8 @@ const units = {
         backUnitNum: 2,
         backUnitStats: otherUnits.spearGoblin,
         deathSpawnNum: 2,
-        deathSpawnStats: otherUnits.spearGoblin
+        deathSpawnStats: otherUnits.spearGoblin,
+        rarity: 'epic'
     },
     ramRider: {
         name: 'Ram Rider',
@@ -2812,7 +2923,8 @@ const units = {
         targetPriority: 'buildings',
         type: 'unit',
         backUnitNum: 1,
-        backUnitStats: otherUnits.ramRider
+        backUnitStats: otherUnits.ramRider,
+        rarity: 'legendary'
     },
     runeGiant: {
         name: 'Rune Giant',
@@ -2831,7 +2943,8 @@ const units = {
         type: 'unit',
         enchantCount: 2,
         enchantDurationAfterDeath: 5000,
-        enchantRange: 8.5 * game.gridSize
+        enchantRange: 8.5 * game.gridSize,
+        rarity: 'epic'
     },
     /*fisherman: {
         name: 'Fisherman',
@@ -2849,12 +2962,14 @@ const units = {
         deployTime: 1000,
         targetPriority: 'ground',
         type: 'unit',
-        hookProjectileStats: projectileStats.fishermanHook
+        hookProjectileStats: projectileStats.fishermanHook,
+        rarity: 'legendary'
     },*/
     mirror: {
         name: 'Mirror',
         symbol: '🪞',
-        cost: '?'
+        cost: '?',
+        rarity: 'epic'
     }
 };
 

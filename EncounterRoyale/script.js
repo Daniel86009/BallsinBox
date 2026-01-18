@@ -10,6 +10,7 @@ ToDo:
 -Add better visuals and particle effects
 -Add tiebreaker
 -Fix mirror with display images
+-Add dragging cards
 */
 
 const c = document.getElementById('c');
@@ -90,6 +91,8 @@ const p2Units = {
     unit7: null,
     unit8: null
 };
+
+const isMobile = !window.matchMedia('(hover: hover)').matches;
 
 let mouse = {x: 0, y: 0, down: false, selection: -1};
 
@@ -242,7 +245,7 @@ function update() {
         if (p.stats.isTimer) p.draw();
     }
 
-    if (mouse.selection != -1 && window.innerWidth > 800) {
+    if (mouse.selection != -1 && !isMobile) {
         let stats = p1Units[p1Hand[mouse.selection]];
         if (stats.name == 'Mirror') stats = p1Units[p1Cycles[p1Cycles.length - 1]];
 
@@ -613,7 +616,7 @@ class Entity {
 
             ctx2.drawImage(img, 0, 0, this.stats.size * 2, this.stats.size * 2);
 
-            ctx.drawImage(c2, this.x - this.stats.size, this.y - this.stats.size, this.stats.size * 2, this.stats.size * 2);
+            ctx.drawImage(c2, this.x - this.stats.size, y - this.stats.size, this.stats.size * 2, this.stats.size * 2);
         } else {
             ctx.font = `${this.stats.size + 5}px Arial`;
             ctx.textAlign = 'center';
@@ -839,7 +842,7 @@ class Entity {
         }
     }
 
-    attack() {
+    attack(isHook = false) {
         let bonusDamage = 0;
 
         if (this.enchantTime > 0 && this.attackCount % 3 == 0) {
@@ -849,8 +852,8 @@ class Entity {
         if (this.stats.aoeStats) {
             if (this.charging) this.aoeAttack(this.x, this.y, this.stats.chargeAOEStats, bonusDamage);
             else this.aoeAttack(this.x, this.y, this.stats.aoeStats, bonusDamage);
-        } else if (this.stats.projectileStats) {
-            this.shoot(this.target, bonusDamage);
+        } else if (this.stats.projectileStats || (this.stats.hookProjectileStats && isHook)) {
+            this.shoot(this.target, bonusDamage, isHook);
         } else {
             this.meleeAttack(this.target, bonusDamage);
         }
@@ -906,8 +909,10 @@ class Entity {
         }
     }
 
-    shoot(target, bonusDamage = 0) {
+    shoot(target, bonusDamage = 0, isHook = false) {
         let dir = M.normalise(target.x - this.x, target.y - this.y);
+
+        let stats = isHook ? this.stats.hookProjectileStats : this.stats.projectileStats
 
         if (this.attackCooldown < 1) {
             if (this.stats.projectileCount) {
@@ -916,26 +921,26 @@ class Entity {
                     let newAngle = Math.random() * (this.stats.projectileSpread + this.stats.projectileSpread) - this.stats.projectileSpread;
                     let angle = currentAngle + newAngle;
                     let newDir = {x: Math.cos(angle), y: Math.sin(angle)};
-                    let p = new Projectile(this.x, this.y, this.stats.projectileStats, newDir, this.team, 'all', this);
+                    let p = new Projectile(this.x, this.y, stats, newDir, this.team, 'all', this);
 
                     p.bonusDamage = bonusDamage;
                     projectiles.push(p);
                 }
             } else {
-                if (this.stats.projectileStats.type == 'lightning') {
-                projectiles.push(new ChainLighning(this.target.x, this.target.y, this.x, this.y, this.stats.projectileStats, this.team, 'all', this));
+                if (stats.type == 'lightning') {
+                projectiles.push(new ChainLighning(this.target.x, this.target.y, this.x, this.y, stats, this.team, 'all', this));
                 } else {
-                    if (this.stats.projectileStats.targetPriority == 'all' || this.stats.projectileStats.targetPriority == 'ground') {
-                        let p = new Projectile(this.x, this.y, this.stats.projectileStats, dir, this.team, 'all', this);
+                    if (stats.targetPriority == 'all' || stats.targetPriority == 'ground') {
+                        let p = new Projectile(this.x, this.y, stats, dir, this.team, 'all', this);
                         p.bonusDamage = bonusDamage;
                         projectiles.push(p);
 
-                    } else if (this.stats.projectileStats.groundProj) {
-                        let p = new Projectile(this.x, this.y, this.stats.projectileStats, dir, this.team, {x: this.target.x, y: this.target.y}, this);
+                    } else if (stats.groundProj && !stats.isHook) {
+                        let p = new Projectile(this.x, this.y, stats, dir, this.team, {x: this.target.x, y: this.target.y}, this);
                         p.bonusDamage = bonusDamage;
                         projectiles.push(p);
                     } else {
-                        let p = new Projectile(this.x, this.y, this.stats.projectileStats, dir, this.team, this.target, this);
+                        let p = new Projectile(this.x, this.y, stats, dir, this.team, this.target, this);
                         p.bonusDamage = bonusDamage;
                         projectiles.push(p);
                     }
@@ -1191,8 +1196,14 @@ class UnitEntity extends Entity {
 
         let minRange = this.stats.range.min || 0;
         let maxRange = this.stats.range.max || this.stats.range;
+        let isHook = false;
 
         let dist = M.dist(this.x, this.y, this.target.x, this.target.y);
+        if (this.stats.hookRange && dist > this.stats.hookRange.min) {
+            minRange = this.stats.hookRange.min;
+            maxRange = this.stats.hookRange.max;
+            isHook = true;
+        }
         let hasDash = this.stats.dashDamage || this.stats.dashAOEStats;
         let canDash = hasDash 
                     && dist > this.stats.dashRange.min + this.target.stats.size 
@@ -1214,7 +1225,7 @@ class UnitEntity extends Entity {
             if (this.initAttackCooldown > 0 && !this.charging) {
                 this.initAttackCooldown -= 1000 / 60;
             } else {
-                this.attack();
+                this.attack(isHook);
                 this.isAttacking = true;
                 this.charging = false;
                 this.distance = 0;
@@ -1803,6 +1814,7 @@ class Projectile {
         this.owner = owner;
         this.returning = false;
         this.bonusDamage = 0;
+        this.hookedEntity = null;
         
         this.particleCooldown = stats.particleSpeed;
 
@@ -1826,6 +1838,15 @@ class Projectile {
             else ctx.fillStyle = '#000';
             ctx.arc(this.x, y, this.stats.size, 0, 2*Math.PI);
             ctx.fill();
+        }
+
+        if (this.stats.isHook) {
+            ctx.beginPath();
+            ctx.strokeStyle = '#975b01ff';
+            ctx.lineWidth = 3;
+            ctx.moveTo(this.x, this.y);
+            ctx.lineTo(this.ox, this.oy);
+            ctx.stroke();
         }
     }
 
@@ -1923,7 +1944,7 @@ class Projectile {
                 } else {
                     if (this.target.stats) this.damage(this.target);
                 }
-                this.dead = true;
+                if (!this.stats.isHook || this.hookedEntity) this.dead = true;
             }
         }
     }
@@ -1949,7 +1970,17 @@ class Projectile {
                 if (this.stats.ctDamage && (u.stats.name == 'king' || u.stats.name == 'princess')) u.takeDamage(this.stats.ctDamage + this.bonusDamage, this.owner);
                 else u.takeDamage(this.stats.damage + this.bonusDamage, this.owner);
             }
-            this.dead = true;
+
+            if (this.stats.isHook) {
+                console.log('Test');
+                this.target = {x: this.owner.x, y: this.owner.y};
+                this.dir = M.normalise(this.target.x - this.x, this.target.y - this.y);
+                this.hookedEntity = u;
+                this.distance = 0;
+                this.lifetime = 999;
+            } else {
+                this.dead = true;
+            }
         }
         if (this.stats.knockback && u.knockbackVel) {
             u.applyKnockback(this.direction, this.stats.knockback);
@@ -2660,6 +2691,7 @@ function drawHandUI() {
         if (!cardStats) continue;
 
         cardElem.classList.add('card');
+        if (cardStats.rarity) cardElem.classList.add(cardStats.rarity);
 
         let symbol = cardStats.name == 'Mirror' ? '🪞' + p1Units[p1Cycles[p1Cycles.length - 1]].symbol : (cardStats.displaySymbol || cardStats.symbol);
         let cost = cardStats.name == 'Mirror' ? p1Units[p1Cycles[p1Cycles.length - 1]].cost + 1 : cardStats.cost;
@@ -2877,6 +2909,7 @@ function populateChoices() {
         let cardElem = document.createElement('div');
 
         cardElem.classList.add('card');
+        if (cardStats.rarity) cardElem.classList.add(cardStats.rarity);
 
         if (cardStats.imgPath) {
             let size = window.innerWidth < 800 ? 35 : 70;
@@ -2912,6 +2945,7 @@ function cardChoiceClick(cardElem, stats, inDeck, index, handIndex = null) {
         for (let i = 0; i < children.length; i++) {
             let child = children[i];
             if (child.classList.contains('occupied')) continue;
+            if (stats.rarity) child.classList.add(stats.rarity);
 
             if (stats.imgPath) {
                 let size = window.innerWidth < 800 ? 35 : 70;

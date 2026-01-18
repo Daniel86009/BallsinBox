@@ -21,38 +21,9 @@ totalCrownDisplay.innerHTML = `${localStorage.crowns || 0} 👑`;
 
 //Change card size on mobile
 if (window.innerWidth < 800) {
-    /*const cards = document.getElementsByClassName('card');
-    const nextCard = document.getElementById('nextCard');
-    const c = document.getElementById('c');
-
-    for (let i = 0; i < cards.length; i++) {
-        cards[i].style.width = '50px';
-        cards[i].style.height = '62px';
-        cards[i].style.fontSize = '7px';
-    }
-
-    nextCard.style.width = '25px';
-    nextCard.style.height = '31px';
-    nextCard.style.fontSize = '3.5px';
-    nextCard.style.display = 'none';
-
-    c.style.width = `${window.innerWidth - 10}px`;
-    c.style.height = `${window.innerHeight - 120}px`;
-    c.style.paddingLeft = '5px';*/
-
     multiplayerMenu.style.transform = 'scale(0.6)';
     multiplayerMenu.style.transformOrigin = 'top left';
-
-    /*document.getElementById('elixirBarOuter').style.width = `${window.innerWidth - 10}px`;
-    document.getElementById('playerUI').style.width = `${window.innerWidth - 10}px`;
-    document.getElementById('chosenCards').style.width = '225px';
-    document.getElementById('gameoverMessage').style.fontSize = '20px';
-    document.getElementById('gameoverScreen').style.height = `${window.innerHeight}`;*/
 }
-
-/*let scale = window.innerWidth / 1800;
-body.style.transform = `scale(${scale})`;
-body.style.transformOrigin = 'top left';*/
 
 //Options Menu
 function updateOptionsMenuVisibility() {
@@ -61,7 +32,6 @@ function updateOptionsMenuVisibility() {
 }
 
 updateOptionsMenuVisibility();
-
 
 const optionsMenu = document.getElementById('optionsMenu');
 const optionsInner = document.getElementById('optionsMenuInner');
@@ -87,7 +57,7 @@ window.addEventListener('click', handleOutsideClick);
 
 window.addEventListener('touchstart', handleOutsideClick);
 
-
+//Options
 const elixirMultSlider = document.getElementById('enemyElixirMult');
 const elixirMultValue = document.getElementById('enemyElixirValue');
 
@@ -141,6 +111,20 @@ pickSameCards.addEventListener('change', e => {
     debug.pickSameCards = e.target.checked;
 });
 
+//Sort options
+/*const sortOptions = document.getElementById('sortOptions');
+const sortDropDown = document.getElementById('sortDropDown');
+
+sortDropDown.addEventListener('change', e => {
+    switch (sortDropDown.value) {
+        case 'name':
+            break;
+        case 'elixir':
+            break;
+        case 'rarity':
+            break;
+    }
+});*/
 
 start();
 window.requestAnimationFrame(update);
