@@ -229,13 +229,24 @@ function particleRequest(x, y, stats, team, deployTime = 1000) {
 }
 
 async function setICE() {
-    const response = await fetch("https://ballsinbox.metered.live/api/v1/turn/credentials?apiKey=5a1fe3be6f2b5f8142db127fe398e66de399");
-    const turnServers = await response.json();
-    iceConfig.iceServers = [
-        //STUN
-        {urls: 'stun:stun.l.google.com:19302'},
-        {urls: 'stun:stun1.l.google.com:5349'},
-        //TURN
-        ...turnServers
-    ]
+    try {
+        const response = await fetch("https://ballsinbox.metered.live/api/v1/turn/credentials?apiKey=5a1fe3be6f2b5f8142db127fe398e66de399");
+        const turnServers = await response.json();
+
+        const stealthServers = turnServers.filter(server => 
+            server.urls.includes(':443') && server.urls.startsWith('turns:')
+        )
+
+        const finalServers = stealthServers.length > 0 ? stealthServers : allServers;
+
+        iceConfig.iceServers = [
+            //STUN
+            {urls: 'stun:stun.l.google.com:19302'},
+            {urls: 'stun:stun1.l.google.com:5349'},
+            //TURN
+            ...finalServers
+        ]
+    } catch (err) {
+        console.error('API blocked by firewall: ', err);
+    }
 }

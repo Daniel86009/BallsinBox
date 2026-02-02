@@ -10,6 +10,10 @@ const particleStats = {
         size: 15,
         colour: '#000',
         isTimer: true
+    },
+    text: {
+        name: 'text',
+        colour: '#a00000ff'
     }
 };
 
@@ -1313,6 +1317,58 @@ const units = {
         stunDuration: 500,
         rarity: 'epic'
     },
+    goblinBarrel: {
+        name: 'Goblin Barrel',
+        symbol: '🤢',
+        imgPath: '../Imgs/Sprites/Goblin_Barrel.png',
+        cost: 3,
+        type: 'spell',
+        damage: 0,
+        distance: 9999,
+        size: 20,
+        speed: 200,
+        colour: '#b16800ff',
+        lifetime: 9999,
+        deathSpawnStats: otherUnits.goblin,
+        deathSpawnNum: 3,
+        rarity: 'epic'
+    },
+    log: {
+        name: 'Log',
+        symbol: '🪵',
+        imgPath: '../Imgs/Sprites/Log.png',
+        cost: 2,
+        type: 'unit',
+        pierce: 9999,
+        width: 3.9 * game.gridSize,
+        height: 24,
+        damage: 266,
+        distance: 10.1 * game.gridSize,
+        knockback: 4,
+        targetPriority: 'ground',
+        speed: 100,
+        colour: '#b16800',
+        lifetime: 9999,
+        ctDamage: 40,
+        rarity: 'legendary'
+    },
+    barbarianBarrel: {
+        name: 'Barbarian Barrel',
+        symbol: '🛢️',
+        cost: 2,
+        type: 'unit',
+        pierce: 9999,
+        width: 2.6 * game.gridSize,
+        height: 36,
+        damage: 240,
+        distance: 4.5 * game.gridSize,
+        targetPriority: 'ground',
+        speed: 100,
+        colour: '#b16800ff',
+        lifetime: 99999,
+        deathSpawnStats: otherUnits.barbarian,
+        rarity: 'epic'
+    },
     valkyrie: {
         name: 'Valkyrie',
         symbol: '🛡️',
@@ -1385,22 +1441,6 @@ const units = {
         targetPriority: 'buildings',
         type: 'unit',
         rarity: 'rare'
-    },
-    goblinBarrel: {
-        name: 'Goblin Barrel',
-        symbol: '🤢',
-        imgPath: '../Imgs/Sprites/Goblin_Barrel.png',
-        cost: 3,
-        type: 'spell',
-        damage: 0,
-        distance: 9999,
-        size: 20,
-        speed: 200,
-        colour: '#b16800ff',
-        lifetime: 9999,
-        deathSpawnStats: otherUnits.goblin,
-        deathSpawnNum: 3,
-        rarity: 'epic'
     },
     fireSpirit: {
         name: 'Fire Spirit',
@@ -1875,25 +1915,6 @@ const units = {
         type: 'unit',
         rarity: 'common'
     },
-    log: {
-        name: 'Log',
-        symbol: '🪵',
-        imgPath: '../Imgs/Sprites/Log.png',
-        cost: 2,
-        type: 'unit',
-        pierce: 9999,
-        width: 3.9 * game.gridSize,
-        height: 24,
-        damage: 266,
-        distance: 10.1 * game.gridSize,
-        knockback: 4,
-        targetPriority: 'ground',
-        speed: 100,
-        colour: '#b16800',
-        lifetime: 9999,
-        ctDamage: 40,
-        rarity: 'legendary'
-    },
     musketeer: {
         name: 'Musketeer',
         symbol: '🔫',
@@ -2283,23 +2304,6 @@ const units = {
         cost: 3,
         symbol: '🤢👺',
         rarity: 'common'
-    },
-    barbarianBarrel: {
-        name: 'Barbarian Barrel',
-        symbol: '🛢️',
-        cost: 2,
-        type: 'unit',
-        pierce: 9999,
-        width: 2.6 * game.gridSize,
-        height: 36,
-        damage: 240,
-        distance: 4.5 * game.gridSize,
-        targetPriority: 'ground',
-        speed: 100,
-        colour: '#b16800ff',
-        lifetime: 99999,
-        deathSpawnStats: otherUnits.barbarian,
-        rarity: 'epic'
     },
     motherWitch: {
         name: 'Mother Witch',
@@ -2946,7 +2950,7 @@ const units = {
         enchantRange: 8.5 * game.gridSize,
         rarity: 'epic'
     },
-    /*fisherman: {
+    fisherman: {
         name: 'Fisherman',
         symbol: '⚓️',
         cost: 3,
@@ -2964,7 +2968,7 @@ const units = {
         type: 'unit',
         hookProjectileStats: projectileStats.fishermanHook,
         rarity: 'legendary'
-    },*/
+    },
     mirror: {
         name: 'Mirror',
         symbol: '🪞',

@@ -116,15 +116,46 @@ pickSameCards.addEventListener('change', e => {
 const sortDropDown = document.getElementById('sortDropDown');
 
 sortDropDown.addEventListener('change', e => {
-    switch (sortDropDown.value) {
-        case 'name':
-            break;
-        case 'elixir':
-            break;
-        case 'rarity':
-            break;
+    sortCards(sortDropDown.value);
+});
+
+function sortCards(sortBy) {
+    console.log('Sorted');
+    let cardsArr = Array.from(cardChoices.querySelectorAll('.card'));
+
+    cardsArr.sort((a, b) => {    
+        let initSortBy = sortBy == 'name' ? 'elixir' : 'name';
+
+        let valA = a.getAttribute(`data-${initSortBy}`);
+        let valB = b.getAttribute(`data-${initSortBy}`);
+
+        if (sortBy == 'elixir') {
+            if (valA == '?') valA = 10;
+            if (valB == '?') valB = 10;
+            return parseInt(valA) - parseInt(valB);
+        }
+
+        return valA.localeCompare(valB);
+    });
+
+    cardsArr.sort((a, b) => {
+        let valA = a.getAttribute(`data-${sortBy}`);
+        let valB = b.getAttribute(`data-${sortBy}`);
+
+        if (sortBy == 'elixir') {
+            if (valA == '?') valA = 10;
+            if (valB == '?') valB = 10;
+            return parseInt(valA) - parseInt(valB);
+        }
+
+        return valA.localeCompare(valB);
+    });
+
+    for (let i = 0; i < cardsArr.length; i++) {
+        cardChoices.appendChild(cardsArr[i]);
     }
-});*/
+}
+sortCards('name');*/
 
 start();
 window.requestAnimationFrame(update);

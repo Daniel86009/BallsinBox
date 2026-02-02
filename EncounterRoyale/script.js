@@ -56,7 +56,8 @@ const debug = {
     drawRange: false,
     drawDash: false,
     pickSameCards: false,
-    showFPS: false
+    showFPS: false,
+    useImages: true
 };
 
 const p1Units = {
@@ -300,7 +301,7 @@ function update() {
             ctx.arc(x, y, stats.size, 0, 2 * Math.PI);
             ctx.fill();
 
-            if (stats.imgPath) {
+            if (stats.imgPath && debug.useImages) {
                 let img = new Image();
                 img.src = stats.imgPath;
                 let c2 = document.createElement('canvas');
@@ -604,7 +605,7 @@ class Entity {
 
         //Symbol
         ctx.fillStyle = this.invisible ? '#ffffff63' : '#ffffff';
-        if (this.stats.imgPath) {
+        if (this.stats.imgPath && debug.useImages) {
             let img = new Image();
             img.src = this.stats.imgPath;
             let c2 = document.createElement('canvas');
@@ -1972,7 +1973,7 @@ class Projectile {
             }
 
             if (this.stats.isHook) {
-                console.log('Test');
+                console.log('Hooked');
                 this.target = {x: this.owner.x, y: this.owner.y};
                 this.dir = M.normalise(this.target.x - this.x, this.target.y - this.y);
                 this.hookedEntity = u;
@@ -2696,7 +2697,7 @@ function drawHandUI() {
         let symbol = cardStats.name == 'Mirror' ? '🪞' + p1Units[p1Cycles[p1Cycles.length - 1]].symbol : (cardStats.displaySymbol || cardStats.symbol);
         let cost = cardStats.name == 'Mirror' ? p1Units[p1Cycles[p1Cycles.length - 1]].cost + 1 : cardStats.cost;
 
-        if (cardStats.imgPath) {
+        if (cardStats.imgPath && debug.useImages) {
             let size = window.innerWidth < 800 ? 35 : 70;
             cardElem.innerHTML = `
                 <img src="${cardStats.displayImgPath || cardStats.imgPath}" width="${size}" height="${size}">
@@ -2732,7 +2733,7 @@ function drawHandUI() {
     let nextCardStats = p1Units[p1Cycles[0]];
 
     if (nextCardStats) {
-        if (nextCardStats.imgPath) {
+        if (nextCardStats.imgPath && debug.useImages) {
             nextCard.innerHTML = `
                 <img src="${nextCardStats.displayImgPath || nextCardStats.imgPath}" width="20" height="20">
                 <div style="font-weight: 700;">${nextCardStats.name}</div>
@@ -2911,7 +2912,7 @@ function populateChoices() {
         cardElem.classList.add('card');
         if (cardStats.rarity) cardElem.classList.add(cardStats.rarity);
 
-        if (cardStats.imgPath) {
+        if (cardStats.imgPath && debug.useImages) {
             let size = window.innerWidth < 800 ? 35 : 70;
             cardElem.innerHTML = `
                 <img src="${cardStats.displayImgPath || cardStats.imgPath}" width="${size}" height="${size}">
@@ -2925,6 +2926,10 @@ function populateChoices() {
                 <div style="font-weight: 700;">Cost: <span style="color: #df00df;">${cardStats.cost}</span></div>
             `;
         }
+
+        cardElem.setAttribute('data-name', cardStats.name);
+        cardElem.setAttribute('data-elixir', cardStats.cost);
+        cardElem.setAttribute('data-rarity', cardStats.rarity);
 
         cardElem.addEventListener('click', () => cardChoiceClick(cardElem, cardStats, false, i));
         cardChoices.appendChild(cardElem);
@@ -2947,7 +2952,7 @@ function cardChoiceClick(cardElem, stats, inDeck, index, handIndex = null) {
             if (child.classList.contains('occupied')) continue;
             if (stats.rarity) child.classList.add(stats.rarity);
 
-            if (stats.imgPath) {
+            if (stats.imgPath && debug.useImages) {
                 let size = window.innerWidth < 800 ? 35 : 70;
                 child.innerHTML = `
                     <img src="${stats.displayImgPath || stats.imgPath}" width="${size}" height="${size}">
