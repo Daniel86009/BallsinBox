@@ -122,6 +122,8 @@ let p2KingActivated = false;
 let p2TowerDead = {left: false, right: false, king: false};
 
 let gameFinished = false;
+let tieBreaker = false;
+let clearedEntities = false;
 
 let timePassed = 0;
 let timeLeft = 120;
@@ -401,6 +403,7 @@ function update() {
 }
 
 function hostUpdate() {
+    if (tieBreaker) runTieBreaker();
     for (let i = 0; i < projectiles.length; i++) {
         let p = projectiles[i];
         if (p.dead) {
@@ -2568,6 +2571,8 @@ function gameover(loser) {
 
 function reset() {
     gameFinished = false;
+    tieBreaker = false;
+    clearedEntities = false;
 
     gameoverScreen.style.visibility = 'hidden';
     gameoverScreen.style.opacity = '0';
@@ -2984,7 +2989,8 @@ function stepTimer() {
     let amount = 0.1;
     timePassed += amount;
     if (timeLeft > 0) timeLeft -= amount;
-    else overtimeLeft -= amount;
+    else if (overtimeLeft > 0) overtimeLeft -= amount;
+    else if (!tieBreaker) tieBreaker = true;
 }
 
 function findMax(x, y) {
@@ -3128,5 +3134,27 @@ function addElixir(team, amount) {
         p1Elixir = Math.min(game.maxElixir, p1Elixir + amount);
     } else {
         p2Elixir = Math.min(game.maxElixir, p2Elixir + amount);
+    }
+}
+
+function runTieBreaker() {
+    if (!clearedEntities) {
+        for (let i = 0; i < entities.length; i++) {
+            let e = entities[i];
+
+            if (e.stats.name != 'princess' && e.stats.name != 'king') {
+                entities.splice(i, 1);
+            }   
+        }
+
+        clearInterval(elixirIntervalID);
+        clearInterval(runAIIntervalID);
+        clearInterval(timerIntervalID);
+
+        clearedEntities = true;
+    } else {
+        for (let i = 0; i < entities.length; i++) {
+            entities[i].takeDamage(6);
+        }
     }
 }
