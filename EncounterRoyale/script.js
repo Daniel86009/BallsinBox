@@ -8,7 +8,6 @@ ToDo:
     -Goblin Machine
 -Add proper icons
 -Add better visuals and particle effects
--Add tiebreaker
 -Fix mirror with display images
 -Add dragging cards
 */
@@ -2380,8 +2379,8 @@ function runAI() {
         spawnPoints = [{x: game.laneLeftX, y: c.height - game.princessY}, {x: game.laneRightX, y: c.height - game.princessY}];
     } else if (stats.name == 'Elixir Collector') {
         spawnPoints = [{x: 50, y: 50}, {x: 120, y: 50}, {x: c.width - 50, y: 50}, {x: c.width - 120, y: 50}];
-    } else if (stats.name == '') {
-
+    } else if (stats.name == 'Graveyard') {
+        spawnPoints = [{x: game.laneLeftX - game.gridSize * 2, y: c.height - game.princessY}, {x: game.laneRightX + game.gridSize * 2, y: c.height - game.princessY}];
     }
 
     let spawnPoint = spawnPoints[Math.floor(Math.random() * spawnPoints.length)];
@@ -2646,7 +2645,7 @@ function requestStart() {
 function randomiseEnemyUnits() {
     let unitsArr = Object.keys(units);
 
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < 7; i++) {
         let index = Math.floor(Math.random() * unitsArr.length);
         let u = units[unitsArr[index]];
 
@@ -3086,18 +3085,38 @@ function runGameTime() {
         elixirMult = 3;
     }
 
+    if (tieBreaker) {
+        displayTime = 0;
+    }
+
     let minutes = displayTime / 60;
     let seconds = displayTime - Math.floor(minutes) * 60;
 
     ctx.fillStyle = (timeLeft <=0) ? '#ff2f00ff' : '#000';
     ctx.font = '20px Arial';
     ctx.textAlign = 'left';
-    if (Math.round(seconds) == 60 && minutes > 1) ctx.fillText(`2m 0s`, 10, 10);
+    /*if (Math.round(seconds) == 60 && minutes > 1) ctx.fillText(`2m 0s`, 10, 10);
     else if (Math.floor(minutes) > 0) ctx.fillText(`${Math.floor(minutes)}m ${Math.round(seconds)}s`, 10, 10);
-    else ctx.fillText(`${Math.round(seconds)}s`, 10, 10);
+    else ctx.fillText(`${Math.round(seconds)}s`, 10, 10);*/
+
+    if (Math.round(seconds) == 60 && minutes > 1) ctx.fillText(`2:00`, 10, 10);
+    else if (Math.floor(minutes) > 0) ctx.fillText(`${Math.floor(minutes)}:${Math.round(seconds)}`, 10, 10);
+    else if (Math.round(seconds) < 10) ctx.fillText(`0:0${Math.round(seconds)}`, 10, 10);
+    else ctx.fillText(`0:${Math.round(seconds)}`, 10, 10);
 
     ctx.textAlign = 'right';
     ctx.fillText(`${elixirMult}x`, c.width - 10, 10);
+
+
+    if (tieBreaker) {
+        ctx.font = 'bold 50px Arial';
+        ctx.fillStyle = '#ff2f00';
+        ctx.textAlign = 'center';
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 2;
+        ctx.fillText('Tiebreaker!', c.width / 2, c.height / 2);
+        ctx.strokeText('Tiebreaker!', c.width / 2, c.height / 2);
+    }
 }
 
 function getCrowns() {
@@ -3139,10 +3158,11 @@ function addElixir(team, amount) {
 
 function runTieBreaker() {
     if (!clearedEntities) {
-        for (let i = 0; i < entities.length; i++) {
+        for (let i = entities.length - 1; i >= 0; i--) {
             let e = entities[i];
 
             if (e.stats.name != 'princess' && e.stats.name != 'king') {
+                console.log(e.stats.name);
                 entities.splice(i, 1);
             }   
         }

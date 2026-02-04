@@ -2950,7 +2950,7 @@ const units = {
         enchantRange: 8.5 * game.gridSize,
         rarity: 'epic'
     },
-    fisherman: {
+    /*fisherman: {
         name: 'Fisherman',
         symbol: '⚓️',
         cost: 3,
@@ -2968,7 +2968,7 @@ const units = {
         type: 'unit',
         hookProjectileStats: projectileStats.fishermanHook,
         rarity: 'legendary'
-    },
+    },*/
     mirror: {
         name: 'Mirror',
         symbol: '🪞',
