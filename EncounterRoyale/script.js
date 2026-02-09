@@ -92,7 +92,7 @@ const p2Units = {
     unit8: null
 };
 
-const isMobile = !window.matchMedia('(hover: hover)').matches;
+let isMobile = false;
 
 let mouse = {x: 0, y: 0, down: false, selection: -1};
 
@@ -152,20 +152,21 @@ function start() {
     c.addEventListener('mousedown', (e) => {
         mouse.down = true;
         
-        spawnUnit(mouse.x, mouse.y, mouse.selection, game.team1, p1Elixir);
-
-        mouse.selection = -1;
-
-        drawHandUI();
+        isMobile = false;
     });
 
     c.addEventListener('mouseup', (e) => {
         mouse.down = false;
+
+        spawnUnit(mouse.x, mouse.y, mouse.selection, game.team1, p1Elixir);
+        mouse.selection = -1;
+        drawHandUI();
     });
 
     c.addEventListener('touchstart', (e) => {
         e.preventDefault();
         mouse.down = true;
+        
         let rect = c.getBoundingClientRect();
         mouse.x = e.touches[0].clientX - rect.left;
         mouse.y = e.touches[0].clientY - rect.top;
@@ -173,15 +174,17 @@ function start() {
         mouse.x *= c.width / rect.width;
         mouse.y *= c.height / rect.height;
 
-        spawnUnit(mouse.x, mouse.y, mouse.selection, game.team1, p1Elixir);
-
-        mouse.selection = -1;
-        
-        drawHandUI();
+        isMobile = true;
     });
 
-    c.addEventListener('touchend', function() {
+    c.addEventListener('touchend', (e) => {
         mouse.down = false;
+
+        spawnUnit(mouse.x, mouse.y, mouse.selection, game.team1, p1Elixir);
+
+        drawHandUI();
+
+        mouse.selection = -1;
     });
 
     document.addEventListener('keydown', (e) => {
@@ -247,7 +250,7 @@ function update() {
         if (p.stats.isTimer) p.draw();
     }
 
-    if (mouse.selection != -1 && !isMobile) {
+    if (mouse.selection != -1 && (!isMobile || mouse.down)) {
         let stats = p1Units[p1Hand[mouse.selection]];
         if (stats.name == 'Mirror') stats = p1Units[p1Cycles[p1Cycles.length - 1]];
 
@@ -2374,6 +2377,8 @@ function runAI() {
     let spawnPoints = [{x: c.width / 2, y: 300}, {x: game.laneLeftX, y: game.princessY + 50}, {x: game.laneRightX, y: game.princessY + 50}];
     let i = Math.floor(Math.random() * p2Hand.length);
     let stats = p2Units[p2Hand[i]];
+    
+    if (!stats) return;
 
     if (stats.name == 'Goblin Barrel' || stats.name == 'Miner') {
         spawnPoints = [{x: game.laneLeftX, y: c.height - game.princessY}, {x: game.laneRightX, y: c.height - game.princessY}];
@@ -2728,7 +2733,8 @@ function drawHandUI() {
             cardElem.classList.add('disabled');
         }
 
-        cardElem.addEventListener('click', () => cardClick(cardElem, i));
+        cardElem.addEventListener('mousedown', (e) => cardClick(cardElem, i, e));
+        cardElem.addEventListener('touchstart', (e) => cardClick(cardElem, i, e));
         cardBar.appendChild(cardElem);
     }
 
@@ -2768,7 +2774,8 @@ function updateCardDisabledState() {
     }
 }
 
-function cardClick(cardElem, index) {
+function cardClick(cardElem, index, e) {
+    if (e) e.preventDefault();
     if (mouse.selection === index) {
         mouse.selection = -1;
         cardElem.classList.remove('selected');
@@ -2778,7 +2785,7 @@ function cardClick(cardElem, index) {
             oldSelected.classList.remove('selected');
         }
 
-        mouse.selection= index;
+        mouse.selection = index;
         cardElem.classList.add('selected');
     }
 }
@@ -3091,18 +3098,15 @@ function runGameTime() {
 
     let minutes = displayTime / 60;
     let seconds = displayTime - Math.floor(minutes) * 60;
+    let displaySeconds = String(Math.round(seconds)).padStart(2, '0');
 
     ctx.fillStyle = (timeLeft <=0) ? '#ff2f00ff' : '#000';
     ctx.font = '20px Arial';
     ctx.textAlign = 'left';
-    /*if (Math.round(seconds) == 60 && minutes > 1) ctx.fillText(`2m 0s`, 10, 10);
-    else if (Math.floor(minutes) > 0) ctx.fillText(`${Math.floor(minutes)}m ${Math.round(seconds)}s`, 10, 10);
-    else ctx.fillText(`${Math.round(seconds)}s`, 10, 10);*/
 
     if (Math.round(seconds) == 60 && minutes > 1) ctx.fillText(`2:00`, 10, 10);
-    else if (Math.floor(minutes) > 0) ctx.fillText(`${Math.floor(minutes)}:${Math.round(seconds)}`, 10, 10);
-    else if (Math.round(seconds) < 10) ctx.fillText(`0:0${Math.round(seconds)}`, 10, 10);
-    else ctx.fillText(`0:${Math.round(seconds)}`, 10, 10);
+    else if (Math.floor(minutes) > 0) ctx.fillText(`${Math.floor(minutes)}:${displaySeconds}`, 10, 10);
+    else ctx.fillText(`0:${displaySeconds}`, 10, 10);
 
     ctx.textAlign = 'right';
     ctx.fillText(`${elixirMult}x`, c.width - 10, 10);

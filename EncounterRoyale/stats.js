@@ -701,7 +701,7 @@ const otherUnits = {
         type: 'unit'
     },
     cursedPig: {
-        name: 'Cursed Pig',
+        name: 'Cursed Hog',
         symbol: '🐷',
         hp: 629,
         damage: 53,
@@ -711,6 +711,7 @@ const otherUnits = {
         viewRange: 9.5 * game.gridSize,
         size: 16,
         speed: 120,
+        canJumpRiver: true,
         targetPriority: 'buildings',
         type: 'unit'
     },
@@ -1400,6 +1401,7 @@ const units = {
         size: 20,
         speed: 120,
         deployTime: 1000,
+        canJumpRiver: true,
         targetPriority: 'buildings',
         type: 'unit',
         rarity: 'rare'
@@ -1820,6 +1822,7 @@ const units = {
         size: 20,
         speed: 60,
         deployTime: 1000,
+        canJumpRiver: true,
         targetPriority: 'ground',
         type: 'unit',
         rarity: 'epic'
@@ -2184,6 +2187,7 @@ const units = {
         size: 20,
         speed: 60,
         deployTime: 1000,
+        canJumpRiver: true,
         targetPriority: 'ground',
         type: 'unit',
         rarity: 'epic'
@@ -2277,6 +2281,7 @@ const units = {
         speed: 120,
         count: 4,
         deployTime: 1000,
+        canJumpRiver: true,
         targetPriority: 'buildings',
         type: 'unit',
         rarity: 'rare'
@@ -2924,6 +2929,7 @@ const units = {
         size: 20,
         speed: 60,
         deployTime: 1000,
+        canJumpRiver: true,
         targetPriority: 'buildings',
         type: 'unit',
         backUnitNum: 1,
@@ -2984,7 +2990,7 @@ const towers = {
         hp: 3052,
         projectileStats: projectileStats.princessTowerArrow,
         attackSpeed: 800,
-        range: 7.5 * game.gridSize,
+        range: (7.5 + 1.5) * game.gridSize,
         size: 36,
         type: 'building'
     },
@@ -2994,7 +3000,7 @@ const towers = {
         hp: 4824,
         projectileStats: projectileStats.kingTowerBullet,
         attackSpeed: 1000,
-        range: 7 * game.gridSize,
+        range: (7 + 2) * game.gridSize,
         size: 48,
         type: 'building'
     }

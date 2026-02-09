@@ -6,10 +6,27 @@ const iceConfig = {
         //STUN
         {urls: 'stun:stun.l.google.com:19302'},
         {urls: 'stun:stun1.l.google.com:5349'},
-    ]
+        //TURN
+        {
+            urls: "turn:openrelay.metered.ca:80",
+            username: "openrelayproject",
+            credential: "openrelayproject",
+        },
+        {
+            urls: "turn:openrelay.metered.ca:443",
+            username: "openrelayproject",
+            credential: "openrelayproject",
+        },
+        {
+            urls: "turn:openrelay.metered.ca:443?transport=tcp",
+            username: "openrelayproject",
+            credential: "openrelayproject",
+        }
+    ],
+    //iceTransportPolicy: 'relay'
 };
 
-setICE();
+//setICE();
 
 let peer = null;
 let conn = null;
@@ -230,17 +247,42 @@ function particleRequest(x, y, stats, team, deployTime = 1000) {
 
 async function setICE() {
     try {
-        const response = await fetch("https://ballsinbox.metered.live/api/v1/turn/credentials?apiKey=5a1fe3be6f2b5f8142db127fe398e66de399");
-        const turnServers = await response.json();
+        //const response = await fetch("https://ballsinbox.metered.live/api/v1/turn/credentials?apiKey=5a1fe3be6f2b5f8142db127fe398e66de399");
+        //const turnServers = await response.json();
 
         iceConfig.iceServers = [
             //STUN
             {urls: 'stun:stun.l.google.com:19302'},
             {urls: 'stun:stun1.l.google.com:5349'},
             //TURN
-            ...turnServers
+            {
+                urls: "turn:openrelay.metered.ca:80",
+                username: "openrelayproject",
+                credential: "openrelayproject",
+            },
+            {
+                urls: "turn:openrelay.metered.ca:443",
+                username: "openrelayproject",
+                credential: "openrelayproject",
+            }
         ]
     } catch (err) {
         console.error('API blocked by firewall: ', err);
     }
 }
+
+/*async function setICE() {
+    try {
+        // Fetch from YOUR proxy, which isn't blocked!
+        const response = await fetch("https://my-game-proxy.vercel.app/api/get-ice");
+        const turnServers = await response.json();
+        
+        iceConfig.iceServers = [
+            {urls: 'stun:stun.l.google.com:19302'},
+            ...turnServers
+        ];
+        console.log("Connected through proxy bridge!");
+    } catch (e) {
+        console.error("Even the bridge failed. School security is tight.");
+    }
+}*/
