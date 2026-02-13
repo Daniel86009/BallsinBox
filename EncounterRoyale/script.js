@@ -5,11 +5,14 @@ ToDo:
     -Make more responsive
 -Add more units, buildings and spells
     -Fisherman
-    -Goblin Machine
 -Add proper icons
 -Add better visuals and particle effects
 -Fix mirror with display images
 -Add dragging cards
+-Hook:
+    -Shoot out to target
+    -If hits the target apply slow
+    -
 */
 
 const c = document.getElementById('c');
@@ -32,8 +35,8 @@ const game = {
     maxElixir: 10,
     elixirRate: 28,
     gridSize: 24,
-    laneLeftX: 108,
-    laneRightX: c.width - 108,
+    laneLeftX: 3.5 * 24,
+    laneRightX: c.width - (3.5 * 24),
     river: c.height / 2,
     riverWidth: 48,
     bridgeWidth: 48,
@@ -47,7 +50,8 @@ const game = {
     p2StartElixir: 7,
     p1ElixirMult: 1,
     p1StartElixir: 7,
-    randomiseEnemyUnits: true
+    randomiseEnemyUnits: true,
+    baseElixirMult: 1
 };
 
 const debug = {
@@ -127,7 +131,7 @@ let clearedEntities = false;
 let timePassed = 0;
 let timeLeft = 120;
 let overtimeLeft = 180;
-let elixirMult = 1;
+let elixirMult = game.baseElixirMult;
 
 let isReady = false;
 let peerIsReady = false;
@@ -1408,8 +1412,8 @@ class UnitEntity extends Entity {
                 let sepX = (dx / Math.sqrt(d2)) * o * c;
                 let sepY = (dy / Math.sqrt(d2)) * o * c;
 
-                this.x += sepX;
-                this.y += sepY;
+                this.x += sepX + 0.05;
+                this.y += sepY + 0.05;
             }
         }
     }
@@ -2590,7 +2594,7 @@ function reset() {
     p2KingActivated = false;
     p2TowerDead = {left: false, right: false, king: false};
 
-    elixirMult = 1;
+    elixirMult = game.baseElixirMult;
 
     updateElixirUI();
 
@@ -2625,7 +2629,10 @@ function reset() {
     }
 
     elixirIntervalID = setInterval(updateElixir, game.elixirRate);
-    if (!isConnected) runAIIntervalID = setInterval(runAI, 1000);
+    if (!isConnected) {
+        if (game.baseElixirMult > 5) runAIIntervalID = setInterval(runAI, 200);
+        else runAIIntervalID = setInterval(runAI, 1000);
+    }
     if (isHost) timerIntervalID = setInterval(stepTimer, 100);
 }
 
@@ -2829,8 +2836,8 @@ function drawMap() {
     ctx.fillRect(game.laneRightX - 12, game.princessY - 84, 24, c.height - (game.princessY - 84) * 2);
 
     //Back lines
-    ctx.fillRect(game.laneLeftX - 12, game.princessY - 84, 240, 24);
-    ctx.fillRect(game.laneLeftX - 12, c.height - game.princessY + 84, 240, 24);
+    ctx.fillRect(game.laneLeftX - 12, game.princessY - 84, 264, 24);
+    ctx.fillRect(game.laneLeftX - 12, c.height - game.princessY + 84, 288, 24);
 
     //Crown tower squares
     //King
@@ -3081,7 +3088,7 @@ function runGameTime() {
 
     let displayTime = timeLeft;
     if (timeLeft <= 60) {
-        elixirMult = 2;
+        elixirMult = game.baseElixirMult + 1;
     }
     if (timeLeft <= 0) {
         displayTime = overtimeLeft;
@@ -3089,7 +3096,7 @@ function runGameTime() {
         if (p2TowersDestroyed > p1TowersDestroyed) gameover(game.team1);
     }
     if (overtimeLeft <= 60) {
-        elixirMult = 3;
+        elixirMult = game.baseElixirMult + 2;
     }
 
     if (tieBreaker) {

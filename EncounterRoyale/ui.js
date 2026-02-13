@@ -60,6 +60,8 @@ window.addEventListener('touchstart', handleOutsideClick);
 //Options
 const elixirMultSlider = document.getElementById('enemyElixirMult');
 const elixirMultValue = document.getElementById('enemyElixirValue');
+const globalElixirMultSlider = document.getElementById('globalElixirMult');
+const globalElixirMultValue = document.getElementById('globalElixirValue');
 
 const debugShowFPS = document.getElementById('debugShowFPS');
 const debugDrawRange = document.getElementById('debugDrawRange');
@@ -77,6 +79,18 @@ pickSameCards.checked = debug.pickSameCards;
 elixirMultSlider.addEventListener('input', () => {
     elixirMultValue.textContent = elixirMultSlider.value;
     game.p2ElixirMult = Number(elixirMultSlider.value);
+});
+
+globalElixirMultSlider.addEventListener('input', () => {
+    let v = globalElixirMultSlider.value;
+    globalElixirMultValue.textContent = v;
+    game.baseElixirMult = Number(v);
+    if (Number(v) > 5) {
+        if (elixirIntervalID) {
+            clearInterval(elixirIntervalID);
+            elixirIntervalID = setInterval(runAI, 200);
+        }
+    }
 });
 
 debugShowFPS.addEventListener('change', e => {

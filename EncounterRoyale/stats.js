@@ -252,6 +252,12 @@ const aoeStats = {
         radius: 60,
         damage: 84,
         ctDamage: 26
+    },
+    goblinMachineRocketAOE: {
+        name: 'goblinMachineRocketAOE',
+        radius: 1.5 * game.gridSize,
+        damage: 304,
+        ctDamage: 152
     }
 };
 
@@ -592,7 +598,16 @@ const projectileStats = {
         slowAmount: 0.7,
         slowDuration: 1500,
         isHook: true,
-        groundProj: true
+        //groundProj: true
+    },
+    goblinMachineRocket: {
+        name: 'goblinMachineRocket',
+        aoeStats: aoeStats.goblinMachineRocketAOE,
+        speed: 250,
+        distance: 8 * game.gridSize,
+        groundProj: true,
+        size: 8,
+        colour: '#a46300'
     }
 };
 
@@ -978,6 +993,20 @@ const otherUnits = {
         size: 12,
         speed: 90,
         targetPriority: 'units',
+        type: 'unit'
+    },
+    rocketLauncher: {
+        name: 'Rocket Launcher',
+        symbol: '🚀',
+        hp: 9999,
+        projectileStats: projectileStats.goblinMachineRocket,
+        attackSpeed: 3500,
+        initHitSpeed: 1500,
+        range: {min: 2.5 * game.gridSize, max: 5 * game.gridSize},
+        viewRange: 5.5 * game.gridSize,
+        size: 12,
+        speed: 60,
+        targetPriority: 'all',
         type: 'unit'
     }
 };
@@ -2930,7 +2959,7 @@ const units = {
         speed: 60,
         deployTime: 1000,
         canJumpRiver: true,
-        targetPriority: 'buildings',
+        targetPriority: 'all',
         type: 'unit',
         backUnitNum: 1,
         backUnitStats: otherUnits.ramRider,
@@ -2975,6 +3004,25 @@ const units = {
         hookProjectileStats: projectileStats.fishermanHook,
         rarity: 'legendary'
     },*/
+    goblinMachine: {
+        name: 'Goblin Machine',
+        symbol: '👶',
+        cost: 5,
+        hp: 2150,
+        damage: 212,
+        attackSpeed: 1200,
+        initHitSpeed: 500,
+        range: 1.2 * game.gridSize,
+        viewRange: 5.5 * game.gridSize,
+        size: 22,
+        speed: 60,
+        deployTime: 1000,
+        targetPriority: '',
+        type: 'unit',
+        backUnitNum: 1,
+        backUnitStats: otherUnits.rocketLauncher,
+        rarity: 'legendary'
+    },
     mirror: {
         name: 'Mirror',
         symbol: '🪞',
