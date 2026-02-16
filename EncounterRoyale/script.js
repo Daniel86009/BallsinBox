@@ -3,16 +3,10 @@ ToDo:
 -Improve AI
     -Add spell support
     -Make more responsive
--Add more units, buildings and spells
-    -Fisherman
--Add proper icons
+-Add icons to more cards
 -Add better visuals and particle effects
 -Fix mirror with display images
--Add dragging cards
--Hook:
-    -Shoot out to target
-    -If hits the target apply slow
-    -
+-Add dragging cards to mobile
 */
 
 const c = document.getElementById('c');
@@ -1814,6 +1808,7 @@ class Projectile {
         this.oy = y;
         this.stats = stats;
         this.direction = direction;
+        this.speed = stats.speed || 500;
         this.team = team;
         this.lifetime = stats.lifetime || 9999;
         this.dead = false;
@@ -1855,7 +1850,7 @@ class Projectile {
             ctx.strokeStyle = '#975b01ff';
             ctx.lineWidth = 3;
             ctx.moveTo(this.x, this.y);
-            ctx.lineTo(this.ox, this.oy);
+            ctx.lineTo(this.owner.x, this.owner.y);
             ctx.stroke();
         }
     }
@@ -1893,14 +1888,15 @@ class Projectile {
             }
         }
 
-        let xAmount = this.direction.x * this.stats.speed / 60 * 0.75;
-        let yAmount = this.direction.y * this.stats.speed / 60 * 0.75;
+        let xAmount = this.direction.x * this.speed / 60 * 0.75;
+        let yAmount = this.direction.y * this.speed / 60 * 0.75;
 
         this.x += xAmount;
         this.y += yAmount;
         this.distance += Math.sqrt(xAmount * xAmount + yAmount * yAmount);
 
         this.collide();
+        if (this.hookedEntity) this.moveHook();
     }
 
     collide() {
@@ -1929,7 +1925,6 @@ class Projectile {
                     let closestX = Math.max(x, Math.min(u.x, x + this.stats.width));
                     let closestY = Math.max(y, Math.min(u.y, y + this.stats.height));
 
-                    //let dist = M.dist(u.x - closestX, u.y - closestY);
                     let dx = u.x - closestX;
                     let dy = u.y - closestY;
 
@@ -1954,7 +1949,8 @@ class Projectile {
                 } else {
                     if (this.target.stats) this.damage(this.target);
                 }
-                if (!this.stats.isHook || this.hookedEntity) this.dead = true;
+
+                if (!this.stats.isHook || !this.hookedEntity) this.dead = true;
             }
         }
     }
@@ -1966,6 +1962,11 @@ class Projectile {
 
         if (this.stats.snareDuration) {
             u.snareTime = this.stats.snareDuration;
+        }
+
+        if (this.stats.slowAmount) {
+            u.slowAmount = this.stats.slowAmount;
+            u.slowTime = this.stats.slowDuration;
         }
 
         if (this.pierce > 0) {
@@ -1982,12 +1983,10 @@ class Projectile {
             }
 
             if (this.stats.isHook) {
-                console.log('Hooked');
-                this.target = {x: this.owner.x, y: this.owner.y};
-                this.dir = M.normalise(this.target.x - this.x, this.target.y - this.y);
-                this.hookedEntity = u;
-                this.distance = 0;
-                this.lifetime = 999;
+                if (!this.hookedEntity) {
+                    this.hookedEntity = u;
+                    this.distance = 0;
+                }
             } else {
                 this.dead = true;
             }
@@ -2009,6 +2008,33 @@ class Projectile {
             let dir = {x: Math.cos(angle), y: Math.sin(angle)};
 
             projectiles.push(new Projectile(this.x, this.y, this.stats.splitStats, dir, this.team, 'all', this.owner));
+        }
+    }
+
+    moveHook() {
+        let dx = this.hookedEntity.x - this.owner.x;
+        let dy = this.hookedEntity.y - this.owner.y;
+        let dir = M.normalise(dx, dy);
+        if (this.hookedEntity.stats.type != 'building') {
+            this.target = {x: this.owner.x, y: this.owner.y};
+            this.direction = {x: -dir.x, y: -dir.y};
+            this.lifetime = 999;
+
+            if (Math.sqrt(dx * dx + dy * dy) > this.owner.stats.size + this.hookedEntity.stats.size) {
+                this.hookedEntity.x = this.x;
+                this.hookedEntity.y = this.y;
+            } else {
+                this.dead = true;
+            }
+        } else {
+            this.speed = 0;
+
+            if (Math.sqrt(dx * dx + dy * dy) > this.owner.stats.range + this.hookedEntity.stats.size) {
+                this.owner.x += dir.x * 3;
+                this.owner.y += dir.y * 3;
+            } else {
+                this.dead = true;
+            }
         }
     }
 
@@ -3173,7 +3199,6 @@ function runTieBreaker() {
             let e = entities[i];
 
             if (e.stats.name != 'princess' && e.stats.name != 'king') {
-                console.log(e.stats.name);
                 entities.splice(i, 1);
             }   
         }

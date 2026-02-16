@@ -594,11 +594,11 @@ const projectileStats = {
         name: 'fishermanHook',
         damage: 0,
         speed: 800,
-        distance: 500,
+        distance: 7 * game.gridSize,
         slowAmount: 0.7,
         slowDuration: 1500,
         isHook: true,
-        //groundProj: true
+        groundProj: true
     },
     goblinMachineRocket: {
         name: 'goblinMachineRocket',
@@ -2985,7 +2985,7 @@ const units = {
         enchantRange: 8.5 * game.gridSize,
         rarity: 'epic'
     },
-    /*fisherman: {
+    fisherman: {
         name: 'Fisherman',
         symbol: '⚓️',
         cost: 3,
@@ -3003,7 +3003,7 @@ const units = {
         type: 'unit',
         hookProjectileStats: projectileStats.fishermanHook,
         rarity: 'legendary'
-    },*/
+    },
     goblinMachine: {
         name: 'Goblin Machine',
         symbol: '👶',
